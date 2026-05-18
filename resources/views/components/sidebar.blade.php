@@ -1,0 +1,153 @@
+<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+    <!-- Brand -->
+    <a class="sidebar-brand d-flex flex-column align-items-center justify-content-center"
+    href="/"
+    style="height: 140px; padding-top: 20px; padding-bottom: 20px;">
+
+        <!-- Logo -->
+        <img src="{{ asset('assets/img/bps.png') }}"
+            alt="Logo BPS"
+            style="width: 70px; height: auto;">
+
+        <!-- Text -->
+        <div class="sidebar-brand-text text-center mt-3"
+            style="
+                white-space: normal;
+                line-height: 1.3;
+                font-size: 18px;
+                font-weight: bold;
+            ">
+
+            BPS PROVINSI <br>
+            SULAWESI SELATAN
+
+        </div>
+
+    </a>
+
+    <hr class="sidebar-divider my-0">
+
+    <!-- Beranda -->
+    <li class="nav-item">
+        <a class="nav-link" href="/">
+            <i class="fas fa-home"></i>
+            <span>Beranda</span>
+        </a>
+    </li>
+
+    <!-- Pengeluaran -->
+    <li class="nav-item">
+
+        <a class="nav-link collapsed"
+           href="#"
+           data-toggle="collapse"
+           data-target="#collapsePengeluaran"
+           aria-expanded="true"
+           aria-controls="collapsePengeluaran">
+
+            <i class="fas fa-money-bill-wave"></i>
+            <span>Pengeluaran</span>
+        </a>
+
+        <div id="collapsePengeluaran"
+             class="collapse"
+             data-parent="#accordionSidebar">
+
+            <div class="bg-white py-2 collapse-inner rounded">
+
+                <a class="collapse-item" href="/pengeluaran/unggah-tabel">
+                    Unggah Tabel
+                </a>
+
+                <a class="collapse-item" href="/pengeluaran/daftar-tabel">
+                    Daftar Tabel
+                </a>
+
+                <a class="collapse-item" href="/pengeluaran/perubahan-nilai">
+                    Perubahan Nilai
+                </a>
+
+                <a class="collapse-item" href="/pengeluaran/hasil-konserda">
+                    Hasil Konserda
+                </a>
+
+            </div>
+        </div>
+    </li>
+
+    <!-- Lapangan Usaha -->
+    <li class="nav-item">
+
+        <a class="nav-link collapsed"
+           href="#"
+           data-toggle="collapse"
+           data-target="#collapseLapanganUsaha"
+           aria-expanded="true"
+           aria-controls="collapseLapanganUsaha">
+
+            <i class="fas fa-briefcase"></i>
+            <span>Lapangan Usaha</span>
+        </a>
+
+        <div id="collapseLapanganUsaha"
+             class="collapse"
+             data-parent="#accordionSidebar">
+
+            <div class="bg-white py-2 collapse-inner rounded">
+
+                <a class="collapse-item" href="/lapangan-usaha/unggah-tabel">
+                    Unggah Tabel
+                </a>
+
+                <a class="collapse-item" href="/lapangan-usaha/daftar-tabel">
+                    Daftar Tabel
+                </a>
+
+                <a class="collapse-item" href="/lapangan-usaha/perubahan-nilai">
+                    Perubahan Nilai
+                </a>
+
+                <a class="collapse-item" href="/lapangan-usaha/hasil-konserda">
+                    Hasil Konserda
+                </a>
+
+            </div>
+        </div>
+    </li>
+
+    <!-- Integrasi -->
+    <li class="nav-item">
+        <a class="nav-link" href="/integrasi">
+            <i class="fas fa-link"></i>
+            <span>Integrasi</span>
+        </a>
+    </li>
+
+    <!-- Monitoring -->
+    <li class="nav-item">
+        <a class="nav-link" href="/monitoring">
+            <i class="fas fa-chart-area"></i>
+            <span>Monitoring</span>
+        </a>
+    </li>
+
+    <!-- Forum -->
+    <li class="nav-item">
+        <a class="nav-link" href="/forum">
+            <i class="fas fa-comments"></i>
+            <span>Forum</span>
+        </a>
+    </li>
+
+    <!-- Operator -->
+    <li class="nav-item">
+        <a class="nav-link" href="/operator">
+            <i class="fas fa-users-cog"></i>
+            <span>Operator</span>
+        </a>
+    </li>
+
+    <hr class="sidebar-divider d-none d-md-block">
+
+</ul>
