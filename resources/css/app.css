@@ -9,3 +9,14 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+.collapse-item.active {
+    background-color: #4e73df;
+    color: #fff !important;
+    font-weight: 600;
+    border-radius: 6px;
+}
+
+.collapse-item.active:hover {
+    color: #fff !important;
+}

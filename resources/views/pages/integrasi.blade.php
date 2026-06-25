@@ -65,20 +65,15 @@
 
                     <div>
 
-                        <div class="font-weight-bold text-warning mb-2"
-                            style="
-                                font-size: 32px;
-                                letter-spacing: 1px;
-                            ">
+                        <div class="font-weight-bold text-warning mb-1"
+                             style="font-size: 22px;">
 
                             ADHB
 
                         </div>
 
-                        <div class="font-weight-bold text-gray-800"
-                            style="
-                                font-size: 20px;
-                            ">
+                        <div class="text-gray-800"
+                             style="font-size: 16px;">
 
                             Ada Selisih
 
@@ -89,7 +84,7 @@
                     <div>
 
                         <i class="fas fa-exclamation-triangle text-warning"
-                        style="font-size: 50px;">
+                           style="font-size: 32px;">
                         </i>
 
                     </div>
@@ -116,20 +111,15 @@
 
                     <div>
 
-                        <div class="font-weight-bold text-success mb-2"
-                            style="
-                                font-size: 32px;
-                                letter-spacing: 1px;
-                            ">
+                        <div class="font-weight-bold text-success mb-1"
+                             style="font-size: 22px;">
 
                             ADHK
 
                         </div>
 
-                        <div class="font-weight-bold text-gray-800"
-                            style="
-                                font-size: 20px;
-                            ">
+                        <div class="text-gray-800"
+                             style="font-size: 16px;">
 
                             Tidak Ada Selisih
 
@@ -140,7 +130,7 @@
                     <div>
 
                         <i class="fas fa-check-circle text-success"
-                        style="font-size: 50px;">
+                           style="font-size: 32px;">
                         </i>
 
                     </div>

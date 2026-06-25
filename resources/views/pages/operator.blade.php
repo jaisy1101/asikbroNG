@@ -5,7 +5,7 @@
 <!-- Header -->
 <div class="mb-4">
 
-    <h1 class="h3 font-weight-bold text-gray-800">
+    <h1 class="h4 font-weight-bold text-gray-800 mb-4">
         Operator
     </h1>
 
@@ -14,97 +14,106 @@
 <!-- SECTION -->
 <div class="mb-5">
 
-    <div class="row">
-
+    <div class="row align-items-stretch">
         <!-- ========================================= -->
         <!-- KIRI -->
         <!-- ========================================= -->
-        <div class="col-lg-6 mb-4">
+        <div class="col-lg-6 mb-4 d-flex">
 
-            <div class="card shadow border-0 h-100"
+            <div class="card shadow-sm border-0 w-100"
                 style="
                     border-radius: 25px;
                 ">
 
-                <div class="card-body p-4">
+                <div class="card-body p-4 d-flex flex-column">
 
-                    <!-- Header -->
-                    <div class="d-flex align-items-center mb-4">
+                    <!-- Isi -->
+                    <div class="flex-grow-1">
 
-                        <div class="mr-3">
+                        <!-- Header -->
+                        <div class="d-flex align-items-center mb-4">
 
-                            <div class="rounded-circle d-flex justify-content-center align-items-center"
-                                style="
-                                    width: 40px;
-                                    height: 40px;
-                                    border: 2px solid #36b9cc;
-                                    color: #36b9cc;
-                                    font-size: 20px;
-                                    font-weight: bold;
-                                ">
+                            <div class="mr-3">
 
-                                !
+                                <div class="rounded-circle d-flex justify-content-center align-items-center"
+                                    style="
+                                        width: 40px;
+                                        height: 40px;
+                                        border: 2px solid #36b9cc;
+                                        color: #36b9cc;
+                                        font-size: 20px;
+                                        font-weight: bold;
+                                    ">
+
+                                    !
+
+                                </div>
 
                             </div>
 
+                            <h5 class="font-weight-bold text-gray-800 mb-0">
+
+                                Buka Putaran Baru
+
+                            </h5>
+
                         </div>
 
-                        <h4 class="font-weight-bold text-gray-800 mb-0">
+                        <!-- Deskripsi -->
+                        <div class="mb-4"
+                            style="
+                                font-size: 15px;
+                                line-height: 1.8;
+                                color: #5a5c69;
+                            ">
 
-                            Buka Putaran Baru
+                            Setelah dibuka, putaran atau triwulan sebelumnya
+                            tidak dapat dibuka kembali. Pilih tahun terlebih
+                            dahulu untuk melanjutkan proses pembukaan putaran.
 
-                        </h4>
+                        </div>
 
-                    </div>
+                        <!-- Pilih Tahun -->
+                        <div>
 
-                    <!-- Deskripsi -->
-                    <div class="mb-4"
-                        style="
-                            font-size: 15px;
-                            line-height: 1.8;
-                            color: #5a5c69;
-                        ">
+                            <small class="text-gray-500 font-weight-bold d-block mb-2">
 
-                        Setelah dibuka putaran/kuartal sebelumnya
-                        tidak dapat diulangi kembali.
-                        Silahkan pilih tahun terlebih dahulu.
+                                PILIH TAHUN
 
-                    </div>
+                            </small>
 
-                    <!-- Pilih Tahun -->
-                    <div class="mb-4">
+                            <select class="form-control"
+                                    style="
+                                        border-radius: 15px;
+                                        height: 50px;
+                                    ">
 
-                        <small class="text-gray-500 font-weight-bold">
-                            PILIH TAHUN
-                        </small>
+                                <option selected>
+                                    2024
+                                </option>
 
-                        <select class="form-control mt-2"
-                                style="
-                                    border-radius: 15px;
-                                    height: 50px;
-                                    font-size: 18px;
-                                ">
+                                <option>
+                                    2025
+                                </option>
 
-                            <option selected>
-                                2024
-                            </option>
+                                <option>
+                                    2026
+                                </option>
 
-                            <option>2025</option>
-                            <option>2026</option>
+                            </select>
 
-                        </select>
+                        </div>
 
                     </div>
 
                     <!-- Tombol -->
-                    <button class="btn btn-success btn-block py-3"
+                    <button class="btn btn-success btn-block py-2 mt-4"
                             data-toggle="modal"
                             data-target="#modalPutaran"
                             style="
                                 border-radius: 18px;
-                                font-size: 18px;
-                                font-weight: bold;
-                                letter-spacing: 1px;
+                                font-size: 16px;
+                                font-weight: 600;
                             ">
 
                         Buka Putaran
@@ -120,91 +129,110 @@
         <!-- ========================================= -->
         <!-- KANAN -->
         <!-- ========================================= -->
-        <div class="col-lg-6 mb-4">
+        <div class="col-lg-6 mb-4 d-flex">
 
-            <div class="card shadow border-0 h-100"
-                 style="
+            <div class="card shadow-sm border-0 w-100"
+                style="
                     border-radius: 25px;
-                 ">
+                ">
 
-                <div class="card-body p-4">
+                <div class="card-body p-4 d-flex flex-column">
 
-                    <!-- Header -->
-                    <div class="d-flex align-items-center mb-4">
+                    <!-- Isi -->
+                    <div class="flex-grow-1">
 
-                        <div class="mr-3">
+                        <!-- Header -->
+                        <div class="d-flex align-items-center mb-4">
 
-                            <div class="rounded-circle d-flex justify-content-center align-items-center"
-                                 style="
-                                    width: 40px;
-                                    height: 40px;
-                                    border: 2px solid #1cc88a;
-                                    color: #1cc88a;
-                                    font-size: 20px;
-                                    font-weight: bold;
-                                 ">
+                            <div class="mr-3">
 
-                                ✓
+                                <div class="rounded-circle d-flex justify-content-center align-items-center"
+                                    style="
+                                        width: 40px;
+                                        height: 40px;
+                                        border: 2px solid #1cc88a;
+                                        color: #1cc88a;
+                                        font-size: 20px;
+                                        font-weight: bold;
+                                    ">
+
+                                    ✓
+
+                                </div>
+
+                            </div>
+
+                            <h5 class="font-weight-bold text-gray-800 mb-0">
+
+                                Putaran Berlangsung
+
+                            </h5>
+
+                        </div>
+
+                        <!-- Informasi -->
+                        <div class="row text-center">
+
+                            <div class="col-4">
+
+                                <small class="text-muted d-block mb-2">
+                                    TAHUN
+                                </small>
+
+                                <h3 class="font-weight-bold text-dark mb-0">
+                                    2026
+                                </h3>
+
+                            </div>
+
+                            <div class="col-4">
+
+                                <small class="text-muted d-block mb-2">
+                                    TRIWULAN
+                                </small>
+
+                                <h3 class="font-weight-bold text-dark mb-0">
+                                    Q2
+                                </h3>
+
+                            </div>
+
+                            <div class="col-4">
+
+                                <small class="text-muted d-block mb-2">
+                                    PUTARAN
+                                </small>
+
+                                <h3 class="font-weight-bold text-dark mb-0">
+                                    1
+                                </h3>
 
                             </div>
 
                         </div>
 
-                        <h4 class="font-weight-bold text-gray-800 mb-0">
+                        <div class="text-center mt-4">
 
-                            Putaran Berlangsung
+                            <span class="badge badge-success px-4 py-2"
+                                style="
+                                    border-radius: 20px;
+                                    font-size: 14px;
+                                ">
 
-                        </h4>
+                                Rekonsiliasi Sedang Berlangsung
 
-                    </div>
-
-                    <!-- Isi -->
-                    <div class="mb-4">
-
-                        <div class="mb-3">
-
-                            <small class="text-gray-500 font-weight-bold">
-                                TAHUN
-                            </small>
-
-                            <h3 class="font-weight-bold text-dark mb-0">
-                                2026
-                            </h3>
-
-                        </div>
-
-                        <div class="mb-3">
-
-                            <small class="text-gray-500 font-weight-bold">
-                                TRIWULAN
-                            </small>
-
-                            <h3 class="font-weight-bold text-dark mb-0">
-                                Q2
-                            </h3>
-
-                        </div>
-
-                        <div>
-
-                            <small class="text-gray-500 font-weight-bold">
-                                PUTARAN
-                            </small>
-
-                            <h3 class="font-weight-bold text-dark mb-0">
-                                Putaran 1
-                            </h3>
+                            </span>
 
                         </div>
 
                     </div>
 
                     <!-- Tombol -->
-                    <button class="btn btn-danger btn-block py-3"
+                    <button class="btn btn-danger btn-block py-2 mt-4"
                             style="
                                 border-radius: 18px;
-                                font-size: 18px;
-                                font-weight: bold;
+                                font-size: 16px;
+                                font-weight: 600;
                             ">
 
                         Tutup Putaran
@@ -263,11 +291,11 @@
         <div class="card-body p-4">
 
             <textarea class="form-control border-0 shadow-none"
-                      rows="8"
+                      rows="5"
                       placeholder="Tulis Disini.............."
                       style="
                         resize: none;
-                        font-size: 18px;
+                        font-size: 14px;
                       "></textarea>
 
             <div class="d-flex justify-content-end align-items-center mt-3">

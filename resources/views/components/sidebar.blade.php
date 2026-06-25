@@ -37,83 +37,97 @@
     </li>
 
     <!-- Pengeluaran -->
-    <li class="nav-item">
+    <li class="nav-item {{ request()->is('pengeluaran/*') ? 'active' : '' }}">
 
-        <a class="nav-link collapsed"
-           href="#"
-           data-toggle="collapse"
-           data-target="#collapsePengeluaran"
-           aria-expanded="true"
-           aria-controls="collapsePengeluaran">
+        <a class="nav-link {{ request()->is('pengeluaran/*') ? '' : 'collapsed' }}"
+        href="#"
+        data-toggle="collapse"
+        data-target="#collapsePengeluaran"
+        aria-expanded="{{ request()->is('pengeluaran/*') ? 'true' : 'false' }}"
+        aria-controls="collapsePengeluaran">
 
             <i class="fas fa-money-bill-wave"></i>
             <span>Pengeluaran</span>
+
         </a>
 
         <div id="collapsePengeluaran"
-             class="collapse"
-             data-parent="#accordionSidebar">
+            class="collapse {{ request()->is('pengeluaran/*') ? 'show' : '' }}"
+            data-parent="#accordionSidebar">
 
             <div class="bg-white py-2 collapse-inner rounded">
 
-                <a class="collapse-item" href="/pengeluaran/unggah-tabel">
+                <a class="collapse-item {{ request()->is('pengeluaran/unggah-tabel') ? 'active' : '' }}"
+                href="/pengeluaran/unggah-tabel">
                     Unggah Tabel
                 </a>
 
-                <a class="collapse-item" href="/pengeluaran/daftar-tabel">
+                <a class="collapse-item {{ request()->is('pengeluaran/daftar-tabel') ? 'active' : '' }}"
+                href="/pengeluaran/daftar-tabel">
                     Daftar Tabel
                 </a>
 
-                <a class="collapse-item" href="/pengeluaran/perubahan-nilai">
+                <a class="collapse-item {{ request()->is('pengeluaran/perubahan-nilai') ? 'active' : '' }}"
+                href="/pengeluaran/perubahan-nilai">
                     Perubahan Nilai
                 </a>
 
-                <a class="collapse-item" href="/pengeluaran/hasil-konserda">
+                <a class="collapse-item {{ request()->is('pengeluaran/hasil-konserda') ? 'active' : '' }}"
+                href="/pengeluaran/hasil-konserda">
                     Hasil Konserda
                 </a>
 
             </div>
+
         </div>
+
     </li>
 
     <!-- Lapangan Usaha -->
-    <li class="nav-item">
+    <li class="nav-item {{ request()->is('lapangan-usaha/*') ? 'active' : '' }}">
 
-        <a class="nav-link collapsed"
-           href="#"
-           data-toggle="collapse"
-           data-target="#collapseLapanganUsaha"
-           aria-expanded="true"
-           aria-controls="collapseLapanganUsaha">
+        <a class="nav-link {{ request()->is('lapangan-usaha/*') ? '' : 'collapsed' }}"
+        href="#"
+        data-toggle="collapse"
+        data-target="#collapseLapanganUsaha"
+        aria-expanded="{{ request()->is('lapangan-usaha/*') ? 'true' : 'false' }}"
+        aria-controls="collapseLapanganUsaha">
 
             <i class="fas fa-briefcase"></i>
             <span>Lapangan Usaha</span>
+
         </a>
 
         <div id="collapseLapanganUsaha"
-             class="collapse"
-             data-parent="#accordionSidebar">
+            class="collapse {{ request()->is('lapangan-usaha/*') ? 'show' : '' }}"
+            data-parent="#accordionSidebar">
 
             <div class="bg-white py-2 collapse-inner rounded">
 
-                <a class="collapse-item" href="/lapangan-usaha/unggah-tabel">
+                <a class="collapse-item {{ request()->is('lapangan-usaha/unggah-tabel') ? 'active' : '' }}"
+                href="/lapangan-usaha/unggah-tabel">
                     Unggah Tabel
                 </a>
 
-                <a class="collapse-item" href="/lapangan-usaha/daftar-tabel">
+                <a class="collapse-item {{ request()->is('lapangan-usaha/daftar-tabel') ? 'active' : '' }}"
+                href="/lapangan-usaha/daftar-tabel">
                     Daftar Tabel
                 </a>
 
-                <a class="collapse-item" href="/lapangan-usaha/perubahan-nilai">
+                <a class="collapse-item {{ request()->is('lapangan-usaha/perubahan-nilai') ? 'active' : '' }}"
+                href="/lapangan-usaha/perubahan-nilai">
                     Perubahan Nilai
                 </a>
 
-                <a class="collapse-item" href="/lapangan-usaha/hasil-konserda">
+                <a class="collapse-item {{ request()->is('lapangan-usaha/hasil-konserda') ? 'active' : '' }}"
+                href="/lapangan-usaha/hasil-konserda">
                     Hasil Konserda
                 </a>
 
             </div>
+
         </div>
+
     </li>
 
     <!-- Integrasi -->
@@ -129,14 +143,6 @@
         <a class="nav-link" href="/monitoring">
             <i class="fas fa-chart-area"></i>
             <span>Monitoring</span>
-        </a>
-    </li>
-
-    <!-- Forum -->
-    <li class="nav-item">
-        <a class="nav-link" href="/forum">
-            <i class="fas fa-comments"></i>
-            <span>Forum</span>
         </a>
     </li>
 
