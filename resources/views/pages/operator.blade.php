@@ -67,41 +67,10 @@
                                 color: #5a5c69;
                             ">
 
-                            Setelah dibuka, putaran atau triwulan sebelumnya
-                            tidak dapat dibuka kembali. Pilih tahun terlebih
-                            dahulu untuk melanjutkan proses pembukaan putaran.
-
-                        </div>
-
-                        <!-- Pilih Tahun -->
-                        <div>
-
-                            <small class="text-gray-500 font-weight-bold d-block mb-2">
-
-                                PILIH TAHUN
-
-                            </small>
-
-                            <select class="form-control"
-                                    style="
-                                        border-radius: 15px;
-                                        height: 50px;
-                                    ">
-
-                                <option selected>
-                                    2024
-                                </option>
-
-                                <option>
-                                    2025
-                                </option>
-
-                                <option>
-                                    2026
-                                </option>
-
-                            </select>
-
+                            Setelah putaran atau triwulan dibuka, 
+                            periode sebelumnya tidak dapat dibuka kembali. 
+                            Putaran yang sedang berlangsung harus ditutup 
+                            terlebih dahulu sebelum membuka putaran baru.
                         </div>
 
                     </div>
@@ -229,6 +198,8 @@
 
                     <!-- Tombol -->
                     <button class="btn btn-danger btn-block py-2 mt-4"
+                            data-toggle="modal"
+                            data-target="#modalTutupPutaran"
                             style="
                                 border-radius: 18px;
                                 font-size: 16px;
@@ -366,9 +337,7 @@
                     </div>
 
                     <h4 class="font-weight-bold mb-0">
-
                         Format buka siklus baru PDRB
-
                     </h4>
 
                 </div>
@@ -428,56 +397,8 @@
 
                 </div>
 
-                <!-- Putaran -->
-                <div class="row align-items-center mb-4">
-
-                    <div class="col-md-4">
-                        <h4 class="font-weight-bold mb-0">
-                            Putaran Terakhir
-                        </h4>
-                    </div>
-
-                    <div class="col-md-1 text-center">
-                        <h4 class="mb-0">:</h4>
-                    </div>
-
-                    <div class="col-md-3">
-
-                        <select class="form-control"
-                                style="
-                                    border-radius: 15px;
-                                    height: 50px;
-                                    font-size: 22px;
-                                ">
-
-                            <option>Putaran 1</option>
-                            <option selected>Putaran 2</option>
-                            <option>Putaran 3</option>
-                            <option>Putaran 4</option>
-
-                        </select>
-
-                    </div>
-
-                    <div class="col-md-4">
-
-                        <button class="btn btn-info btn-block py-3"
-                                style="
-                                    border-radius: 18px;
-                                    font-size: 20px;
-                                    box-shadow: 0 5px 10px rgba(0,0,0,0.15);
-                                ">
-
-                            Buka Putaran Baru
-
-                        </button>
-
-                    </div>
-
-                </div>
-
                 <!-- Quartal -->
-                <div class="row align-items-center">
+                <div class="row align-items-center mb-4">
 
                     <div class="col-md-4">
                         <h4 class="font-weight-bold mb-0">
@@ -524,6 +445,54 @@
 
                 </div>
 
+                <!-- Putaran -->
+                <div class="row align-items-center">
+
+                    <div class="col-md-4">
+                        <h4 class="font-weight-bold mb-0">
+                            Putaran Terakhir
+                        </h4>
+                    </div>
+
+                    <div class="col-md-1 text-center">
+                        <h4 class="mb-0">:</h4>
+                    </div>
+
+                    <div class="col-md-3">
+
+                        <select class="form-control"
+                                style="
+                                    border-radius: 15px;
+                                    height: 50px;
+                                    font-size: 22px;
+                                ">
+
+                            <option>Putaran 1</option>
+                            <option selected>Putaran 2</option>
+                            <option>Putaran 3</option>
+                            <option>Putaran 4</option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <button class="btn btn-info btn-block py-3"
+                                style="
+                                    border-radius: 18px;
+                                    font-size: 20px;
+                                    box-shadow: 0 5px 10px rgba(0,0,0,0.15);
+                                ">
+
+                            Buka Putaran Baru
+
+                        </button>
+
+                    </div>
+
+                </div>
+
             </div>
 
             <hr class="my-0">
@@ -553,6 +522,88 @@
                     Batalkan
 
                 </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ========================================= -->
+<!-- MODAL KONFIRMASI TUTUP PUTARAN -->
+<!-- ========================================= -->
+<div class="modal fade"
+     id="modalTutupPutaran"
+     tabindex="-1"
+     role="dialog"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered"
+         role="document"
+         style="max-width: 450px;">
+
+        <div class="modal-content border-0 shadow"
+             style="border-radius: 20px;">
+
+            <div class="modal-body text-center px-5 py-5">
+
+                <!-- Icon Tanda Tanya -->
+                <div class="d-flex justify-content-center mb-4">
+
+                    <div class="d-flex justify-content-center align-items-center"
+                         style="
+                            width: 70px;
+                            height: 70px;
+                            border-radius: 50%;
+                            border: 3px solid #e74a3b;
+                            color: #e74a3b;
+                            font-size: 32px;
+                            font-weight: bold;
+                         ">
+
+                        ?
+
+                    </div>
+
+                </div>
+
+                <!-- Judul -->
+                <h5 class="font-weight-bold text-gray-800 mb-3">
+                    Yakin ingin menutup putaran?
+                </h5>
+
+                <!-- Keterangan -->
+                <p class="text-gray-600 mb-4"
+                   style="font-size: 14px; line-height: 1.7;">
+
+                    Setelah putaran ditutup, proses rekonsiliasi pada
+                    putaran ini tidak dapat dilakukan kembali.
+
+                </p>
+
+                <!-- Tombol -->
+                <div class="d-flex justify-content-center">
+
+                    <button type="button"
+                            class="btn btn-light px-4 mr-2"
+                            data-dismiss="modal"
+                            style="border-radius: 10px;">
+
+                        Tidak
+
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-danger px-4"
+                            style="border-radius: 10px;">
+
+                        Ya, Tutup
+
+                    </button>
+
+                </div>
 
             </div>
 

@@ -35,3 +35,5 @@ Route::view('/lapangan-usaha/daftar-tabel', 'pages.lapangan-usaha.daftar-tabel')
 Route::view('/lapangan-usaha/perubahan-nilai', 'pages.lapangan-usaha.perubahan-nilai');
 
 Route::view('/lapangan-usaha/hasil-konserda', 'pages.lapangan-usaha.hasil-konserda');
+
+Route::view('/login-preview', 'auth.login');
