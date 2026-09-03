@@ -8,6 +8,7 @@ use App\Models\Rekonsiliasi;
 use App\Models\Putaran;
 use App\Models\Periode;
 use Illuminate\Support\Facades\DB;
+use App\Models\RekonsiliasiPeriode;
 
 class RekonsiliasiController extends Controller
 {
@@ -78,6 +79,23 @@ class RekonsiliasiController extends Controller
                 'status' => 'berlangsung',
                 'tanggal_mulai' => now(),
             ]);
+
+            $periodeRekonsiliasi = Periode::where('tahun', $periode->tahun)
+                ->where('triwulan', '<=', $periode->triwulan)
+                ->get();
+
+
+            foreach ($periodeRekonsiliasi as $periodeItem) {
+
+                RekonsiliasiPeriode::create([
+
+                    'rekonsiliasi_id' => $rekonsiliasi->id,
+
+                    'periode_id' => $periodeItem->id,
+
+                ]);
+
+}
 
             $putaran = Putaran::create([
                 'rekonsiliasi_id' => $rekonsiliasi->id,

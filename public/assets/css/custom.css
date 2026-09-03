@@ -17,6 +17,23 @@
 
 
 /* =====================================================
+   FONT
+===================================================== */
+
+body,
+button,
+input,
+select,
+textarea,
+.navbar,
+.sidebar,
+.card,
+.modal {
+    font-family: 'Poppins', sans-serif !important;
+}
+
+
+/* =====================================================
    SIDEBAR
 ===================================================== */
 
@@ -150,4 +167,8 @@
 
 .bg-brand-dark {
     background-color: var(--brand-dark-blue) !important;
+}
+
+.bg-success {
+    background-color: var(--brand-green) !important;
 }

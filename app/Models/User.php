@@ -34,6 +34,6 @@ class User extends Authenticatable
 
     public function wilayah()
     {
-        return $this->belongsTo(Wilayah::class);
+        return $this->belongsTo(Wilayah::class, 'wilayah_id');
     }
 }

@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Submission;
+use App\Models\DataPdrbLapanganUsaha;
+use App\Models\DataPdrbPengeluaran;
 
 class PdrbTableController extends Controller
 {
-    public function show($id)
+    public function showSubmission($id)
     {
         $submission = Submission::findOrFail($id);
 
@@ -120,4 +122,108 @@ class PdrbTableController extends Controller
         ]);
 
     }
+
+    public function showSourceLapanganUsaha($wilayah_id, $jenis_tabel_id)
+    {
+        $data = DataPdrbLapanganUsaha::where('wilayah_id', $wilayah_id)
+            ->where('jenis_tabel_id', $jenis_tabel_id)
+            ->with([
+                'periode',
+                'kategori'
+            ])
+            ->get();
+
+
+        $result = $data
+            ->groupBy('kategori.nama')
+            ->map(function ($items) {
+
+                $row = [];
+
+                $row['kategori'] = $items->first()->kategori->nama;
+
+
+                foreach ($items as $item) {
+
+                    $periode =
+                        $item->periode->tahun .
+                        ' Q' .
+                        $item->periode->triwulan;
+
+
+                    $row[$periode] = $item->nilai;
+
+                }
+
+
+                return $row;
+
+            })
+            ->values();
+
+
+
+        return response()->json([
+
+            'wilayah_id' => $wilayah_id,
+
+            'jenis_tabel_id' => $jenis_tabel_id,
+
+            'table' => $result
+
+        ]);
+    }
+
+    public function showSourcePengeluaran($wilayah_id, $jenis_tabel_id)
+    {
+        $data = DataPdrbPengeluaran::where('wilayah_id', $wilayah_id)
+            ->where('jenis_tabel_id', $jenis_tabel_id)
+            ->with([
+                'periode',
+                'kategori'
+            ])
+            ->get();
+
+
+
+        $result = $data
+            ->groupBy('kategori.nama')
+            ->map(function ($items) {
+
+                $row = [];
+
+                $row['kategori'] = $items->first()->kategori->nama;
+
+
+                foreach ($items as $item) {
+
+                    $periode =
+                        $item->periode->tahun .
+                        ' Q' .
+                        $item->periode->triwulan;
+
+
+                    $row[$periode] = $item->nilai;
+
+                }
+
+
+                return $row;
+
+            })
+            ->values();
+
+
+
+        return response()->json([
+
+            'wilayah_id' => $wilayah_id,
+
+            'jenis_tabel_id' => $jenis_tabel_id,
+
+            'table' => $result
+
+        ]);
+    }
+    
 }

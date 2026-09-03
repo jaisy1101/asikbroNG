@@ -11,11 +11,12 @@
     <div class="d-flex align-items-center mb-4">
 
         <div class="bg-success text-white px-3 py-1 mr-2 shadow-sm"
-             style="
+            style="
                 border-radius: 8px;
-                font-size: 16px;
-                font-weight: bold;
-             ">
+                font-size: 2rem;
+                font-weight: 700;
+                line-height: 1.2;
+            ">
 
             Tentang
 

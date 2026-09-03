@@ -55,11 +55,6 @@ Route::middleware('auth:sanctum')->group(function () {
         [SubmissionDataController::class, 'show']
     );
 
-    Route::get(
-        '/submissions/{id}/table',
-        [PdrbTableController::class, 'show']
-    );
-
     Route::post(
         '/rekonsiliasi/buka-quartal',
         [RekonsiliasiController::class, 'bukaQuartalBaru']
@@ -73,4 +68,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post(
         '/rekonsiliasi/tutup',
         [RekonsiliasiController::class, 'tutup']
+    );
+
+    Route::get(
+        '/submissions/{id}/table',
+        [PdrbTableController::class, 'showSubmission']
+    );
+
+    Route::get(
+        '/pdrb/source-lapangan-usaha/{wilayah_id}/{jenis_tabel_id}',
+        [PdrbTableController::class, 'showSourceLapanganUsaha']
+    );
+
+    Route::get(
+        '/pdrb/source-pengeluaran/{wilayah_id}/{jenis_tabel_id}',
+        [PdrbTableController::class, 'showSourcePengeluaran']
     );

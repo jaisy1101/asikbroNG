@@ -6,12 +6,17 @@ use App\Models\DataPdrbLapanganUsaha;
 use App\Models\Periode;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use App\Models\RekonsiliasiPeriode;
 
 class LapanganUsahaImportService
 {
-    public function import($filePath, $submission)
+    public function import($filePath, $submission=null, $wilayahId=null)
     {
-        $spreadsheet = IOFactory::load($filePath);
+        $reader = IOFactory::createReader('Xlsx');
+        $reader->setReadDataOnly(true);
+        $reader->setReadEmptyCells(false);
+
+        $spreadsheet = $reader->load($filePath);
 
         $sheet = $spreadsheet->getActiveSheet();
 
@@ -19,12 +24,13 @@ class LapanganUsahaImportService
         // Tabel 1 ADHB
         $this->importTable(
             $sheet,
-            4,      // baris tahun
-            5,      // baris triwulan
-            9,      // mulai kategori
-            73,     // akhir kategori
-            1,      // jenis tabel ADHB
-            $submission
+            4,
+            5,
+            9,
+            73,
+            1,
+            $submission,
+            $wilayahId
         );
 
 
@@ -36,7 +42,8 @@ class LapanganUsahaImportService
             86,     // mulai kategori
             150,    // akhir kategori
             2,      // jenis tabel ADHK
-            $submission
+            $submission,
+            $wilayahId
         );
     }
 
@@ -49,7 +56,8 @@ class LapanganUsahaImportService
         $startRow,
         $endRow,
         $jenisTabelId,
-        $submission
+        $submission,
+        $wilayahId
     ) {
 
         $highestColumn = $sheet->getHighestColumn();
@@ -66,7 +74,6 @@ class LapanganUsahaImportService
 
 
             $column = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
-
 
 
             // ambil tahun
@@ -121,6 +128,26 @@ class LapanganUsahaImportService
                 continue;
             }
 
+            if ($submission) {
+
+                $periodeAllowed = RekonsiliasiPeriode::whereHas(
+                    'rekonsiliasi.putaran',
+                    function ($query) {
+
+                        $query->where('status', 'berlangsung');
+
+                    }
+                )
+                ->where('periode_id', $periode->id)
+                ->exists();
+
+
+                if (!$periodeAllowed) {
+                    continue;
+                }
+
+            }
+
 
             $kategoriId = 1;
 
@@ -143,9 +170,9 @@ class LapanganUsahaImportService
 
                 DataPdrbLapanganUsaha::create([
 
-                    'submission_id' => $submission->id,
+                    'submission_id' => $submission ? $submission->id : null,
 
-                    'wilayah_id' => $submission->wilayah_id,
+                    'wilayah_id' => $submission ? $submission->wilayah_id : $wilayahId,
 
                     'periode_id' => $periode->id,
 

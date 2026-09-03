@@ -6,13 +6,18 @@ use App\Models\DataPdrbPengeluaran;
 use App\Models\Periode;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use App\Models\RekonsiliasiPeriode;
 
 class PengeluaranImportService
 {
 
-    public function import($filePath, $submission)
+    public function import($filePath, $submission=null, $wilayahId=null)
     {
-        $spreadsheet = IOFactory::load($filePath);
+        $reader = IOFactory::createReader('Xlsx');
+        $reader->setReadDataOnly(true);
+        $reader->setReadEmptyCells(false);
+
+        $spreadsheet = $reader->load($filePath);
 
         $sheet = $spreadsheet->getActiveSheet();
 
@@ -24,7 +29,8 @@ class PengeluaranImportService
             9,
             33,
             1,
-            $submission
+            $submission,
+            $wilayahId
         );
 
 
@@ -35,7 +41,8 @@ class PengeluaranImportService
             86,
             110,
             2,
-            $submission
+            $submission,
+            $wilayahId
         );
     }
 
@@ -47,7 +54,8 @@ class PengeluaranImportService
         $startRow,
         $endRow,
         $jenisTabelId,
-        $submission
+        $submission,
+        $wilayahId
     )
     {
 
@@ -111,7 +119,25 @@ class PengeluaranImportService
                 continue;
             }
 
+            if ($submission) {
 
+                $periodeAllowed = RekonsiliasiPeriode::whereHas(
+                    'rekonsiliasi.putaran',
+                    function ($query) {
+
+                        $query->where('status', 'berlangsung');
+
+                    }
+                )
+                ->where('periode_id', $periode->id)
+                ->exists();
+
+
+                if (!$periodeAllowed) {
+                    continue;
+                }
+
+            }
 
             $kategoriId = 1;
 
@@ -137,9 +163,9 @@ class PengeluaranImportService
 
                 DataPdrbPengeluaran::create([
 
-                    'submission_id' => $submission->id,
+                    'submission_id' => $submission ? $submission->id : null,
 
-                    'wilayah_id' => $submission->wilayah_id,
+                    'wilayah_id' => $submission ? $submission->wilayah_id : $wilayahId,
 
                     'periode_id' => $periode->id,
 

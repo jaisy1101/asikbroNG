@@ -44,12 +44,13 @@ class SubmissionController extends Controller
         }
 
         $putaran = Putaran::where('rekonsiliasi_id', $rekonsiliasi->id)
-            ->where('nomor', 0)
+            ->where('status', 'berlangsung')
+            ->latest('nomor')
             ->first();
-
+            
         if (!$putaran) {
             return response()->json([
-                'message' => 'Putaran 0 belum tersedia',
+                'message' => 'Tidak ada putaran yang sedang berlangsung',
             ], 404);
         }
 
@@ -71,7 +72,7 @@ class SubmissionController extends Controller
 
             $submission = Submission::create([
                 'putaran_id' => $putaran->id,
-                'user_id' => 7, // SEMENTARA UNTUK TESTING
+                'user_id' => 9, // SEMENTARA UNTUK TESTING
                 'wilayah_id' => $wilayahId,
                 'modul_id' => $request->modul_id,
                 'versi' => 1,
