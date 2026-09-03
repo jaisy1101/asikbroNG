@@ -23,6 +23,7 @@
 
 </nav>
 
+
 <!-- Filter Section 1 -->
 <div class="card shadow mb-4">
 
@@ -48,6 +49,7 @@
 
                 </div>
 
+
                 <!-- Dropdown Wilayah -->
                 <div class="mr-3 mb-2">
 
@@ -68,6 +70,7 @@
                     </select>
 
                 </div>
+
 
                 <!-- Dropdown Tahun -->
                 <div class="mr-3 mb-2">
@@ -96,6 +99,7 @@
 
                 </div>
 
+
                 <!-- Dropdown Triwulan -->
                 <div class="mr-3 mb-2">
 
@@ -113,6 +117,7 @@
                     </select>
 
                 </div>
+
 
                 <!-- Dropdown Putaran -->
                 <div class="mb-2">
@@ -134,6 +139,7 @@
 
             </div>
 
+
             <!-- Kanan -->
             <div class="mt-2 mt-md-0">
 
@@ -152,6 +158,7 @@
     </div>
 
 </div>
+
 
 <!-- Filter Section 2 -->
 <div class="card shadow mb-4">
@@ -190,18 +197,18 @@
 
 </div>
 
+
 <!-- Tabel -->
 <div class="card shadow">
 
     <div class="card-header py-3">
 
         <h6 class="m-0 font-weight-bold text-primary">
-
             Daftar Tabel
-
         </h6>
 
     </div>
+
 
     <div class="card-body">
 
@@ -211,107 +218,61 @@
 
                 <thead class="thead-light">
 
+                    <!-- Baris Tahun -->
                     <tr>
 
-                        <th>Tabel</th>
-                        <th>Wilayah</th>
-                        <th>Tahun</th>
-                        <th>Triwulan</th>
-                        <th>Putaran</th>
-                        <th>Status</th>
-                        <th>Tanggal Upload</th>
+                        <th rowspan="2">
+                            Kategori
+                        </th>
+
+                        @for($tahun = 2010; $tahun <= 2026; $tahun++)
+
+                            <th colspan="5">
+                                {{ $tahun }}
+                            </th>
+
+                        @endfor
+
+                    </tr>
+
+
+                    <!-- Baris Triwulan -->
+                    <tr>
+
+                        @for($tahun = 2010; $tahun <= 2026; $tahun++)
+
+                            <th>I</th>
+                            <th>II</th>
+                            <th>III</th>
+                            <th>IV</th>
+                            <th>Total</th>
+
+                        @endfor
 
                     </tr>
 
                 </thead>
 
+
                 <tbody>
 
-                    <tr>
-                        <td>Distribusi Konsumsi Rumah Tangga</td>
-                        <td>Sulawesi Selatan</td>
-                        <td>2026</td>
-                        <td>Q2</td>
-                        <td>0</td>
-                        <td>
-                            <span class="badge badge-success">
-                                Tersedia
-                            </span>
-                        </td>
-                        <td>15 Mei 2026</td>
-                    </tr>
+                <tr>
+                    <td>Pertanian</td>
 
-                    <tr>
-                        <td>Indeks Implisit Pengeluaran</td>
-                        <td>Sulawesi Selatan</td>
-                        <td>2026</td>
-                        <td>Q2</td>
-                        <td>0</td>
-                        <td>
-                            <span class="badge badge-success">
-                                Tersedia
-                            </span>
-                        </td>
-                        <td>15 Mei 2026</td>
-                    </tr>
-
-                    <tr>
-                        <td>Laju Implisit Pengeluaran</td>
-                        <td>Sulawesi Selatan</td>
-                        <td>2026</td>
-                        <td>Q2</td>
-                        <td>0</td>
-                        <td>
-                            <span class="badge badge-warning">
-                                Revisi
-                            </span>
-                        </td>
-                        <td>14 Mei 2026</td>
-                    </tr>
-
-                    <tr>
-                        <td>Pertumbuhan YtoY</td>
-                        <td>Sulawesi Selatan</td>
-                        <td>2026</td>
-                        <td>Q2</td>
-                        <td>0</td>
-                        <td>
-                            <span class="badge badge-danger">
-                                Belum Upload
-                            </span>
-                        </td>
+                    @for($i = 0; $i < 17 * 5; $i++)
                         <td>-</td>
-                    </tr>
+                    @endfor
+                </tr>
 
-                    <tr>
-                        <td>Pertumbuhan QtoQ</td>
-                        <td>Sulawesi Selatan</td>
-                        <td>2026</td>
-                        <td>Q2</td>
-                        <td>0</td>
-                        <td>
-                            <span class="badge badge-success">
-                                Tersedia
-                            </span>
-                        </td>
-                        <td>15 Mei 2026</td>
-                    </tr>
+                <tr>
+                    <td>Pertambangan</td>
 
-                    <tr>
-                        <td>Pertumbuhan CtoC</td>
-                        <td>Sulawesi Selatan</td>
-                        <td>2026</td>
-                        <td>Q2</td>
-                        <td>0</td>
-                        <td>
-                            <span class="badge badge-success">
-                                Tersedia
-                            </span>
-                        </td>
-                        <td>15 Mei 2026</td>
-                    </tr>
+                    @for($i = 0; $i < 17 * 5; $i++)
+                        <td>-</td>
+                    @endfor
+                </tr>
 
-                </tbody>
+            </tbody>
 
             </table>
 

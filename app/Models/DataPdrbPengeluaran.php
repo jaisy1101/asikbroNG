@@ -14,12 +14,14 @@ class DataPdrbPengeluaran extends Model
     protected $table = 'data_pdrb_pengeluaran';
 
     protected $fillable = [
-        'submission_id',
-        'jenis_tabel_id',
-        'kategori_id',
-        'periode_id',
-        'nilai',
-    ];
+    'submission_id',
+    'wilayah_id',
+    'periode_id',
+    'jenis_tabel_id',
+    'kategori_pengeluaran_id',
+    'nilai',
+    'tipe_data',
+    ];  
 
     public function submission(): BelongsTo
     {
@@ -33,7 +35,7 @@ class DataPdrbPengeluaran extends Model
 
     public function kategori(): BelongsTo
     {
-        return $this->belongsTo(KategoriPengeluaran::class, 'kategori_id');
+        return $this->belongsTo(KategoriPengeluaran::class, 'kategori_pengeluaran_id');
     }
 
     public function periode(): BelongsTo

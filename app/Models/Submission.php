@@ -18,4 +18,37 @@ class Submission extends Model
     'status',
     'submitted_at'
     ];
+
+    public function dataPdrbLapanganUsaha()
+    {
+        return $this->hasMany(DataPdrbLapanganUsaha::class);
+    }
+    
+    public function dataPdrbPengeluaran()
+    {
+        return $this->hasMany(DataPdrbPengeluaran::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+
+    public function modul()
+    {
+        return $this->belongsTo(ModulPdrb::class, 'modul_id');
+    }
+
+
+    public function putaran()
+    {
+        return $this->belongsTo(Putaran::class, 'putaran_id');
+    }
+
+
+    public function files()
+    {
+        return $this->hasMany(SubmissionFile::class, 'submission_id');
+    }
 }

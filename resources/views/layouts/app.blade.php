@@ -58,5 +58,13 @@
 
     <script src="{{ asset('assets/vendor/chart.js/Chart.min.js') }}"></script>
 
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+
+    {{-- Script halaman --}}
+    @yield('scripts')
+
+
 </body>
 </html>

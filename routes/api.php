@@ -4,6 +4,10 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Api\SubmissionController;
+use App\Http\Controllers\Api\SubmissionListController;
+use App\Http\Controllers\Api\SubmissionDataController;
+use App\Http\Controllers\Api\PdrbTableController;
+use App\Http\Controllers\Api\RekonsiliasiController;
 
 Route::post('/login', function (Request $request) {
 
@@ -32,9 +36,41 @@ Route::post('/login', function (Request $request) {
 
 Route::middleware('auth:sanctum')->group(function () {
 
+
+});
+
+//sementara buat testing, nanti dihapus
     Route::post(
         '/submission/upload',
         [SubmissionController::class, 'upload']
     );
 
-});
+    Route::get(
+        '/submissions',
+        [SubmissionListController::class, 'index']
+    );
+
+    Route::get(
+        '/submissions/{id}/data',
+        [SubmissionDataController::class, 'show']
+    );
+
+    Route::get(
+        '/submissions/{id}/table',
+        [PdrbTableController::class, 'show']
+    );
+
+    Route::post(
+        '/rekonsiliasi/buka-quartal',
+        [RekonsiliasiController::class, 'bukaQuartalBaru']
+    );
+
+    Route::post(
+        '/rekonsiliasi/buka-putaran',
+        [RekonsiliasiController::class, 'bukaPutaranBaru']
+    );
+
+    Route::post(
+        '/rekonsiliasi/tutup',
+        [RekonsiliasiController::class, 'tutup']
+    );
