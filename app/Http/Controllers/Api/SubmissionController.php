@@ -11,6 +11,8 @@ use App\Services\LapanganUsaha\LapanganUsahaImportService;
 use App\Services\Pengeluaran\PengeluaranImportService;
 use App\Models\Rekonsiliasi;
 use App\Models\Putaran;
+use App\Models\DataPdrbLapanganUsaha;
+use App\Models\DataPdrbPengeluaran;
 
 class SubmissionController extends Controller
 {
@@ -110,6 +112,8 @@ class SubmissionController extends Controller
                     $submission
                 );
 
+                $this->updateMasterLapanganUsaha($submission);
+
             }
 
             if ($submission->modul_id == 2) {
@@ -118,6 +122,8 @@ class SubmissionController extends Controller
                     $filePath,
                     $submission
                 );
+
+                $this->updateMasterPengeluaran($submission);
 
             }
 
@@ -143,6 +149,53 @@ class SubmissionController extends Controller
                 'message' => 'Submission gagal dibuat',
                 'error' => $e->getMessage(),
             ], 500);
+        }
+    }
+
+    private function updateMasterLapanganUsaha($submission)
+    {
+        $data = $submission
+            ->dataPdrbLapanganUsaha()
+            ->get();
+
+
+        foreach ($data as $item) {
+
+
+            DataPdrbLapanganUsaha::whereNull('submission_id')
+                ->where('wilayah_id', $item->wilayah_id)
+                ->where('periode_id', $item->periode_id)
+                ->where('jenis_tabel_id', $item->jenis_tabel_id)
+                ->where('kategori_lapus_id', $item->kategori_lapus_id)
+                ->update([
+
+                    'nilai' => $item->nilai
+
+                ]);
+
+        }
+    }
+
+    private function updateMasterPengeluaran($submission)
+    {
+        $data = $submission
+            ->dataPdrbPengeluaran()
+            ->get();
+
+
+        foreach ($data as $item) {
+
+            DataPdrbPengeluaran::whereNull('submission_id')
+                ->where('wilayah_id', $item->wilayah_id)
+                ->where('periode_id', $item->periode_id)
+                ->where('jenis_tabel_id', $item->jenis_tabel_id)
+                ->where('kategori_pengeluaran_id', $item->kategori_pengeluaran_id)
+                ->update([
+
+                    'nilai' => $item->nilai
+
+                ]);
+
         }
     }
 }

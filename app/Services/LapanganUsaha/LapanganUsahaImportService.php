@@ -7,6 +7,8 @@ use App\Models\Periode;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use App\Models\RekonsiliasiPeriode;
+use illuminate\Support\Facades\DB;
+
 
 class LapanganUsahaImportService
 {
@@ -20,6 +22,27 @@ class LapanganUsahaImportService
 
         $sheet = $spreadsheet->getActiveSheet();
 
+        $allowedPeriods = [];
+
+        if ($submission) {
+
+            $allowedPeriods = RekonsiliasiPeriode::where(
+                'rekonsiliasi_id',
+                $submission->putaran->rekonsiliasi_id
+            )
+            ->with('periode')
+            ->get()
+            ->mapWithKeys(function($item){
+
+                return [
+                    $item->periode->tahun . '-' . $item->periode->triwulan => true
+                ];
+
+            })
+            ->toArray();
+
+        }
+
 
         // Tabel 1 ADHB
         $this->importTable(
@@ -30,7 +53,8 @@ class LapanganUsahaImportService
             73,
             1,
             $submission,
-            $wilayahId
+            $wilayahId,
+            $allowedPeriods
         );
 
 
@@ -43,7 +67,8 @@ class LapanganUsahaImportService
             150,    // akhir kategori
             2,      // jenis tabel ADHK
             $submission,
-            $wilayahId
+            $wilayahId,
+            $allowedPeriods
         );
     }
 
@@ -57,26 +82,34 @@ class LapanganUsahaImportService
         $endRow,
         $jenisTabelId,
         $submission,
-        $wilayahId
+        $wilayahId,
+        $allowedPeriods
     ) {
 
         $highestColumn = $sheet->getHighestColumn();
 
+        $startColumn = Coordinate::columnIndexFromString('D');
+
+        $endColumn = Coordinate::columnIndexFromString($highestColumn);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Cari kolom yang dibutuhkan saja
+        |--------------------------------------------------------------------------
+        */
+
+        $columns = [];
+
         $tahunAktif = null;
-
-
-        $startColumn = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString('D');
-
-        $endColumn = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($highestColumn);
 
 
         for ($col = $startColumn; $col <= $endColumn; $col++) {
 
 
-            $column = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
+            $column = Coordinate::stringFromColumnIndex($col);
 
 
-            // ambil tahun
             $tahunCell = $sheet
                 ->getCell($column . $tahunRow)
                 ->getCalculatedValue();
@@ -87,8 +120,6 @@ class LapanganUsahaImportService
             }
 
 
-
-            // ambil triwulan
             $triwulan = $sheet
                 ->getCell($column . $triwulanRow)
                 ->getCalculatedValue();
@@ -100,16 +131,12 @@ class LapanganUsahaImportService
             }
 
 
-
-            // skip kolom Total
             if (strtolower(trim($triwulan)) == 'total') {
                 continue;
             }
 
 
-
             $triwulanAngka = $this->convertTriwulan($triwulan);
-
 
 
             if (!$triwulanAngka) {
@@ -118,57 +145,103 @@ class LapanganUsahaImportService
 
 
 
-            $periode = Periode::where('tahun', $tahunAktif)
-                ->where('triwulan', $triwulanAngka)
-                ->first();
-
-
-
-            if (!$periode) {
-                continue;
-            }
+            /*
+            | hanya ambil periode rekon
+            */
 
             if ($submission) {
 
-                $periodeAllowed = RekonsiliasiPeriode::whereHas(
-                    'rekonsiliasi.putaran',
-                    function ($query) {
-
-                        $query->where('status', 'berlangsung');
-
-                    }
-                )
-                ->where('periode_id', $periode->id)
-                ->exists();
+                $key = $tahunAktif . '-' . $triwulanAngka;
 
 
-                if (!$periodeAllowed) {
+                if (!isset($allowedPeriods[$key])) {
                     continue;
                 }
 
             }
+
+
+            $columns[] = [
+
+                'column' => $column,
+
+                'tahun' => $tahunAktif,
+
+                'triwulan' => $triwulanAngka,
+
+            ];
+
+        }
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Ambil periode sekali
+        |--------------------------------------------------------------------------
+        */
+
+        $periodeIds = Periode::whereIn('tahun',
+            collect($columns)
+                ->pluck('tahun')
+                ->unique()
+        )
+        ->get()
+        ->keyBy(function($item){
+
+            return $item->tahun . '-' . $item->triwulan;
+
+        });
+
+
+
+        $rows = [];
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Baca hanya kolom yang dibutuhkan
+        |--------------------------------------------------------------------------
+        */
+
+        foreach ($columns as $colData) {
+
+
+            $key = $colData['tahun'] . '-' . $colData['triwulan'];
+
+
+            if (!isset($periodeIds[$key])) {
+                continue;
+            }
+
+
+            $periode = $periodeIds[$key];
 
 
             $kategoriId = 1;
 
 
+
             for ($row = $startRow; $row <= $endRow; $row++) {
 
 
+
                 $nilai = $sheet
-                    ->getCell($column . $row)
+                    ->getCell($colData['column'] . $row)
                     ->getCalculatedValue();
 
 
 
                 if ($nilai === null || $nilai === '') {
-                    $kategoriId++;
-                    continue;
+
+                    $nilai = 0;
+
                 }
 
 
 
-                DataPdrbLapanganUsaha::create([
+                $rows[] = [
 
                     'submission_id' => $submission ? $submission->id : null,
 
@@ -184,12 +257,30 @@ class LapanganUsahaImportService
 
                     'tipe_data' => 'source',
 
-                ]);
+                    'created_at' => now(),
+
+                    'updated_at' => now(),
+
+                ];
 
 
                 $kategoriId++;
 
             }
+
+        }
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Insert sekali
+        |--------------------------------------------------------------------------
+        */
+
+        if (count($rows) > 0) {
+
+            DataPdrbLapanganUsaha::insert($rows);
 
         }
 

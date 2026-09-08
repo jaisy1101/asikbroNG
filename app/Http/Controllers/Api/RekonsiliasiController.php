@@ -80,14 +80,38 @@ class RekonsiliasiController extends Controller
                 'tanggal_mulai' => now(),
             ]);
 
-            $periodeRekonsiliasi = Periode::where('tahun', $periode->tahun)
-                ->where('triwulan', '<=', $periode->triwulan)
-                ->get();
+            if ($periode->triwulan < 4) {
+
+                // Q1, Q2, Q3
+                $periodeRekonsiliasi = Periode::where('tahun', $periode->tahun)
+                    ->where('triwulan', '<=', $periode->triwulan)
+                    ->get();
+
+
+            } else {
+
+
+                // Q4
+                // ambil Q1-Q4 tahun berjalan + 2 tahun sebelumnya
+
+                $periodeRekonsiliasi = Periode::whereIn(
+                        'tahun',
+                        [
+                            $periode->tahun,
+                            $periode->tahun - 1,
+                            $periode->tahun - 2
+                        ]
+                    )
+                    ->orderBy('tahun')
+                    ->orderBy('triwulan')
+                    ->get();
+
+            }
 
 
             foreach ($periodeRekonsiliasi as $periodeItem) {
 
-                RekonsiliasiPeriode::create([
+                RekonsiliasiPeriode::firstOrCreate([
 
                     'rekonsiliasi_id' => $rekonsiliasi->id,
 
@@ -185,11 +209,15 @@ class RekonsiliasiController extends Controller
 
             DB::commit();
 
+            $periode = $rekonsiliasi->periode;
+
             return response()->json([
                 'message' => 'Putaran baru berhasil dibuka',
                 'rekonsiliasi_id' => $rekonsiliasi->id,
                 'putaran_id' => $putaranBaru->id,
                 'nomor_putaran' => $nomorBaru,
+                'tahun' => $periode->tahun,
+                'triwulan' => $periode->triwulan,
             ], 200);
 
         } catch (\Throwable $e) {

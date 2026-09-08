@@ -23,11 +23,10 @@ class ImportDataDasar extends Command
         ini_set('memory_limit', '1024M');
         set_time_limit(0);
 
-        
+        /*
         |--------------------------------------------------------------------------
         | DATA DASAR LAPANGAN USAHA
         |--------------------------------------------------------------------------
-        
 
         $folderLapangan = storage_path('app/data-dasar/Lapangan_Usaha');
 
@@ -77,7 +76,7 @@ class ImportDataDasar extends Command
             gc_collect_cycles();
 
         }
-
+        */
         unset($files);
         gc_collect_cycles();
 
@@ -132,6 +131,79 @@ class ImportDataDasar extends Command
                 null,
                 $wilayah->id
             );
+
+            gc_collect_cycles();
+
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | DATA DASAR PROVINSI
+        |--------------------------------------------------------------------------
+        */
+
+        $folderProvinsi = storage_path('app/data-dasar/Provinsi');
+
+        $files = File::files($folderProvinsi);
+
+
+        foreach ($files as $file) {
+
+            $namaFile = $file->getFilename();
+
+            preg_match('/\d{4}/', $namaFile, $match);
+
+
+            if (!$match) {
+                continue;
+            }
+
+
+            $kodeFile = $match[0];
+
+            if ($kodeFile == '7300') {
+                $kodeBps = '73';
+            }
+
+
+            $wilayah = Wilayah::where(
+                'kode_bps',
+                $kodeBps
+            )->first();
+
+
+            if (!$wilayah) {
+                $this->error("Provinsi tidak ditemukan: ".$kodeBps);
+                continue;
+            }
+
+
+            $this->info(
+                "Import Provinsi : ".$wilayah->nama
+            );
+
+
+            if (str_contains($namaFile, 'Lapangan')) {
+
+                $lapanganUsahaImport->import(
+                    $file->getPathname(),
+                    null,
+                    $wilayah->id
+                );
+
+            }
+
+
+            if (str_contains($namaFile, 'Pengeluaran')) {
+
+                $pengeluaranImport->import(
+                    $file->getPathname(),
+                    null,
+                    $wilayah->id
+                );
+
+            }
+
 
             gc_collect_cycles();
 
