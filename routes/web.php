@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Services\Derived\DerivedPdrbService;
 
 Route::get('/', function () {
     return view('pages.dashboard');
@@ -37,3 +38,15 @@ Route::view('/lapangan-usaha/perubahan-nilai', 'pages.lapangan-usaha.perubahan-n
 Route::view('/lapangan-usaha/hasil-konserda', 'pages.lapangan-usaha.hasil-konserda');
 
 Route::view('/login-preview', 'auth.login');
+
+
+Route::get('/test-derived', function (DerivedPdrbService $service) {
+
+    $service->hitungDistribusi(
+        1, // wilayah_id
+        61  // periode_id
+    );
+
+    return "Derived selesai";
+
+});

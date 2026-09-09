@@ -27,13 +27,21 @@ class ImportDataDasar extends Command
         |--------------------------------------------------------------------------
         | DATA DASAR LAPANGAN USAHA
         |--------------------------------------------------------------------------
-
+        
         $folderLapangan = storage_path('app/data-dasar/Lapangan_Usaha');
 
         $files = File::files($folderLapangan);
 
         foreach ($files as $file) {
 
+            //khusus untuk testing, hanya import wilayah 7306
+            /*
+            if (!str_contains($file->getFilename(), '7306')) {
+                continue;
+            }
+            */
+
+            /*
             $namaFile = $file->getFilename();
 
 
@@ -76,16 +84,16 @@ class ImportDataDasar extends Command
             gc_collect_cycles();
 
         }
-        */
+
         unset($files);
         gc_collect_cycles();
 
-        /*
+        /
         |--------------------------------------------------------------------------
         | DATA DASAR PENGELUARAN
         |--------------------------------------------------------------------------
         */
-
+        /*
         $folderPengeluaran = storage_path('app/data-dasar/Pengeluaran');
 
         $files = File::files($folderPengeluaran);
@@ -93,7 +101,13 @@ class ImportDataDasar extends Command
 
         foreach ($files as $file) {
 
-
+            //khusus untuk testing, hanya import wilayah 7306
+            /*
+            if (!str_contains($file->getFilename(), '7306')) {
+                continue;
+            }
+            */
+            /*
             $namaFile = $file->getFilename();
 
 
@@ -140,7 +154,7 @@ class ImportDataDasar extends Command
         |--------------------------------------------------------------------------
         | DATA DASAR PROVINSI
         |--------------------------------------------------------------------------
-        */
+        
 
         $folderProvinsi = storage_path('app/data-dasar/Provinsi');
 
@@ -208,7 +222,101 @@ class ImportDataDasar extends Command
             gc_collect_cycles();
 
         }
+        */
 
+        /*
+        |--------------------------------------------------------------------------
+        | DATA DASAR PROVINSI LAPANGAN USAHA 2008 - 2009
+        |--------------------------------------------------------------------------
+        */
+
+        $folderProvinsi = storage_path('app/data-dasar/Provinsi');
+
+        $files = File::files($folderProvinsi);
+
+
+        foreach ($files as $file) {
+
+
+            $namaFile = $file->getFilename();
+
+
+
+            // Ambil kode file
+            preg_match('/\d{4}/', $namaFile, $match);
+
+
+            if (!$match) {
+                continue;
+            }
+
+
+            $kodeFile = $match[0];
+
+
+
+            // Khusus Provinsi Sulawesi Selatan
+            if ($kodeFile == '7300') {
+
+                $kodeBps = '73';
+
+            } else {
+
+                continue;
+
+            }
+
+
+
+            $wilayah = Wilayah::where(
+                'kode_bps',
+                $kodeBps
+            )->first();
+
+
+
+            if (!$wilayah) {
+
+                $this->error(
+                    "Provinsi tidak ditemukan: ".$kodeBps
+                );
+
+                continue;
+
+            }
+
+
+
+            $this->info(
+                "Import Provinsi Lapangan Usaha 2008-2009 : ".$wilayah->nama
+            );
+
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Hanya import Lapangan Usaha
+            |--------------------------------------------------------------------------
+            */
+
+            if (str_contains($namaFile, 'Lapangan')) {
+
+
+                $lapanganUsahaImport->import(
+                    $file->getPathname(),
+                    null,
+                    $wilayah->id
+                );
+
+
+            }
+
+
+
+            gc_collect_cycles();
+
+
+        }
 
         $this->info("Import data dasar selesai.");
 

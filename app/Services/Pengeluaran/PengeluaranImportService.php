@@ -21,6 +21,27 @@ class PengeluaranImportService
 
         $sheet = $spreadsheet->getActiveSheet();
 
+        $allowedPeriods = [];
+
+        if ($submission) {
+
+            $allowedPeriods = RekonsiliasiPeriode::where(
+                'rekonsiliasi_id',
+                $submission->putaran->rekonsiliasi_id
+            )
+            ->with('periode')
+            ->get()
+            ->mapWithKeys(function($item){
+
+                return [
+                    $item->periode->tahun . '-' . $item->periode->triwulan => true
+                ];
+
+            })
+            ->toArray();
+
+        }
+
 
         // Tabel 1 ADHB
         $this->importTable(
@@ -30,7 +51,8 @@ class PengeluaranImportService
             33,
             1,
             $submission,
-            $wilayahId
+            $wilayahId,
+            $allowedPeriods
         );
 
 
@@ -42,7 +64,8 @@ class PengeluaranImportService
             110,
             2,
             $submission,
-            $wilayahId
+            $wilayahId,
+            $allowedPeriods
         );
     }
 
@@ -55,7 +78,8 @@ class PengeluaranImportService
         $endRow,
         $jenisTabelId,
         $submission,
-        $wilayahId
+        $wilayahId,
+        $allowedPeriods
     )
     {
 
@@ -65,6 +89,16 @@ class PengeluaranImportService
         $startColumn = Coordinate::columnIndexFromString('D');
 
         $endColumn = Coordinate::columnIndexFromString($highestColumn);
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Cari kolom periode yang dibutuhkan
+        |--------------------------------------------------------------------------
+        */
+
+        $columns = [];
 
 
 
@@ -92,7 +126,6 @@ class PengeluaranImportService
 
 
 
-            // Skip Total
             if (str_contains(strtolower($header), 'total')) {
                 continue;
             }
@@ -109,35 +142,85 @@ class PengeluaranImportService
 
 
 
-            $periode = Periode::where('tahun', $periodeData['tahun'])
-                ->where('triwulan', $periodeData['triwulan'])
-                ->first();
-
-
-
-            if (!$periode) {
-                continue;
-            }
-
             if ($submission) {
 
-                $periodeAllowed = RekonsiliasiPeriode::whereHas(
-                    'rekonsiliasi.putaran',
-                    function ($query) {
-
-                        $query->where('status', 'berlangsung');
-
-                    }
-                )
-                ->where('periode_id', $periode->id)
-                ->exists();
+                $key = $periodeData['tahun'] . '-' . $periodeData['triwulan'];
 
 
-                if (!$periodeAllowed) {
+                if (!isset($allowedPeriods[$key])) {
                     continue;
                 }
 
             }
+
+
+
+            $columns[] = [
+
+                'column' => $column,
+
+                'tahun' => $periodeData['tahun'],
+
+                'triwulan' => $periodeData['triwulan'],
+
+            ];
+
+
+        }
+
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Ambil periode sekali
+        |--------------------------------------------------------------------------
+        */
+
+
+        $periodeIds = Periode::whereIn(
+            'tahun',
+            collect($columns)
+                ->pluck('tahun')
+                ->unique()
+        )
+        ->get()
+        ->keyBy(function($item){
+
+            return $item->tahun . '-' . $item->triwulan;
+
+        });
+
+
+
+
+        $rows = [];
+
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Baca hanya kolom yang diperlukan
+        |--------------------------------------------------------------------------
+        */
+
+        foreach ($columns as $colData) {
+
+
+            $key = $colData['tahun'] . '-' . $colData['triwulan'];
+
+
+
+            if (!isset($periodeIds[$key])) {
+                continue;
+            }
+
+
+
+            $periode = $periodeIds[$key];
+
+
 
             $kategoriId = 1;
 
@@ -146,22 +229,23 @@ class PengeluaranImportService
             for ($row = $startRow; $row <= $endRow; $row++) {
 
 
+
                 $nilai = $sheet
-                    ->getCell($column . $row)
+                    ->getCell($colData['column'] . $row)
                     ->getCalculatedValue();
 
 
 
                 if ($nilai === null || $nilai === '') {
 
-                    $kategoriId++;
+                    $nilai = 0;
 
-                    continue;
                 }
 
 
 
-                DataPdrbPengeluaran::create([
+
+                $rows[] = [
 
                     'submission_id' => $submission ? $submission->id : null,
 
@@ -177,7 +261,11 @@ class PengeluaranImportService
 
                     'tipe_data' => 'source',
 
-                ]);
+                    'created_at' => now(),
+
+                    'updated_at' => now(),
+
+                ];
 
 
 
@@ -186,6 +274,22 @@ class PengeluaranImportService
             }
 
         }
+
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Insert sekali
+        |--------------------------------------------------------------------------
+        */
+
+        if (count($rows) > 0) {
+
+            DataPdrbPengeluaran::insert($rows);
+
+        }
+
 
     }
 
