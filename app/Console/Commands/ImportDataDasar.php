@@ -154,7 +154,7 @@ class ImportDataDasar extends Command
         |--------------------------------------------------------------------------
         | DATA DASAR PROVINSI
         |--------------------------------------------------------------------------
-        
+        */
 
         $folderProvinsi = storage_path('app/data-dasar/Provinsi');
 
@@ -222,13 +222,13 @@ class ImportDataDasar extends Command
             gc_collect_cycles();
 
         }
-        */
+        
 
         /*
         |--------------------------------------------------------------------------
         | DATA DASAR PROVINSI LAPANGAN USAHA 2008 - 2009
         |--------------------------------------------------------------------------
-        */
+        
 
         $folderProvinsi = storage_path('app/data-dasar/Provinsi');
 
@@ -297,7 +297,7 @@ class ImportDataDasar extends Command
             |--------------------------------------------------------------------------
             | Hanya import Lapangan Usaha
             |--------------------------------------------------------------------------
-            */
+            
 
             if (str_contains($namaFile, 'Lapangan')) {
 
@@ -317,6 +317,7 @@ class ImportDataDasar extends Command
 
 
         }
+        */
 
         $this->info("Import data dasar selesai.");
 
