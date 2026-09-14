@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\File;
 use App\Models\Wilayah;
 use App\Services\LapanganUsaha\LapanganUsahaImportService;
 use App\Services\Pengeluaran\PengeluaranImportService;
+use App\Jobs\GenerateDerivedLapanganUsahaJob;
 
 #[Signature('import:data-dasar')]
 #[Description('Import data dasar PDRB historis')]
@@ -39,9 +40,9 @@ class ImportDataDasar extends Command
             if (!str_contains($file->getFilename(), '7306')) {
                 continue;
             }
-            */
+            
 
-            /*
+            
             $namaFile = $file->getFilename();
 
 
@@ -82,18 +83,18 @@ class ImportDataDasar extends Command
             );
 
             gc_collect_cycles();
+            unset($files);
+            gc_collect_cycles();
 
         }
 
-        unset($files);
-        gc_collect_cycles();
-
-        /
+        
+        /*
         |--------------------------------------------------------------------------
         | DATA DASAR PENGELUARAN
         |--------------------------------------------------------------------------
-        */
-        /*
+        
+        
         $folderPengeluaran = storage_path('app/data-dasar/Pengeluaran');
 
         $files = File::files($folderPengeluaran);
@@ -106,8 +107,8 @@ class ImportDataDasar extends Command
             if (!str_contains($file->getFilename(), '7306')) {
                 continue;
             }
-            */
-            /*
+            
+            
             $namaFile = $file->getFilename();
 
 
@@ -146,6 +147,9 @@ class ImportDataDasar extends Command
                 $wilayah->id
             );
 
+
+            gc_collect_cycles();
+            unset($files);
             gc_collect_cycles();
 
         }
@@ -175,9 +179,14 @@ class ImportDataDasar extends Command
 
             $kodeFile = $match[0];
 
-            if ($kodeFile == '7300') {
-                $kodeBps = '73';
+
+            // hanya provinsi Sulawesi Selatan
+            if ($kodeFile != '7300') {
+                continue;
             }
+
+
+            $kodeBps = '73';
 
 
             $wilayah = Wilayah::where(
@@ -187,8 +196,13 @@ class ImportDataDasar extends Command
 
 
             if (!$wilayah) {
-                $this->error("Provinsi tidak ditemukan: ".$kodeBps);
+
+                $this->error(
+                    "Provinsi tidak ditemukan: ".$kodeBps
+                );
+
                 continue;
+
             }
 
 
@@ -224,102 +238,15 @@ class ImportDataDasar extends Command
         }
         
 
-        /*
-        |--------------------------------------------------------------------------
-        | DATA DASAR PROVINSI LAPANGAN USAHA 2008 - 2009
-        |--------------------------------------------------------------------------
-        
-
-        $folderProvinsi = storage_path('app/data-dasar/Provinsi');
-
-        $files = File::files($folderProvinsi);
-
-
-        foreach ($files as $file) {
-
-
-            $namaFile = $file->getFilename();
-
-
-
-            // Ambil kode file
-            preg_match('/\d{4}/', $namaFile, $match);
-
-
-            if (!$match) {
-                continue;
-            }
-
-
-            $kodeFile = $match[0];
-
-
-
-            // Khusus Provinsi Sulawesi Selatan
-            if ($kodeFile == '7300') {
-
-                $kodeBps = '73';
-
-            } else {
-
-                continue;
-
-            }
-
-
-
-            $wilayah = Wilayah::where(
-                'kode_bps',
-                $kodeBps
-            )->first();
-
-
-
-            if (!$wilayah) {
-
-                $this->error(
-                    "Provinsi tidak ditemukan: ".$kodeBps
-                );
-
-                continue;
-
-            }
-
-
-
-            $this->info(
-                "Import Provinsi Lapangan Usaha 2008-2009 : ".$wilayah->nama
-            );
-
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Hanya import Lapangan Usaha
-            |--------------------------------------------------------------------------
-            
-
-            if (str_contains($namaFile, 'Lapangan')) {
-
-
-                $lapanganUsahaImport->import(
-                    $file->getPathname(),
-                    null,
-                    $wilayah->id
-                );
-
-
-            }
-
-
-
-            gc_collect_cycles();
-
-
-        }
-        */
-
         $this->info("Import data dasar selesai.");
 
+        /*    
+        GenerateDerivedLapanganUsahaJob::dispatch(
+            'ALL'
+        );
+
+
+        $this->info("Generate derived dikirim ke queue.");
+        */    
     }
 }

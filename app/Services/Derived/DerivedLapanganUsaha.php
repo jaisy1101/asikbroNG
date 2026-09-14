@@ -120,10 +120,16 @@ class DerivedLapanganUsaha
 
         $periodeSebelumnya = $this->getPeriodeQtQ($periodeId);
 
-
         if (!$periodeSebelumnya) {
             return;
         }
+        
+        DataPdrbLapanganUsaha::where([
+            'wilayah_id' => $wilayahId,
+            'periode_id' => $periodeId,
+            'jenis_tabel_id' => 4,
+            'tipe_data' => 'derived'
+        ])->delete();
 
 
         $sourceSekarang = DataPdrbLapanganUsaha::where([

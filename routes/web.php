@@ -1,7 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Services\Derived\DerivedPdrbService;
+use App\Services\Derived\DerivedLapanganUsaha;
+use App\Jobs\GenerateDerivedLapanganUsahaJob;
 
 Route::get('/', function () {
     return view('pages.dashboard');
@@ -40,7 +41,7 @@ Route::view('/lapangan-usaha/hasil-konserda', 'pages.lapangan-usaha.hasil-konser
 Route::view('/login-preview', 'auth.login');
 
 
-Route::get('/test-distribusi', function (DerivedPdrbService $service) {
+Route::get('/test-distribusi', function (DerivedLapanganUsaha $service) {
 
     $service->hitungDistribusi(
         1, // wilayah_id
@@ -52,7 +53,7 @@ Route::get('/test-distribusi', function (DerivedPdrbService $service) {
 });
 
 Route::get('/test-qtq', function(
-    \App\Services\Derived\DerivedPdrbService $service
+    \App\Services\Derived\DerivedLapanganUsaha $service
 ){
 
     $service->hitungQtQ(
@@ -65,7 +66,7 @@ Route::get('/test-qtq', function(
 });
 
 Route::get('/test-yty', function(
-    \App\Services\Derived\DerivedPdrbService $service
+    \App\Services\Derived\DerivedLapanganUsaha $service
 ){
 
     $service->hitungYtY(
@@ -78,7 +79,7 @@ Route::get('/test-yty', function(
 });
 
 Route::get('/test-ctc', function(
-    \App\Services\Derived\DerivedPdrbService $service
+    \App\Services\Derived\DerivedLapanganUsaha $service
 ){
 
     $service->hitungCtC(
@@ -91,7 +92,7 @@ Route::get('/test-ctc', function(
 });
 
 Route::get('/test-implisit', function(
-    \App\Services\Derived\DerivedPdrbService $service
+    \App\Services\Derived\DerivedLapanganUsaha $service
 ){
 
     $service->hitungImplisit(
@@ -104,7 +105,7 @@ Route::get('/test-implisit', function(
 });
 
 Route::get('/test-implisit-qtq', function(
-    \App\Services\Derived\DerivedPdrbService $service
+    \App\Services\Derived\DerivedLapanganUsaha $service
 ){
 
     $service->hitungImplisitQtQ(
@@ -117,7 +118,7 @@ Route::get('/test-implisit-qtq', function(
 });
 
 Route::get('/test-implisit-yty', function(
-    \App\Services\Derived\DerivedPdrbService $service
+    \App\Services\Derived\DerivedLapanganUsaha $service
 ){
 
     $service->hitungImplisitYtY(
@@ -127,4 +128,37 @@ Route::get('/test-implisit-yty', function(
 
     return "Implisit YTY selesai";
 
+});
+
+
+Route::get('/test-job-derived', function(){
+
+    GenerateDerivedLapanganUsahaJob::dispatch(
+        1,
+        63
+    );
+
+    return "Job dikirim";
+
+});
+
+Route::get('/test-derived-error', function () {
+
+    \App\Jobs\GenerateDerivedLapanganUsahaJob::dispatch(
+        12,
+        56
+    );
+
+    return "dikirim";
+
+});
+
+Route::get('/test-derived-qtq', function () {
+
+    GenerateDerivedLapanganUsahaJob::dispatch(
+        7,
+        67
+    );
+
+    return "job dikirim";
 });

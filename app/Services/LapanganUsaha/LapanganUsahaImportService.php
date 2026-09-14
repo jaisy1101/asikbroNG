@@ -7,7 +7,6 @@ use App\Models\Periode;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use App\Models\RekonsiliasiPeriode;
-use illuminate\Support\Facades\DB;
 
 
 class LapanganUsahaImportService
@@ -70,8 +69,12 @@ class LapanganUsahaImportService
             $wilayahId,
             $allowedPeriods
         );
-    }
 
+        $spreadsheet->disconnectWorksheets();
+        unset($spreadsheet);
+
+        gc_collect_cycles();
+    }
 
 
     private function importTable(
@@ -280,9 +283,25 @@ class LapanganUsahaImportService
 
         if (count($rows) > 0) {
 
-            DataPdrbLapanganUsaha::insert($rows);
+            DataPdrbLapanganUsaha::upsert(
+                $rows,
+                [
+                    'wilayah_id',
+                    'periode_id',
+                    'jenis_tabel_id',
+                    'kategori_lapus_id',
+                    'tipe_data'
+                ],
+                [
+                    'nilai',
+                    'updated_at'
+                ]
+            );
 
         }
+
+        unset($rows);
+        gc_collect_cycles();
 
     }
 

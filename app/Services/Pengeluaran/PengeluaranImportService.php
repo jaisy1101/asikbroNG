@@ -67,6 +67,11 @@ class PengeluaranImportService
             $wilayahId,
             $allowedPeriods
         );
+
+        $spreadsheet->disconnectWorksheets();
+        unset($spreadsheet);
+
+        gc_collect_cycles();
     }
 
 
@@ -100,19 +105,11 @@ class PengeluaranImportService
 
         $columns = [];
 
-
-
         for ($col = $startColumn; $col <= $endColumn; $col++) {
 
 
             $column = Coordinate::stringFromColumnIndex($col);
 
-
-
-            // Header contoh:
-            // I-2018
-            // II-2018
-            // Total-2018
 
             $header = $sheet
                 ->getCell($column . $headerRow)
@@ -286,10 +283,25 @@ class PengeluaranImportService
 
         if (count($rows) > 0) {
 
-            DataPdrbPengeluaran::insert($rows);
+            DataPdrbPengeluaran::upsert(
+                $rows,
+                [
+                    'wilayah_id',
+                    'periode_id',
+                    'jenis_tabel_id',
+                    'kategori_pengeluaran_id',
+                    'tipe_data'
+                ],
+                [
+                    'nilai',
+                    'updated_at'
+                ]
+            );
 
         }
 
+        unset($rows);
+        gc_collect_cycles();
 
     }
 

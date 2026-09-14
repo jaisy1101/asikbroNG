@@ -7,19 +7,23 @@ use Illuminate\Http\Request;
 use App\Models\Submission;
 use App\Models\SubmissionFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use App\Services\LapanganUsaha\LapanganUsahaImportService;
 use App\Services\Pengeluaran\PengeluaranImportService;
 use App\Models\Rekonsiliasi;
 use App\Models\Putaran;
 use App\Models\DataPdrbLapanganUsaha;
 use App\Models\DataPdrbPengeluaran;
+use App\Jobs\GenerateDerivedLapanganUsahaJob;
+use App\Services\Integrasi\IntegrasiPdrbService;
 
 class SubmissionController extends Controller
 {
     public function upload(
         Request $request,
         LapanganUsahaImportService $lapanganUsahaImport,
-        PengeluaranImportService $pengeluaranImport
+        PengeluaranImportService $pengeluaranImport,
+        IntegrasiPdrbService $integrasi
     )
     {
         $request->validate([
@@ -103,7 +107,7 @@ class SubmissionController extends Controller
             |
             */
 
-            $filePath = storage_path('app/private/' . $path);
+            $filePath = Storage::disk('local')->path($path);
 
             if ($submission->modul_id == 1) {
 
@@ -113,6 +117,12 @@ class SubmissionController extends Controller
                 );
 
                 $this->updateMasterLapanganUsaha($submission);
+
+                // Generate integrasi setelah master LU berubah
+                $integrasi->generate(
+                    $rekonsiliasi->id,
+                    $submission->wilayah_id
+                );
 
             }
 
@@ -125,6 +135,12 @@ class SubmissionController extends Controller
 
                 $this->updateMasterPengeluaran($submission);
 
+                // Generate integrasi setelah master  PG berubah
+                $integrasi->generate(
+                    $rekonsiliasi->id,
+                    $submission->wilayah_id
+                );
+
             }
 
             SubmissionFile::where(
@@ -135,6 +151,17 @@ class SubmissionController extends Controller
             ]);
 
             DB::commit();
+
+
+            if ($submission->modul_id == 1) {
+
+                GenerateDerivedLapanganUsahaJob::dispatch(
+                    $submission->wilayah_id,
+                    $submission->putaran->rekonsiliasi->periode_id
+                );
+
+            }
+
 
             return response()->json([
                 'message' => 'Submission berhasil dibuat',
@@ -198,4 +225,4 @@ class SubmissionController extends Controller
 
         }
     }
-}
+} 
