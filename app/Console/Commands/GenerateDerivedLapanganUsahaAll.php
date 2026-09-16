@@ -7,9 +7,9 @@ use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use App\Jobs\GenerateDerivedLapanganUsahaJob;
 
-#[Signature('app:generate-derived-all')]
+#[Signature('app:generate-derived-lapangan-usaha-all')]
 #[Description('Command description')]
-class GenerateDerivedAll extends Command
+class GenerateDerivedLapanganUsahaAll extends Command
 {
     /**
      * Execute the console command.

@@ -8,6 +8,7 @@ use App\Models\Rekonsiliasi;
 use App\Models\Putaran;
 use App\Models\Periode;
 use Illuminate\Support\Facades\DB;
+use App\Jobs\GenerateKonserdaJob;
 use App\Models\RekonsiliasiPeriode;
 
 class RekonsiliasiController extends Controller
@@ -264,6 +265,17 @@ class RekonsiliasiController extends Controller
             'status' => 'selesai',
             'tanggal_selesai' => now(),
         ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | GENERATE HASIL KONSERDA
+        |--------------------------------------------------------------------------
+        */
+
+        GenerateKonserdaJob::dispatch(
+            $putaran->id
+        );
+
 
         return response()->json([
             'message' => 'Putaran berhasil ditutup',

@@ -44,8 +44,8 @@ Route::view('/login-preview', 'auth.login');
 Route::get('/test-distribusi', function (DerivedLapanganUsaha $service) {
 
     $service->hitungDistribusi(
-        1, // wilayah_id
-        61  // periode_id
+        7, // wilayah_id
+        67  // periode_id
     ); 
 
     return "Membuat Tabel Distribusi selesai";

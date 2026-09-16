@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\SubmissionListController;
 use App\Http\Controllers\Api\SubmissionDataController;
 use App\Http\Controllers\Api\PdrbTableController;
 use App\Http\Controllers\Api\RekonsiliasiController;
+use App\Http\Controllers\Api\IntegrasiPdrbController;
+use App\Http\Controllers\Api\KonserdaController;
 
 Route::post('/login', function (Request $request) {
 
@@ -76,11 +78,21 @@ Route::middleware('auth:sanctum')->group(function () {
     );
 
     Route::get(
-        '/pdrb/source-lapangan-usaha/{wilayah_id}/{jenis_tabel_id}',
-        [PdrbTableController::class, 'showSourceLapanganUsaha']
+        '/pdrb/lapangan-usaha/{wilayah_id}/{jenis_tabel_id}',
+        [PdrbTableController::class, 'showLapanganUsaha']
     );
 
     Route::get(
-        '/pdrb/source-pengeluaran/{wilayah_id}/{jenis_tabel_id}',
-        [PdrbTableController::class, 'showSourcePengeluaran']
+        '/pdrb/pengeluaran/{wilayah_id}/{jenis_tabel_id}',
+        [PdrbTableController::class, 'showPengeluaran']
+    );
+
+    Route::get(
+        '/integrasi',
+        [IntegrasiPdrbController::class, 'index']
+    );
+
+    Route::get(
+        '/konserda/{putaranId}',
+        [KonserdaController::class, 'index']
     );

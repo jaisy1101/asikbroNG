@@ -20,7 +20,8 @@ class GenerateIntegrasiPdrb extends Command
     {
 
         $service->generate(
-            $this->argument('rekonsiliasi_id')
+            $this->argument('rekonsiliasi_id'),
+            null
         );
 
 

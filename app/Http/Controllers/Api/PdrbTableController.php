@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Submission;
+use App\Models\Rekonsiliasi;
+use App\Models\Periode;
 use App\Models\DataPdrbLapanganUsaha;
 use App\Models\DataPdrbPengeluaran;
 
@@ -123,10 +125,37 @@ class PdrbTableController extends Controller
 
     }
 
-    public function showSourceLapanganUsaha($wilayah_id, $jenis_tabel_id)
+    public function showLapanganUsaha($wilayah_id, $jenis_tabel_id)
     {
+        $rekonsiliasi = Rekonsiliasi::where('status', 'berlangsung')
+            ->latest('id')
+            ->first();
+
+
+        $periodeAktif = null;
+
+        if ($rekonsiliasi) {
+            $periodeAktif = $rekonsiliasi->periode;
+        }
+
+
         $data = DataPdrbLapanganUsaha::where('wilayah_id', $wilayah_id)
             ->where('jenis_tabel_id', $jenis_tabel_id)
+            ->when($periodeAktif, function ($query) use ($periodeAktif) {
+
+                $query->whereHas('periode', function ($q) use ($periodeAktif) {
+
+                    $q->where('tahun', '<', $periodeAktif->tahun)
+                    ->orWhere(function ($q2) use ($periodeAktif) {
+
+                        $q2->where('tahun', $periodeAktif->tahun)
+                        ->where('triwulan', '<=', $periodeAktif->triwulan);
+
+                    });
+
+                });
+
+            })
             ->with([
                 'periode',
                 'kategori'
@@ -134,13 +163,16 @@ class PdrbTableController extends Controller
             ->get();
 
 
+
         $result = $data
             ->groupBy('kategori.nama')
             ->map(function ($items) {
 
+
                 $row = [];
 
-                $row['kategori'] = $items->first()->kategori->nama;
+                $row['kategori'] =
+                    $items->first()->kategori->nama;
 
 
                 foreach ($items as $item) {
@@ -158,6 +190,7 @@ class PdrbTableController extends Controller
 
                 return $row;
 
+
             })
             ->values();
 
@@ -172,12 +205,46 @@ class PdrbTableController extends Controller
             'table' => $result
 
         ]);
+
     }
 
-    public function showSourcePengeluaran($wilayah_id, $jenis_tabel_id)
+    public function showPengeluaran($wilayah_id, $jenis_tabel_id)
     {
+        $rekonsiliasi = Rekonsiliasi::where('status', 'berlangsung')
+            ->latest('id')
+            ->first();
+
+
+        $periodeAktif = null;
+
+        if ($rekonsiliasi) {
+            $periodeAktif = $rekonsiliasi->periode;
+        }
+
+
+
         $data = DataPdrbPengeluaran::where('wilayah_id', $wilayah_id)
             ->where('jenis_tabel_id', $jenis_tabel_id)
+            ->when($periodeAktif, function ($query) use ($periodeAktif) {
+
+                $query->whereHas('periode', function ($q) use ($periodeAktif) {
+
+
+                    $q->where('tahun', '<', $periodeAktif->tahun)
+                    ->orWhere(function ($q2) use ($periodeAktif) {
+
+
+                        $q2->where('tahun', $periodeAktif->tahun)
+                        ->where('triwulan', '<=', $periodeAktif->triwulan);
+
+
+                    });
+
+
+                });
+
+
+            })
             ->with([
                 'periode',
                 'kategori'
@@ -190,12 +257,16 @@ class PdrbTableController extends Controller
             ->groupBy('kategori.nama')
             ->map(function ($items) {
 
+
                 $row = [];
 
-                $row['kategori'] = $items->first()->kategori->nama;
+                $row['kategori'] =
+                    $items->first()->kategori->nama;
+
 
 
                 foreach ($items as $item) {
+
 
                     $periode =
                         $item->periode->tahun .
@@ -203,12 +274,16 @@ class PdrbTableController extends Controller
                         $item->periode->triwulan;
 
 
+
                     $row[$periode] = $item->nilai;
+
 
                 }
 
 
+
                 return $row;
+
 
             })
             ->values();
@@ -224,6 +299,7 @@ class PdrbTableController extends Controller
             'table' => $result
 
         ]);
+
     }
     
 }

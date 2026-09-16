@@ -2,10 +2,10 @@
 
 namespace App\Services\Derived;
 
-use App\Models\DataPdrbLapanganUsaha;
+use App\Models\DataPdrbPengeluaran;
 use Illuminate\Support\Facades\DB;
 
-class DerivedLapanganUsaha
+class DerivedPengeluaran
 {
 
     public function hitungDistribusi($wilayahId, $periodeId)
@@ -15,7 +15,7 @@ class DerivedLapanganUsaha
 
 
             // 1. Ambil ADHB source
-            $source = DataPdrbLapanganUsaha::where([
+            $source = DataPdrbPengeluaran::where([
                 'wilayah_id' => $wilayahId,
                 'periode_id' => $periodeId,
                 'jenis_tabel_id' => 1, // ADHB
@@ -46,7 +46,7 @@ class DerivedLapanganUsaha
 
 
             // 3. Hapus derived distribusi lama
-            DataPdrbLapanganUsaha::where([
+            DataPdrbPengeluaran::where([
                 'wilayah_id' => $wilayahId,
                 'periode_id' => $periodeId,
                 'jenis_tabel_id' => 3
@@ -64,7 +64,7 @@ class DerivedLapanganUsaha
 
 
 
-                DataPdrbLapanganUsaha::create([
+                DataPdrbPengeluaran::create([
 
                     'submission_id' => null,
 
@@ -74,7 +74,7 @@ class DerivedLapanganUsaha
 
                     'jenis_tabel_id' => 3,
 
-                    'kategori_lapus_id' => $item->kategori_lapus_id,
+                    'kategori_pengeluaran_id' => $item->kategori_pengeluaran_id,
 
                     'nilai' => round($nilaiDistribusi,2),
 
@@ -122,7 +122,7 @@ class DerivedLapanganUsaha
             return;
         }
         
-        DataPdrbLapanganUsaha::where([
+        DataPdrbPengeluaran::where([
             'wilayah_id' => $wilayahId,
             'periode_id' => $periodeId,
             'jenis_tabel_id' => 4,
@@ -130,7 +130,7 @@ class DerivedLapanganUsaha
         ])->delete();
 
 
-        $sourceSekarang = DataPdrbLapanganUsaha::where([
+        $sourceSekarang = DataPdrbPengeluaran::where([
             'wilayah_id' => $wilayahId,
             'periode_id' => $periodeId,
             'jenis_tabel_id' => 2,
@@ -138,21 +138,21 @@ class DerivedLapanganUsaha
         ])->get();
 
 
-        $sourceSebelumnya = DataPdrbLapanganUsaha::where([
+        $sourceSebelumnya = DataPdrbPengeluaran::where([
             'wilayah_id' => $wilayahId,
             'periode_id' => $periodeSebelumnya->id,
             'jenis_tabel_id' => 2,
             'tipe_data' => 'source'
         ])
         ->get()
-        ->keyBy('kategori_lapus_id');
+        ->keyBy('kategori_pengeluaran_id');
 
 
 
         foreach ($sourceSekarang as $item) {
 
 
-            $sebelumnya = $sourceSebelumnya[$item->kategori_lapus_id] ?? null;
+            $sebelumnya = $sourceSebelumnya[$item->kategori_pengeluaran_id] ?? null;
 
 
             if (!$sebelumnya || $sebelumnya->nilai == 0) {
@@ -165,7 +165,7 @@ class DerivedLapanganUsaha
 
 
 
-            DataPdrbLapanganUsaha::create([
+            DataPdrbPengeluaran::create([
 
                 'submission_id' => null,
 
@@ -175,7 +175,7 @@ class DerivedLapanganUsaha
 
                 'jenis_tabel_id' => 4,
 
-                'kategori_lapus_id' => $item->kategori_lapus_id,
+                'kategori_pengeluaran_id' => $item->kategori_pengeluaran_id,
 
                 'nilai' => round($qtq,2),
 
@@ -212,7 +212,7 @@ class DerivedLapanganUsaha
         }
 
 
-        $sourceSekarang = DataPdrbLapanganUsaha::where([
+        $sourceSekarang = DataPdrbPengeluaran::where([
             'wilayah_id' => $wilayahId,
             'periode_id' => $periodeId,
             'jenis_tabel_id' => 2,
@@ -222,19 +222,19 @@ class DerivedLapanganUsaha
 
 
 
-        $sourceTahunLalu = DataPdrbLapanganUsaha::where([
+        $sourceTahunLalu = DataPdrbPengeluaran::where([
             'wilayah_id' => $wilayahId,
             'periode_id' => $periodeSebelumnya->id,
             'jenis_tabel_id' => 2,
             'tipe_data' => 'source'
         ])
         ->get()
-        ->keyBy('kategori_lapus_id');
+        ->keyBy('kategori_pengeluaran_id');
 
 
 
         // hapus hasil lama
-        DataPdrbLapanganUsaha::where([
+        DataPdrbPengeluaran ::where([
             'wilayah_id' => $wilayahId,
             'periode_id' => $periodeId,
             'jenis_tabel_id' => 5
@@ -246,7 +246,7 @@ class DerivedLapanganUsaha
         foreach ($sourceSekarang as $item) {
 
 
-            $tahunLalu = $sourceTahunLalu[$item->kategori_lapus_id] ?? null;
+            $tahunLalu = $sourceTahunLalu[$item->kategori_pengeluaran_id] ?? null;
 
 
             if (!$tahunLalu || $tahunLalu->nilai == 0) {
@@ -260,7 +260,7 @@ class DerivedLapanganUsaha
 
 
 
-            DataPdrbLapanganUsaha::create([
+            DataPdrbPengeluaran::create([
 
                 'submission_id' => null,
 
@@ -270,7 +270,7 @@ class DerivedLapanganUsaha
 
                 'jenis_tabel_id' => 5,
 
-                'kategori_lapus_id' => $item->kategori_lapus_id,
+                'kategori_pengeluaran_id' => $item->kategori_pengeluaran_id,
 
                 'nilai' => round($yty,2),
 
@@ -312,7 +312,7 @@ class DerivedLapanganUsaha
         );
 
 
-        $sourceSekarang = DataPdrbLapanganUsaha::where([
+        $sourceSekarang = DataPdrbPengeluaran::where([
             'wilayah_id' => $wilayahId,
             'jenis_tabel_id' => 2,
             'tipe_data' => 'source'
@@ -322,11 +322,11 @@ class DerivedLapanganUsaha
             $periodeSekarang->pluck('id')
         )
         ->get()
-        ->groupBy('kategori_lapus_id');
+        ->groupBy('kategori_pengeluaran_id');
 
 
 
-        $sourceTahunLalu = DataPdrbLapanganUsaha::where([
+        $sourceTahunLalu = DataPdrbPengeluaran::where([
             'wilayah_id' => $wilayahId,
             'jenis_tabel_id' => 2,
             'tipe_data' => 'source'
@@ -336,11 +336,11 @@ class DerivedLapanganUsaha
             $periodeTahunLalu->pluck('id')
         )
         ->get()
-        ->groupBy('kategori_lapus_id');
+        ->groupBy('kategori_pengeluaran_id');
 
 
 
-        DataPdrbLapanganUsaha::where([
+        DataPdrbPengeluaran::where([
             'wilayah_id' => $wilayahId,
             'periode_id' => $periodeId,
             'jenis_tabel_id' => 6
@@ -375,7 +375,7 @@ class DerivedLapanganUsaha
 
 
 
-            DataPdrbLapanganUsaha::create([
+            DataPdrbPengeluaran::create([
 
                 'submission_id' => null,
 
@@ -385,7 +385,7 @@ class DerivedLapanganUsaha
 
                 'jenis_tabel_id' => 6,
 
-                'kategori_lapus_id' => $kategoriId,
+                'kategori_pengeluaran_id' => $kategoriId,
 
                 'nilai' => round($ctc,2),
 
@@ -400,25 +400,25 @@ class DerivedLapanganUsaha
     public function hitungImplisit($wilayahId, $periodeId)
     {
 
-        $adhb = DataPdrbLapanganUsaha::where([
+        $adhb = DataPdrbPengeluaran::where([
             'wilayah_id' => $wilayahId,
             'periode_id' => $periodeId,
             'jenis_tabel_id' => 1,
             'tipe_data' => 'source'
         ])
         ->get()
-        ->keyBy('kategori_lapus_id');
+        ->keyBy('kategori_pengeluaran_id');
 
 
 
-        $adhk = DataPdrbLapanganUsaha::where([
+        $adhk = DataPdrbPengeluaran::where([
             'wilayah_id' => $wilayahId,
             'periode_id' => $periodeId,
             'jenis_tabel_id' => 2,
             'tipe_data' => 'source'
         ])
         ->get()
-        ->keyBy('kategori_lapus_id');
+        ->keyBy('kategori_pengeluaran_id');
 
 
 
@@ -429,7 +429,7 @@ class DerivedLapanganUsaha
 
 
         // hapus hasil lama
-        DataPdrbLapanganUsaha::where([
+        DataPdrbPengeluaran::where([
             'wilayah_id' => $wilayahId,
             'periode_id' => $periodeId,
             'jenis_tabel_id' => 7
@@ -462,7 +462,7 @@ class DerivedLapanganUsaha
 
 
 
-            DataPdrbLapanganUsaha::create([
+            DataPdrbPengeluaran::create([
 
                 'submission_id' => null,
 
@@ -472,7 +472,7 @@ class DerivedLapanganUsaha
 
                 'jenis_tabel_id' => 7,
 
-                'kategori_lapus_id' => $kategoriId,
+                'kategori_pengeluaran_id' => $kategoriId,
 
                 'nilai' => round($implisit,2),
 
@@ -495,29 +495,29 @@ class DerivedLapanganUsaha
         }
 
 
-        $sourceSekarang = DataPdrbLapanganUsaha::where([
+        $sourceSekarang = DataPdrbPengeluaran::where([
             'wilayah_id' => $wilayahId,
             'periode_id' => $periodeId,
             'jenis_tabel_id' => 7,
             'tipe_data' => 'derived'
         ])
         ->get()
-        ->keyBy('kategori_lapus_id');
+        ->keyBy('kategori_pengeluaran_id');
 
 
 
-        $sourceSebelumnya = DataPdrbLapanganUsaha::where([
+        $sourceSebelumnya = DataPdrbPengeluaran::where([
             'wilayah_id' => $wilayahId,
             'periode_id' => $periodeSebelumnya->id,
             'jenis_tabel_id' => 7,
             'tipe_data' => 'derived'
         ])
         ->get()
-        ->keyBy('kategori_lapus_id');
+        ->keyBy('kategori_pengeluaran_id');
 
 
 
-        DataPdrbLapanganUsaha::where([
+        DataPdrbPengeluaran::where([
             'wilayah_id' => $wilayahId,
             'periode_id' => $periodeId,
             'jenis_tabel_id' => 8
@@ -543,7 +543,7 @@ class DerivedLapanganUsaha
 
 
 
-            DataPdrbLapanganUsaha::create([
+            DataPdrbPengeluaran::create([
 
                 'submission_id' => null,
 
@@ -553,7 +553,7 @@ class DerivedLapanganUsaha
 
                 'jenis_tabel_id' => 8,
 
-                'kategori_lapus_id' => $kategoriId,
+                'kategori_pengeluaran_id' => $kategoriId,
 
                 'nilai' => round($qtq,2),
 
@@ -576,29 +576,29 @@ class DerivedLapanganUsaha
         }
 
 
-        $sourceSekarang = DataPdrbLapanganUsaha::where([
+        $sourceSekarang = DataPdrbPengeluaran::where([
             'wilayah_id' => $wilayahId,
             'periode_id' => $periodeId,
             'jenis_tabel_id' => 7,
             'tipe_data' => 'derived'
         ])
         ->get()
-        ->keyBy('kategori_lapus_id');
+        ->keyBy('kategori_pengeluaran_id');
 
 
 
-        $sourceTahunLalu = DataPdrbLapanganUsaha::where([
+        $sourceTahunLalu = DataPdrbPengeluaran::where([
             'wilayah_id' => $wilayahId,
             'periode_id' => $periodeSebelumnya->id,
             'jenis_tabel_id' => 7,
             'tipe_data' => 'derived'
         ])
         ->get()
-        ->keyBy('kategori_lapus_id');
+        ->keyBy('kategori_pengeluaran_id');
 
 
 
-        DataPdrbLapanganUsaha::where([
+        DataPdrbPengeluaran::where([
             'wilayah_id' => $wilayahId,
             'periode_id' => $periodeId,
             'jenis_tabel_id' => 9
@@ -624,7 +624,7 @@ class DerivedLapanganUsaha
 
 
 
-            DataPdrbLapanganUsaha::create([
+            DataPdrbPengeluaran::create([
 
                 'submission_id' => null,
 
@@ -634,7 +634,7 @@ class DerivedLapanganUsaha
 
                 'jenis_tabel_id' => 9,
 
-                'kategori_lapus_id' => $kategoriId,
+                'kategori_pengeluaran_id' => $kategoriId,
 
                 'nilai' => round($yty,2),
 
