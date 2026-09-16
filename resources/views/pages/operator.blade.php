@@ -148,8 +148,9 @@
                                     TAHUN
                                 </small>
 
-                                <h3 class="font-weight-bold text-dark mb-0">
-                                    2026
+                                <h3 id="statusTahun"
+                                    class="font-weight-bold text-dark mb-0">
+                                    -
                                 </h3>
 
                             </div>
@@ -160,8 +161,9 @@
                                     TRIWULAN
                                 </small>
 
-                                <h3 class="font-weight-bold text-dark mb-0">
-                                    Q2
+                                <h3 id="statusTriwulan"
+                                    class="font-weight-bold text-dark mb-0">
+                                    -
                                 </h3>
 
                             </div>
@@ -172,8 +174,9 @@
                                     PUTARAN
                                 </small>
 
-                                <h3 class="font-weight-bold text-dark mb-0">
-                                    1
+                                <h3 id="statusPutaran"
+                                    class="font-weight-bold text-dark mb-0">
+                                    -
                                 </h3>
 
                             </div>
@@ -182,13 +185,14 @@
 
                         <div class="text-center mt-4">
 
-                            <span class="badge badge-success px-4 py-2"
+                            <span id="statusBadge"
+                                class="badge badge-success px-4 py-2"
                                 style="
                                     border-radius: 20px;
                                     font-size: 14px;
                                 ">
 
-                                Rekonsiliasi Sedang Berlangsung
+                                -
 
                             </span>
 
@@ -362,168 +366,188 @@
 
             <hr class="my-0">
 
-            <!-- Body -->
-            <div class="modal-body py-4 px-5">
+           <!-- Body -->
+            <div class="modal-body px-5 py-4">
+
 
                 <!-- Tahun -->
                 <div class="row align-items-center mb-4">
 
-                    <div class="col-md-4">
-                        <h4 class="font-weight-bold mb-0">
+                    <div class="col-md-5">
+
+                        <label class="font-weight-bold text-gray-700 mb-0"
+                            style="font-size:18px;">
+
                             Tahun
-                        </h4>
+
+                        </label>
+
                     </div>
 
-                    <div class="col-md-1 text-center">
-                        <h4 class="mb-0">:</h4>
-                    </div>
 
                     <div class="col-md-3">
 
                         <select class="form-control"
+                                id="tahun"
                                 style="
-                                    border-radius: 15px;
-                                    height: 50px;
-                                    font-size: 24px;
+                                    height:45px;
+                                    border-radius:12px;
+                                    font-size:18px;
                                 ">
 
-                            <option>2024</option>
-                            <option>2025</option>
-                            <option>2026</option>
+                            @for($tahun = 2010; $tahun <= 2028; $tahun++)
+
+                                <option>{{ $tahun }}</option>
+
+                            @endfor
 
                         </select>
 
                     </div>
 
+
                 </div>
+
 
                 <!-- Quartal -->
                 <div class="row align-items-center mb-4">
 
-                    <div class="col-md-4">
-                        <h4 class="font-weight-bold mb-0">
+
+                    <div class="col-md-5">
+
+                        <label class="font-weight-bold text-gray-700 mb-0"
+                            style="font-size:18px;">
+
                             Quartal Terakhir
-                        </h4>
+
+                        </label>
+
                     </div>
 
-                    <div class="col-md-1 text-center">
-                        <h4 class="mb-0">:</h4>
-                    </div>
+
 
                     <div class="col-md-3">
 
+
                         <select class="form-control"
+                                id="triwulan"
                                 style="
-                                    border-radius: 15px;
-                                    height: 50px;
-                                    font-size: 24px;
+                                    border-radius:15px;
+                                    height:50px;
+                                    font-size:18px;
                                 ">
 
-                            <option>Q1</option>
-                            <option>Q2</option>
-                            <option>Q3</option>
-                            <option>Q4</option>
+                            <option value="1">Q1</option>
+                            <option value="2">Q2</option>
+                            <option value="3">Q3</option>
+                            <option value="4">Q4</option>
 
                         </select>
 
+
                     </div>
+
+
 
                     <div class="col-md-4">
 
-                        <button class="btn btn-info btn-block py-3"
+
+                        <button id="btnBukaQuartal"
+                                class="btn btn-success btn-block"
                                 style="
-                                    border-radius: 18px;
-                                    font-size: 20px;
-                                    box-shadow: 0 5px 10px rgba(0,0,0,0.15);
+                                    height:45px;
+                                    border-radius:12px;
+                                    font-size:15px;
+                                    font-weight:600;
                                 ">
 
                             Buka Quartal Baru
 
                         </button>
 
+
                     </div>
 
+
                 </div>
+
+
+
 
                 <!-- Putaran -->
                 <div class="row align-items-center">
 
-                    <div class="col-md-4">
-                        <h4 class="font-weight-bold mb-0">
+
+                    <div class="col-md-5">
+
+
+                        <label class="font-weight-bold text-gray-700 mb-0"
+                            style="font-size:18px;">
+
                             Putaran Terakhir
-                        </h4>
+
+                        </label>
+
+
                     </div>
 
-                    <div class="col-md-1 text-center">
-                        <h4 class="mb-0">:</h4>
-                    </div>
+
 
                     <div class="col-md-3">
 
+
                         <select class="form-control"
+                                id="putaran"
                                 style="
-                                    border-radius: 15px;
-                                    height: 50px;
-                                    font-size: 22px;
+                                    border-radius:15px;
+                                    height:50px;
+                                    font-size:18px;
                                 ">
 
-                            <option>Putaran 1</option>
-                            <option selected>Putaran 2</option>
-                            <option>Putaran 3</option>
-                            <option>Putaran 4</option>
+                            <option value="0">Putaran 0</option>
+                            <option value="1">Putaran 1</option>
+                            <option value="2">Putaran 2</option>
+                            <option value="3">Putaran 3</option>
+                            <option value="4">Putaran 4</option>
+                            <option value="5">Putaran 5</option>
+                            <option value="6">Putaran 6</option>
+                            <option value="7">Putaran 7</option>
 
                         </select>
 
+
                     </div>
+
+
 
                     <div class="col-md-4">
 
-                        <button class="btn btn-info btn-block py-3"
+
+                        <button id="btnBukaPutaran"
+                                class="btn btn-success btn-block"
                                 style="
-                                    border-radius: 18px;
-                                    font-size: 20px;
-                                    box-shadow: 0 5px 10px rgba(0,0,0,0.15);
+                                    height:45px;
+                                    border-radius:12px;
+                                    font-size:15px;
+                                    font-weight:600;
                                 ">
+
 
                             Buka Putaran Baru
 
+
                         </button>
+
 
                     </div>
 
+
                 </div>
+
 
             </div>
 
             <hr class="my-0">
-
-            <!-- Footer -->
-            <div class="modal-footer border-0 py-4 px-5 justify-content-start">
-
-                <button class="btn btn-success px-5 py-3 mr-3"
-                        style="
-                            border-radius: 20px;
-                            font-size: 22px;
-                            font-weight: bold;
-                        ">
-
-                    Konfirmasi
-
-                </button>
-
-                <button class="btn btn-outline-success px-5 py-3"
-                        data-dismiss="modal"
-                        style="
-                            border-radius: 20px;
-                            font-size: 22px;
-                            font-weight: bold;
-                        ">
-
-                    Batalkan
-
-                </button>
-
-            </div>
 
         </div>
 
@@ -595,7 +619,8 @@
 
                     </button>
 
-                    <button type="button"
+                    <button id="btnTutupPutaran"
+                            type="button"
                             class="btn btn-danger px-4"
                             style="border-radius: 10px;">
 
@@ -612,5 +637,228 @@
     </div>
 
 </div>
+
+@endsection
+
+
+@section('scripts')
+
+<script>
+
+
+// Buka Quartal
+document.getElementById('btnBukaQuartal')
+.addEventListener('click', function(){
+
+    let tahun = document.getElementById('tahun').value;
+    let triwulan = document.getElementById('triwulan').value;
+
+
+    axios.post('/api/rekonsiliasi/buka-quartal', {
+
+        tahun: tahun,
+        triwulan: triwulan
+
+    })
+    .then(response => {
+
+        alert(response.data.message ?? 'Quartal berhasil dibuka');
+
+        ambilStatusRekonsiliasi();
+
+    })
+    .catch(error => {
+
+        console.error(error);
+
+        alert(
+            error.response?.data?.message 
+            ?? 'Gagal membuka quartal'
+        );
+
+    });
+
+});
+
+
+// Buka Putaran
+document.getElementById('btnBukaPutaran')
+.addEventListener('click', function(){
+
+
+    // cek status dulu
+    axios.get('/api/rekonsiliasi/status')
+
+    .then(response => {
+
+
+        let data = response.data;
+
+
+        // kalau masih ada putaran berjalan
+        if(data.putaran_aktif){
+
+
+            alert(
+                'Putaran masih berlangsung. Tutup putaran sebelumnya terlebih dahulu.'
+            );
+
+
+            return;
+
+        }
+
+
+
+        // kalau tidak ada putaran aktif, buka putaran baru
+        axios.post('/api/rekonsiliasi/buka-putaran')
+
+        .then(response => {
+
+
+            alert(
+                response.data.message ?? 
+                'Putaran berhasil dibuka'
+            );
+
+
+            ambilStatusRekonsiliasi();
+
+
+        })
+
+        .catch(error => {
+
+
+            console.error(error);
+
+
+            alert(
+                error.response?.data?.message 
+                ?? 'Gagal membuka putaran'
+            );
+
+
+        });
+
+
+
+    })
+
+    .catch(error => {
+
+
+        console.error(error);
+
+
+        alert(
+            'Gagal mengecek status rekonsiliasi'
+        );
+
+
+    });
+
+
+});
+
+
+
+
+// Tutup Putaran
+document.getElementById('btnTutupPutaran')
+.addEventListener('click', function(){
+
+    axios.post('/api/rekonsiliasi/tutup')
+    .then(response => {
+
+        alert(response.data.message ?? 'Putaran berhasil ditutup');
+
+        ambilStatusRekonsiliasi();
+
+    })
+    .catch(error => {
+
+        console.error(error);
+
+        alert(
+            error.response?.data?.message 
+            ?? 'Gagal menutup putaran'
+        );
+
+    });
+
+});
+
+
+function ambilStatusRekonsiliasi(){
+
+    axios.get('/api/rekonsiliasi/status')
+    .then(response => {
+
+        let data = response.data;
+
+
+        // kotak kanan
+        document.getElementById('statusTahun').innerHTML =
+            data.rekonsiliasi.tahun;
+
+
+        document.getElementById('statusTriwulan').innerHTML =
+            'Q' + data.rekonsiliasi.triwulan;
+
+
+        if(data.putaran_aktif){
+
+            document.getElementById('statusPutaran').innerHTML =
+                data.putaran_aktif.nomor;
+
+
+            document.getElementById('statusBadge').innerHTML =
+                'Rekonsiliasi Sedang Berlangsung';
+
+        } else {
+
+            document.getElementById('statusPutaran').innerHTML =
+                data.putaran_terakhir?.nomor ?? '-';
+
+
+            document.getElementById('statusBadge').innerHTML =
+                'Rekonsiliasi Ditutup';
+
+        }
+
+
+        // modal
+        document.getElementById('tahun').value =
+            data.rekonsiliasi.tahun;
+
+
+        document.getElementById('triwulan').value =
+            data.rekonsiliasi.triwulan;
+
+
+        if(data.putaran_terakhir){
+
+            document.getElementById('putaran').value =
+                data.putaran_terakhir.nomor;
+
+        }
+
+
+    })
+
+    .catch(error => {
+
+        console.log(error);
+
+    });
+
+}
+
+
+// jalankan saat halaman dibuka
+ambilStatusRekonsiliasi();
+
+</script>
 
 @endsection

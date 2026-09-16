@@ -38,12 +38,14 @@
                 <div class="btn-group mr-3 mb-2" role="group">
 
                     <button type="button"
-                            class="btn btn-primary">
+                            class="btn btn-primary"
+                            data-id="1">
                         ADHB
                     </button>
 
                     <button type="button"
-                            class="btn btn-outline-primary">
+                            class="btn btn-outline-primary"
+                            data-id="2">
                         ADHK
                     </button>
 
@@ -53,18 +55,106 @@
                 <!-- Dropdown Wilayah -->
                 <div class="mr-3 mb-2">
 
-                    <select class="form-control">
+                    <select class="form-control" id="wilayah_id">
 
-                        <option selected>
+                        <option value="1" selected>
                             Sulawesi Selatan
                         </option>
 
-                        <option>
-                            Kota Makassar
+                        <option value="2">
+                            Kepulauan Selayar
                         </option>
 
-                        <option>
-                            Kabupaten Gowa
+                        <option value="3">
+                            Bulukumba
+                        </option>
+
+                        <option value="4">
+                            Bantaeng
+                        </option>
+
+                        <option value="5">
+                            Jeneponto
+                        </option>
+
+                        <option value="6">
+                            Takalar
+                        </option>
+
+                        <option value="7">
+                            Gowa
+                        </option>
+
+                        <option value="8">
+                            Sinjai
+                        </option>
+
+                        <option value="9">
+                            Maros
+                        </option>
+
+                        <option value="10">
+                            Pangkajene dan Kepulauan
+                        </option>
+
+                        <option value="11">
+                            Barru
+                        </option>
+
+                        <option value="12">
+                            Bone
+                        </option>
+
+                        <option value="13">
+                            Soppeng
+                        </option>
+
+                        <option value="14">
+                            Wajo
+                        </option>
+
+                        <option value="15">
+                            Sidenreng Rappang
+                        </option>
+
+                        <option value="16">
+                            Pinrang
+                        </option>
+
+                        <option value="17">
+                            Enrekang
+                        </option>
+
+                        <option value="18">
+                            Luwu
+                        </option>
+
+                        <option value="19">
+                            Tana Toraja
+                        </option>
+
+                        <option value="20">
+                            Luwu Utara
+                        </option>
+
+                        <option value="21">
+                            Luwu Timur
+                        </option>
+
+                        <option value="22">
+                            Toraja Utara
+                        </option>
+
+                        <option value="23">
+                            Makassar
+                        </option>
+
+                        <option value="24">
+                            Parepare
+                        </option>
+
+                        <option value="25">
+                            Palopo
                         </option>
 
                     </select>
@@ -167,27 +257,38 @@
 
         <div class="d-flex flex-wrap">
 
-            <button class="btn btn-primary mr-2 mb-2">
+            <button class="btn btn-primary mr-2 mb-2 jenis-tabel"
+                    data-id="3">
                 Distribusi
             </button>
 
-            <button class="btn btn-outline-primary mr-2 mb-2">
+            <button class="btn btn-outline-primary mr-2 mb-2 jenis-tabel"
+                    data-id="7">
                 Indeks Implisit
             </button>
 
-            <button class="btn btn-outline-primary mr-2 mb-2">
-                Laju Implisit
+            <button class="btn btn-outline-primary mr-2 mb-2 jenis-tabel"
+                    data-id="8">
+                Laju Implisit QtoQ
             </button>
 
-            <button class="btn btn-outline-primary mr-2 mb-2">
+            <button class="btn btn-outline-primary mr-2 mb-2 jenis-tabel"
+                    data-id="9">
+                Laju Implisit YtoY
+            </button>
+
+            <button class="btn btn-outline-primary mr-2 mb-2 jenis-tabel"
+                    data-id="5">
                 YtoY
             </button>
 
-            <button class="btn btn-outline-primary mr-2 mb-2">
+            <button class="btn btn-outline-primary mr-2 mb-2 jenis-tabel"
+                    data-id="4">
                 QtoQ
             </button>
 
-            <button class="btn btn-outline-primary mr-2 mb-2">
+            <button class="btn btn-outline-primary mr-2 mb-2 jenis-tabel"
+                    data-id="6">
                 CtoC
             </button>
 
@@ -214,7 +315,7 @@
 
         <div class="table-responsive">
 
-            <table class="table table-bordered table-hover">
+            <table class="table table-bordered table-hover table-data-large">
 
                 <thead class="thead-light">
 
@@ -254,25 +355,9 @@
                 </thead>
 
 
-                <tbody>
+                <tbody id="tabel-pdrb">
 
-                <tr>
-                    <td>Pertanian</td>
-
-                    @for($i = 0; $i < 17 * 5; $i++)
-                        <td>-</td>
-                    @endfor
-                </tr>
-
-                <tr>
-                    <td>Pertambangan</td>
-
-                    @for($i = 0; $i < 17 * 5; $i++)
-                        <td>-</td>
-                    @endfor
-                </tr>
-
-            </tbody>
+                </tbody>
 
             </table>
 
@@ -281,5 +366,154 @@
     </div>
 
 </div>
+
+@endsection
+
+@section('scripts')
+
+<script>
+
+let jenisTabelId = 1;
+
+
+// pilih jenis tabel
+document.querySelectorAll('.jenis-tabel')
+.forEach(button => {
+
+
+    button.addEventListener('click', function(){
+
+
+        jenisTabelId = this.dataset.id;
+
+
+        document.querySelectorAll('.jenis-tabel')
+        .forEach(btn => {
+
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-outline-primary');
+
+        });
+
+
+        this.classList.remove('btn-outline-primary');
+        this.classList.add('btn-primary');
+
+
+        ambilTabelPdrb();
+
+
+    });
+
+
+});
+
+
+
+// ambil data tabel
+
+console.log('HALAMAN DAFTAR TABEL AKTIF');
+
+function ambilTabelPdrb(){
+
+
+    let wilayah_id = document.getElementById('wilayah_id').value;
+
+
+    axios.get(
+        `/api/pdrb/lapangan-usaha/${wilayah_id}/${jenisTabelId}`
+    )
+    .then(response => {
+
+        let data = response.data.table;
+
+        let html = "";
+
+
+        data.forEach(item => {
+
+            html += `<tr>`;
+
+            // kolom kategori
+            html += `
+                <td>
+                    ${item.kategori}
+                </td>
+            `;
+
+
+            // semua kolom periode
+            Object.keys(item).forEach(key => {
+
+                if(key !== 'kategori') {
+
+                    html += `
+                        <td>
+                            ${item[key]}
+                        </td>
+                    `;
+
+                }
+
+            });
+
+
+            html += `</tr>`;
+
+        });
+
+
+        document.getElementById('tabel-pdrb').innerHTML = html;
+
+
+    })
+    .catch(error => {
+
+
+        console.error(error);
+
+
+    });
+
+
+}
+
+
+function buatKolomNilai(item){
+
+
+    let html = "";
+
+
+    for(let i = 0; i < 85; i++){
+
+        html += `
+
+        <td>
+            ${item.nilai ?? '-'}
+        </td>
+
+        `;
+
+    }
+
+
+    return html;
+
+}
+
+// ketika wilayah diganti
+document.getElementById('wilayah_id')
+.addEventListener('change', function(){
+
+    ambilTabelPdrb();
+
+});
+
+// load awal
+ambilTabelPdrb();
+
+
+</script>
 
 @endsection

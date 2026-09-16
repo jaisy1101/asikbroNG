@@ -73,6 +73,11 @@ Route::middleware('auth:sanctum')->group(function () {
     );
 
     Route::get(
+        '/rekonsiliasi/status',
+        [RekonsiliasiController::class, 'status']
+    );
+
+    Route::get(
         '/submissions/{id}/table',
         [PdrbTableController::class, 'showSubmission']
     );

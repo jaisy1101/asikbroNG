@@ -157,7 +157,17 @@
             </h5>
 
             <!-- Button -->
-            <button class="btn btn-primary mt-4">
+            <input type="hidden"
+                id="modul_id"
+                value="1">
+            <input type="file"
+                id="fileExcel"
+                hidden
+                accept=".xlsx,.xls">
+
+
+            <button id="btnUpload"
+                    class="btn btn-primary mt-4">
 
                 <i class="fas fa-folder-open mr-2"></i>
 
@@ -170,5 +180,91 @@
     </div>
 
 </div>
+
+@endsection
+
+@section('scripts')
+
+<script>
+
+let fileInput = document.getElementById('fileExcel');
+let btnUpload = document.getElementById('btnUpload');
+
+
+// buka explorer
+btnUpload.addEventListener('click', function(){
+
+    fileInput.click();
+
+});
+
+
+// ketika file dipilih
+fileInput.addEventListener('change', function(){
+
+    let file = this.files[0];
+
+    if(file){
+
+        uploadFile(file);
+
+    }
+
+});
+
+
+
+function uploadFile(file){
+
+
+    let formData = new FormData();
+
+    formData.append('file', file);
+
+    formData.append(
+        'modul_id',
+        document.getElementById('modul_id').value
+    );
+
+
+
+    axios.post('/api/submission/upload', formData, {
+
+        headers: {
+
+            'Content-Type': 'multipart/form-data'
+
+        }
+
+    })
+    .then(response => {
+
+
+        alert(
+            response.data.message 
+            ?? 'Upload berhasil'
+        );
+
+
+    })
+    .catch(error => {
+
+
+        console.error(error);
+
+
+        alert(
+            error.response?.data?.message
+            ?? 'Upload gagal'
+        );
+
+
+    });
+
+
+}
+
+
+</script>
 
 @endsection

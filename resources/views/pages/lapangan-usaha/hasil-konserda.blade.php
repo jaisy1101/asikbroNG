@@ -219,105 +219,19 @@
 
                 <thead class="thead-light">
 
-                    <tr>
+                <tr>
 
-                        <th>Tabel</th>
-                        <th>Wilayah</th>
-                        <th>Tahun</th>
-                        <th>Triwulan</th>
-                        <th>Putaran</th>
-                        <th>Status</th>
-                        <th>Tanggal Upload</th>
+                    <th>Kategori</th>
+                    <th>Diskrepansi</th>
+                    <th>Selisih</th>
+                    <th>Provinsi</th>
+                    <th>Kab/Kota</th>
 
-                    </tr>
+                </tr>
 
                 </thead>
 
-                <tbody>
-
-                    <tr>
-                        <td>Distribusi Konsumsi Rumah Tangga</td>
-                        <td>Sulawesi Selatan</td>
-                        <td>2026</td>
-                        <td>Q2</td>
-                        <td>0</td>
-                        <td>
-                            <span class="badge badge-success">
-                                Tersedia
-                            </span>
-                        </td>
-                        <td>15 Mei 2026</td>
-                    </tr>
-
-                    <tr>
-                        <td>Indeks Implisit Pengeluaran</td>
-                        <td>Sulawesi Selatan</td>
-                        <td>2026</td>
-                        <td>Q2</td>
-                        <td>0</td>
-                        <td>
-                            <span class="badge badge-success">
-                                Tersedia
-                            </span>
-                        </td>
-                        <td>15 Mei 2026</td>
-                    </tr>
-
-                    <tr>
-                        <td>Laju Implisit Pengeluaran</td>
-                        <td>Sulawesi Selatan</td>
-                        <td>2026</td>
-                        <td>Q2</td>
-                        <td>0</td>
-                        <td>
-                            <span class="badge badge-warning">
-                                Revisi
-                            </span>
-                        </td>
-                        <td>14 Mei 2026</td>
-                    </tr>
-
-                    <tr>
-                        <td>Pertumbuhan YtoY</td>
-                        <td>Sulawesi Selatan</td>
-                        <td>2026</td>
-                        <td>Q2</td>
-                        <td>0</td>
-                        <td>
-                            <span class="badge badge-danger">
-                                Belum Upload
-                            </span>
-                        </td>
-                        <td>-</td>
-                    </tr>
-
-                    <tr>
-                        <td>Pertumbuhan QtoQ</td>
-                        <td>Sulawesi Selatan</td>
-                        <td>2026</td>
-                        <td>Q2</td>
-                        <td>0</td>
-                        <td>
-                            <span class="badge badge-success">
-                                Tersedia
-                            </span>
-                        </td>
-                        <td>15 Mei 2026</td>
-                    </tr>
-
-                    <tr>
-                        <td>Pertumbuhan CtoC</td>
-                        <td>Sulawesi Selatan</td>
-                        <td>2026</td>
-                        <td>Q2</td>
-                        <td>0</td>
-                        <td>
-                            <span class="badge badge-success">
-                                Tersedia
-                            </span>
-                        </td>
-                        <td>15 Mei 2026</td>
-                    </tr>
+                <tbody id="tabel-konserda">
 
                 </tbody>
 
@@ -328,5 +242,82 @@
     </div>
 
 </div>
+
+@endsection
+
+@section('scripts')
+
+<script>
+
+
+let putaranId = 27; 
+// sementara tes dulu
+
+
+axios.get(`/api/konserda/${putaranId}`)
+.then(response => {
+
+
+    console.log(response.data);
+
+
+
+    let data = response.data.data;
+
+
+    let html = "";
+
+
+
+    data.forEach(item => {
+
+
+        html += `
+
+        <tr>
+
+            <td>
+                ${item.kategori}
+            </td>
+
+            <td>
+                ${item.diskrepansi ?? '-'}
+            </td>
+
+            <td>
+                ${item.selisih ?? '-'}
+            </td>
+
+            <td>
+                ${item.wilayah_parent?.nama ?? '-'}
+            </td>
+
+            <td>
+                ${item.wilayah?.nama ?? '-'}
+            </td>
+
+        </tr>
+
+        `;
+
+
+    });
+
+
+
+    document.getElementById('tabel-konserda')
+    .innerHTML = html;
+
+
+
+})
+.catch(error => {
+
+    console.error(error);
+
+});
+
+
+</script>
 
 @endsection

@@ -172,3 +172,47 @@ textarea,
 .bg-success {
     background-color: var(--brand-green) !important;
 }
+
+/* =====================================================
+   DATA TABLE BESAR
+===================================================== */
+
+.table-data-large {
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+
+.table-data-large th,
+.table-data-large td {
+    padding: 5px 8px !important;
+    vertical-align: middle;
+}
+
+
+/* Header tahun */
+.table-data-large thead th {
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+}
+
+
+/* Isi tabel */
+.table-data-large tbody td {
+    font-size: 12px;
+}
+
+
+/* Kolom kategori */
+.table-data-large th:first-child,
+.table-data-large td:first-child {
+    min-width: 220px;
+    text-align: left;
+}
+
+
+/* Hover */
+.table-data-large tbody tr:hover {
+    background-color: rgba(57,170,227,0.08);
+}

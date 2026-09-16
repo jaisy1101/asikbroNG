@@ -120,7 +120,7 @@ class RekonsiliasiController extends Controller
 
                 ]);
 
-}
+            }
 
             $putaran = Putaran::create([
                 'rekonsiliasi_id' => $rekonsiliasi->id,
@@ -168,6 +168,18 @@ class RekonsiliasiController extends Controller
             $rekonsiliasi = Rekonsiliasi::where('status', 'berlangsung')
                 ->latest('id')
                 ->first();
+
+            $putaranAktif = Putaran::where('rekonsiliasi_id', $rekonsiliasi->id)
+                ->where('status', 'berlangsung')
+                ->first();
+
+            if ($putaranAktif) {
+
+                return response()->json([
+                    'message' => 'Masih ada putaran yang sedang berlangsung'
+                ], 400);
+
+}
 
             if (!$rekonsiliasi) {
 
@@ -283,5 +295,73 @@ class RekonsiliasiController extends Controller
             'putaran_id' => $putaran->id,
             'nomor_putaran' => $putaran->nomor,
         ], 200);
+    }
+
+    public function status()
+    {
+        $rekonsiliasi = Rekonsiliasi::with('periode')
+            ->latest('id')
+            ->first();
+
+
+        if (!$rekonsiliasi) {
+
+            return response()->json([
+                'status' => 'kosong'
+            ]);
+
+        }
+
+
+        $putaranAktif = Putaran::where(
+            'rekonsiliasi_id',
+            $rekonsiliasi->id
+        )
+        ->where('status', 'berlangsung')
+        ->latest('nomor')
+        ->first();
+
+
+        $putaranTerakhir = Putaran::where(
+            'rekonsiliasi_id',
+            $rekonsiliasi->id
+        )
+        ->latest('nomor')
+        ->first();
+
+
+
+        return response()->json([
+
+            'rekonsiliasi' => [
+
+                'id' => $rekonsiliasi->id,
+
+                'status' => $rekonsiliasi->status,
+
+                'tahun' => $rekonsiliasi->periode->tahun,
+
+                'triwulan' => $rekonsiliasi->periode->triwulan,
+
+            ],
+
+
+            'putaran_aktif' => $putaranAktif ? [
+
+                'nomor' => $putaranAktif->nomor,
+
+                'status' => $putaranAktif->status
+
+            ] : null,
+
+
+            'putaran_terakhir' => $putaranTerakhir ? [
+
+                'nomor' => $putaranTerakhir->nomor
+
+            ] : null,
+
+
+        ]);
     }
 }
