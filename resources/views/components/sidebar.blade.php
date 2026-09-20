@@ -85,14 +85,16 @@
                     Daftar Tabel
 
                 </a>
-
+                
+                <!-- Menyusul (modul yg dikorbankan) 
                 <a class="collapse-item {{ request()->is('pengeluaran/perubahan-nilai') ? 'active' : '' }}"
                    href="/pengeluaran/perubahan-nilai">
 
                     Perubahan Nilai
 
                 </a>
-
+                -->
+                
                 <a class="collapse-item {{ request()->is('pengeluaran/hasil-konserda') ? 'active' : '' }}"
                    href="/pengeluaran/hasil-konserda">
 
@@ -143,12 +145,14 @@
 
                 </a>
 
+                <!-- Menyusul (modul yg dikorbankan) 
                 <a class="collapse-item {{ request()->is('lapangan-usaha/perubahan-nilai') ? 'active' : '' }}"
                    href="/lapangan-usaha/perubahan-nilai">
 
                     Perubahan Nilai
 
                 </a>
+                -->
 
                 <a class="collapse-item {{ request()->is('lapangan-usaha/hasil-konserda') ? 'active' : '' }}"
                    href="/lapangan-usaha/hasil-konserda">

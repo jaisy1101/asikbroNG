@@ -33,7 +33,7 @@
 
             <!-- Kiri -->
             <div class="d-flex flex-wrap align-items-center">
-
+                {{--  
                 <!-- Toggle ADHB / ADHK -->
                 <div class="btn-group mr-3 mb-2" role="group">
 
@@ -50,11 +50,12 @@
                     </button>
 
                 </div>
+                --}}
 
 
                 <!-- Dropdown Wilayah -->
                 <div class="mr-3 mb-2">
-
+                    
                     <select class="form-control" id="wilayah_id">
 
                         <option value="1" selected>
@@ -165,7 +166,7 @@
                 <!-- Dropdown Tahun -->
                 <div class="mr-3 mb-2">
 
-                    <select class="form-control">
+                    <select class="form-control" id="filter-tahun">
 
                         <option selected>
                             2026
@@ -193,7 +194,7 @@
                 <!-- Dropdown Triwulan -->
                 <div class="mr-3 mb-2">
 
-                    <select class="form-control">
+                    <select class="form-control" id="filter-triwulan">
 
                         <option selected>
                             Q2
@@ -212,7 +213,7 @@
                 <!-- Dropdown Putaran -->
                 <div class="mb-2">
 
-                    <select class="form-control">
+                    <select class="form-control" id="filter-putaran">
 
                         <option selected>
                             Putaran 0
@@ -256,6 +257,17 @@
     <div class="card-body">
 
         <div class="d-flex flex-wrap">
+
+            <button class="btn btn-primary mr-2 mb-2 jenis-tabel"
+                    data-id="1">
+                ADHB
+            </button>
+
+            <button class="btn btn-primary mr-2 mb-2 jenis-tabel"
+                    data-id="2">
+                ADHK
+            </button>
+
 
             <button class="btn btn-primary mr-2 mb-2 jenis-tabel"
                     data-id="3">
@@ -376,7 +388,73 @@
 let jenisTabelId = 1;
 
 
-// pilih jenis tabel
+// ===============================
+// AMBIL STATUS REKONSILIASI
+// ===============================
+
+function ambilStatusRekonsiliasi(){
+
+
+    axios.get('/api/rekonsiliasi/status')
+
+    .then(response => {
+
+
+        let data = response.data;
+
+
+        if(data.rekonsiliasi){
+
+
+            document.getElementById('filter_tahun').value =
+                data.rekonsiliasi.tahun;
+
+
+            document.getElementById('filter_triwulan').value =
+                data.rekonsiliasi.triwulan;
+
+
+        }
+
+
+        if(data.putaran_aktif){
+
+
+            document.getElementById('filter_putaran').value =
+                data.putaran_aktif.nomor;
+
+
+        }
+        else if(data.putaran_terakhir){
+
+
+            document.getElementById('filter_putaran').value =
+                data.putaran_terakhir.nomor;
+
+
+        }
+
+
+        console.log('STATUS REKONSILIASI', data);
+
+
+    })
+
+
+    .catch(error => {
+
+        console.error(error);
+
+    });
+
+
+}
+
+
+// ===============================
+// PILIH JENIS TABEL
+// ===============================
+
 document.querySelectorAll('.jenis-tabel')
 .forEach(button => {
 
@@ -390,14 +468,20 @@ document.querySelectorAll('.jenis-tabel')
         document.querySelectorAll('.jenis-tabel')
         .forEach(btn => {
 
+
             btn.classList.remove('btn-primary');
+
             btn.classList.add('btn-outline-primary');
+
 
         });
 
 
+
         this.classList.remove('btn-outline-primary');
+
         this.classList.add('btn-primary');
+
 
 
         ambilTabelPdrb();
@@ -408,11 +492,29 @@ document.querySelectorAll('.jenis-tabel')
 
 });
 
+function formatAngka(nilai){
+
+    if(nilai === null || nilai === undefined || nilai === ''){
+        return '-';
+    }
 
 
-// ambil data tabel
+    if(isNaN(nilai)){
+        return nilai;
+    }
 
-console.log('HALAMAN DAFTAR TABEL AKTIF');
+
+    return Number(nilai).toLocaleString('id-ID', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+
+}
+
+
+// ===============================
+// AMBIL DATA PDRB
+// ===============================
 
 function ambilTabelPdrb(){
 
@@ -420,53 +522,116 @@ function ambilTabelPdrb(){
     let wilayah_id = document.getElementById('wilayah_id').value;
 
 
+
     axios.get(
         `/api/pdrb/lapangan-usaha/${wilayah_id}/${jenisTabelId}`
     )
+
+
     .then(response => {
 
+
         let data = response.data.table;
+
 
         let html = "";
 
 
+
         data.forEach(item => {
 
-            html += `<tr>`;
 
-            // kolom kategori
+
             html += `
+
+            <tr>
+
                 <td>
                     ${item.kategori}
                 </td>
+
             `;
 
 
-            // semua kolom periode
-            Object.keys(item).forEach(key => {
 
-                if(key !== 'kategori') {
+            let periode = [];
 
-                    html += `
-                        <td>
-                            ${item[key]}
-                        </td>
-                    `;
+            for(let tahun = 2010; tahun <= 2026; tahun++){
+
+                periode.push(`${tahun} Q1`);
+                periode.push(`${tahun} Q2`);
+                periode.push(`${tahun} Q3`);
+                periode.push(`${tahun} Q4`);
+                periode.push(`TOTAL_${tahun}`);
+
+            }
+
+
+            periode.forEach(key => {
+
+                let nilai = '-';
+
+
+                if(key.startsWith('TOTAL_')){
+
+
+                    let tahun = key.replace('TOTAL_', '');
+
+
+                    let q1 = Number(item[`${tahun} Q1`] ?? 0);
+                    let q2 = Number(item[`${tahun} Q2`] ?? 0);
+                    let q3 = Number(item[`${tahun} Q3`] ?? 0);
+                    let q4 = Number(item[`${tahun} Q4`] ?? 0);
+
+
+                    if(q1 || q2 || q3 || q4){
+
+                        nilai = formatAngka(q1 + q2 + q3 + q4);
+
+                    }
+
+
+                } else {
+
+
+                    nilai = formatAngka(item[key]);
+
 
                 }
+
+
+                html += `
+
+                <td>
+                    ${formatAngka(nilai)}
+                </td>
+
+                `;
+
 
             });
 
 
-            html += `</tr>`;
+
+            html += `
+
+            </tr>
+
+            `;
+
 
         });
 
 
-        document.getElementById('tabel-pdrb').innerHTML = html;
+
+        document.getElementById('tabel-pdrb')
+        .innerHTML = html;
+
 
 
     })
+
+
     .catch(error => {
 
 
@@ -479,39 +644,34 @@ function ambilTabelPdrb(){
 }
 
 
-function buatKolomNilai(item){
 
+// ===============================
+// GANTI WILAYAH
+// ===============================
 
-    let html = "";
-
-
-    for(let i = 0; i < 85; i++){
-
-        html += `
-
-        <td>
-            ${item.nilai ?? '-'}
-        </td>
-
-        `;
-
-    }
-
-
-    return html;
-
-}
-
-// ketika wilayah diganti
 document.getElementById('wilayah_id')
 .addEventListener('change', function(){
 
+
     ambilTabelPdrb();
+
 
 });
 
-// load awal
+
+
+
+// ===============================
+// LOAD AWAL
+// ===============================
+
+console.log('HALAMAN DAFTAR TABEL AKTIF');
+
+
+ambilStatusRekonsiliasi();
+
 ambilTabelPdrb();
+
 
 
 </script>

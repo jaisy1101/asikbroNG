@@ -39,4 +39,12 @@ class Rekonsiliasi extends Model
     {
         return $this->hasMany(Putaran::class, 'rekonsiliasi_id');
     }
+
+    public function rekonsiliasiPeriode(): HasMany
+    {
+        return $this->hasMany(
+            RekonsiliasiPeriode::class,
+            'rekonsiliasi_id'
+        );
+    }
 }

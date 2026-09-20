@@ -299,7 +299,10 @@ class RekonsiliasiController extends Controller
 
     public function status()
     {
-        $rekonsiliasi = Rekonsiliasi::with('periode')
+        $rekonsiliasi = Rekonsiliasi::with([
+            'periode',
+            'rekonsiliasiPeriode.periode'
+        ])
             ->latest('id')
             ->first();
 
@@ -307,7 +310,7 @@ class RekonsiliasiController extends Controller
         if (!$rekonsiliasi) {
 
             return response()->json([
-                'status' => 'kosong'
+                'status' => 'kosong',
             ]);
 
         }
@@ -344,6 +347,19 @@ class RekonsiliasiController extends Controller
                 'triwulan' => $rekonsiliasi->periode->triwulan,
 
             ],
+
+            'periode' => $rekonsiliasi->rekonsiliasiPeriode
+                ->map(function($item){
+
+                    return [
+
+                        'tahun' => $item->periode->tahun,
+
+                        'triwulan' => $item->periode->triwulan
+
+                    ];
+
+                }),
 
 
             'putaran_aktif' => $putaranAktif ? [
