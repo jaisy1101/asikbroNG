@@ -175,44 +175,230 @@ textarea,
 
 /* =====================================================
    DATA TABLE BESAR
+   (DAFTAR TABEL + KONSERDA)
 ===================================================== */
 
 .table-data-large {
+
     font-size: 12px;
     white-space: nowrap;
+    width: max-content;
+    min-width: 100%;
+
 }
 
+
+/* Semua cell */
 
 .table-data-large th,
 .table-data-large td {
-    padding: 5px 8px !important;
+
+    padding: 3px 8px !important;
     vertical-align: middle;
+
 }
 
 
-/* Header tahun */
+/* =====================================================
+   HEADER
+===================================================== */
+
 .table-data-large thead th {
+
+    background-color: var(--brand-dark-blue) !important;
+
+    color: #ffffff !important;
+
     font-size: 12px;
+
     font-weight: 600;
+
     text-align: center;
+
+    vertical-align: middle;
+
+    border-color: var(--brand-dark-blue) !important;
+
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+
 }
 
 
-/* Isi tabel */
+
+/* =====================================================
+   ISI DATA
+===================================================== */
+
 .table-data-large tbody td {
+
     font-size: 12px;
+
+    line-height: 1.2;
+
 }
 
 
-/* Kolom kategori */
-.table-data-large th:first-child,
-.table-data-large td:first-child {
-    min-width: 220px;
+/* Kolom angka */
+
+.table-data-large td:not(.kolom-kategori),
+.table-data-large th:not(.kolom-kategori) {
+
+    width: 90px;
+
+    min-width: 90px;
+
+}
+
+
+/* Isi angka rata kanan */
+
+.table-data-large tbody td:not(.kolom-kategori) {
+
+    text-align: right;
+
+}
+
+
+
+/* Header angka rata tengah */
+
+.table-data-large thead th:not(.kolom-kategori) {
+
+    text-align: center;
+
+}
+
+
+
+/* =====================================================
+   KATEGORI FREEZE
+===================================================== */
+
+
+.table-data-large .kolom-kategori {
+
+    width: 300px;
+
+    min-width: 300px;
+
+    max-width: 300px;
+
+
+    position: sticky;
+
+    left: 0;
+
+
     text-align: left;
+
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+
+    z-index: 10;
+
 }
 
 
-/* Hover */
-.table-data-large tbody tr:hover {
-    background-color: rgba(57,170,227,0.08);
+/* Header kategori */
+
+.table-data-large thead .kolom-kategori {
+
+    background-color: var(--brand-dark-blue) !important;
+
+    color: white !important;
+
+    z-index: 20;
+
+}
+
+
+
+/* =====================================================
+   LEVEL KATEGORI
+===================================================== */
+
+
+/* Level 1 - Parent utama */
+.table-data-large tbody tr.level-1 td {
+
+    background-color: #e9ecef;
+
+    font-weight: 700;
+
+}
+
+
+/* Level 2 - Sub kategori */
+.table-data-large tbody tr.level-2 td {
+
+    background-color: #ffffff;
+
+    font-weight: 400;
+
+}
+
+
+/* Level 3 - Detail */
+.table-data-large tbody tr.level-3 td {
+
+    background-color: #ffffff;
+
+    font-weight: 400;
+
+}
+
+
+
+/* Freeze ikut warna */
+
+.table-data-large tbody tr.level-1 .kolom-kategori {
+
+    background-color: #e9ecef;
+
+    font-weight: 700;
+
+}
+
+
+.table-data-large tbody tr.level-2 .kolom-kategori {
+
+    background-color: #ffffff;
+
+    font-weight: 400;
+
+}
+
+
+.table-data-large tbody tr.level-3 .kolom-kategori {
+
+    background-color: #ffffff;
+
+    font-weight: 400;
+
+}
+
+/* =====================================================
+   HOVER CELL
+===================================================== */
+
+
+/* hanya cell yang diarahkan mouse */
+.table-data-large tbody td:hover {
+
+    background-color: rgba(57,170,227,0.12) !important;
+
+}
+
+
+/* kategori tidak ikut hover */
+.table-data-large tbody td.kolom-kategori:hover {
+
+    background-color: inherit !important;
+
 }

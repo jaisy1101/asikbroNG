@@ -158,21 +158,26 @@ class PdrbTableController extends Controller
             })
             ->with([
                 'periode',
-                'kategori'
+                'kategori.parent'
             ])
             ->get();
 
 
 
         $result = $data
-            ->groupBy('kategori.nama')
+            ->groupBy('kategori.id')
             ->map(function ($items) {
 
 
                 $row = [];
 
-                $row['kategori'] =
-                    $items->first()->kategori->nama;
+                $kategori = $items->first()->kategori;
+
+                $row['kategori'] = $kategori->nama;
+
+                $row['kode'] = $kategori->kode;
+
+                $row['level'] = $kategori->level;
 
 
                 foreach ($items as $item) {
@@ -283,7 +288,6 @@ class PdrbTableController extends Controller
 
 
                 return $row;
-
 
             })
             ->values();

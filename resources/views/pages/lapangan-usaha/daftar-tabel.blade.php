@@ -263,13 +263,13 @@
                 ADHB
             </button>
 
-            <button class="btn btn-primary mr-2 mb-2 jenis-tabel"
+            <button class="btn btn-outline-primary mr-2 mb-2 jenis-tabel"
                     data-id="2">
                 ADHK
             </button>
 
 
-            <button class="btn btn-primary mr-2 mb-2 jenis-tabel"
+            <button class="btn btn-outline-primary mr-2 mb-2 jenis-tabel"
                     data-id="3">
                 Distribusi
             </button>
@@ -327,14 +327,15 @@
 
         <div class="table-responsive">
 
-            <table class="table table-bordered table-hover table-data-large">
+            <table  class="table table-bordered table-hover table-data-large">
 
                 <thead class="thead-light">
 
                     <!-- Baris Tahun -->
                     <tr>
 
-                        <th rowspan="2">
+                        <th rowspan="2"
+                            class="kolom-kategori">
                             Kategori
                         </th>
 
@@ -544,9 +545,14 @@ function ambilTabelPdrb(){
 
             html += `
 
-            <tr>
+            <tr class="level-${item.level}">
 
-                <td>
+                <td class="kolom-kategori"
+                    style="
+                    padding-left:${(item.level - 1) * 30}px;
+                    font-weight:${item.level == 1 ? 'bold' : 'normal'};
+                ">
+                    ${item.kode ?? ''} 
                     ${item.kategori}
                 </td>
 
@@ -613,12 +619,7 @@ function ambilTabelPdrb(){
 
 
 
-            html += `
-
-            </tr>
-
-            `;
-
+            html += `</tr>`;
 
         });
 
@@ -627,7 +628,9 @@ function ambilTabelPdrb(){
         document.getElementById('tabel-pdrb')
         .innerHTML = html;
 
+        let scrollTable = document.querySelector('.table-responsive');
 
+        scrollTable.scrollLeft = scrollTable.scrollWidth;
 
     })
 
