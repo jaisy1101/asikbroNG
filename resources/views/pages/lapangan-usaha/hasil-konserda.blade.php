@@ -240,11 +240,8 @@
 
 <script>
 
-let putaranId = 52;
-
-// contoh Lapus ADHB
+let putaranId = null;
 let jenisTabelId = 1;
-
 
 function formatAngka(nilai){
 
@@ -265,8 +262,24 @@ function formatAngka(nilai){
 
 }
 
-function loadKonserda(){
+axios.get('/api/rekonsiliasi/status')
+.then(response => {
 
+
+    putaranId = response.data.putaran_terakhir.id;
+
+
+    loadKonserda();
+
+
+})
+.catch(error => {
+
+    console.error(error);
+
+});
+
+function loadKonserda(){
 
 axios.get(
     `/api/konserda/lapangan-usaha/${putaranId}/${jenisTabelId}`

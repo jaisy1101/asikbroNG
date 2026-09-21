@@ -162,30 +162,11 @@
 
                 </div>
 
-
+                {{--  
                 <!-- Dropdown Tahun -->
                 <div class="mr-3 mb-2">
 
                     <select class="form-control" id="filter-tahun">
-
-                        <option selected>
-                            2026
-                        </option>
-
-                        <option>2025</option>
-                        <option>2024</option>
-                        <option>2023</option>
-                        <option>2022</option>
-                        <option>2021</option>
-                        <option>2020</option>
-                        <option>2019</option>
-                        <option>2018</option>
-                        <option>2017</option>
-                        <option>2016</option>
-                        <option>2015</option>
-                        <option>2014</option>
-                        <option>2013</option>
-
                     </select>
 
                 </div>
@@ -195,16 +176,6 @@
                 <div class="mr-3 mb-2">
 
                     <select class="form-control" id="filter-triwulan">
-
-                        <option selected>
-                            Q2
-                        </option>
-
-                        <option>Q1</option>
-                        <option>Q2</option>
-                        <option>Q3</option>
-                        <option>Q4</option>
-
                     </select>
 
                 </div>
@@ -214,19 +185,10 @@
                 <div class="mb-2">
 
                     <select class="form-control" id="filter-putaran">
-
-                        <option selected>
-                            Putaran 0
-                        </option>
-
-                        <option>Putaran 1</option>
-                        <option>Putaran 2</option>
-                        <option>Putaran 3</option>
-                        <option>Putaran 4</option>
-
                     </select>
 
                 </div>
+                --}}
 
             </div>
 
@@ -258,51 +220,52 @@
 
         <div class="d-flex flex-wrap">
 
-            <button class="btn btn-primary mr-2 mb-2 jenis-tabel"
-                    data-id="1">
-                ADHB
-            </button>
+                <button class="btn btn-primary mr-2 mb-2 jenis-tabel"
+                        data-id="1">
+                    ADHB
+                </button>
 
-            <button class="btn btn-outline-primary mr-2 mb-2 jenis-tabel"
-                    data-id="2">
-                ADHK
-            </button>
+                <button class="btn btn-outline-primary mr-2 mb-2 jenis-tabel"
+                        data-id="2">
+                    ADHK
+                </button>
 
 
-            <button class="btn btn-outline-primary mr-2 mb-2 jenis-tabel"
-                    data-id="3">
-                Distribusi
-            </button>
+                <button class="btn btn-outline-primary mr-2 mb-2 jenis-tabel"
+                        data-id="3">
+                    Distribusi
+                </button>
 
-            <button class="btn btn-outline-primary mr-2 mb-2 jenis-tabel"
-                    data-id="7">
-                Indeks Implisit
-            </button>
+                <button class="btn btn-outline-primary mr-2 mb-2 jenis-tabel"
+                        data-id="7">
+                    Indeks Implisit
+                </button>
 
-            <button class="btn btn-outline-primary mr-2 mb-2 jenis-tabel"
-                    data-id="8">
-                Laju Implisit QtoQ
-            </button>
+                <button class="btn btn-outline-primary mr-2 mb-2 jenis-tabel"
+                        data-id="8">
+                    Laju Implisit QtoQ
+                </button>
 
-            <button class="btn btn-outline-primary mr-2 mb-2 jenis-tabel"
-                    data-id="9">
-                Laju Implisit YtoY
-            </button>
+                <button class="btn btn-outline-primary mr-2 mb-2 jenis-tabel"
+                        data-id="9">
+                    Laju Implisit YtoY
+                </button>
 
-            <button class="btn btn-outline-primary mr-2 mb-2 jenis-tabel"
-                    data-id="5">
-                YtoY
-            </button>
+                <button class="btn btn-outline-primary mr-2 mb-2 jenis-tabel"
+                        data-id="5">
+                    YtoY
+                </button>
 
-            <button class="btn btn-outline-primary mr-2 mb-2 jenis-tabel"
-                    data-id="4">
-                QtoQ
-            </button>
+                <button class="btn btn-outline-primary mr-2 mb-2 jenis-tabel"
+                        data-id="4">
+                    QtoQ
+                </button>
 
-            <button class="btn btn-outline-primary mr-2 mb-2 jenis-tabel"
-                    data-id="6">
-                CtoC
-            </button>
+                <button class="btn btn-outline-primary mr-2 mb-2 jenis-tabel"
+                        data-id="6">
+                    CtoC
+                </button>
+            
 
         </div>
 
@@ -328,42 +291,8 @@
         <div class="table-responsive">
 
             <table  class="table table-bordered table-hover table-data-large">
-
-                <thead class="thead-light">
-
-                    <!-- Baris Tahun -->
-                    <tr>
-
-                        <th rowspan="2"
-                            class="kolom-kategori">
-                            Kategori
-                        </th>
-
-                        @for($tahun = 2010; $tahun <= 2026; $tahun++)
-
-                            <th colspan="5">
-                                {{ $tahun }}
-                            </th>
-
-                        @endfor
-
-                    </tr>
-
-
-                    <!-- Baris Triwulan -->
-                    <tr>
-
-                        @for($tahun = 2010; $tahun <= 2026; $tahun++)
-
-                            <th>I</th>
-                            <th>II</th>
-                            <th>III</th>
-                            <th>IV</th>
-                            <th>Total</th>
-
-                        @endfor
-
-                    </tr>
+                
+                <thead class="thead-light" id="header-tabel">
 
                 </thead>
 
@@ -387,7 +316,7 @@
 <script>
 
 let jenisTabelId = 1;
-
+let tahunAkhir = null;
 
 // ===============================
 // AMBIL STATUS REKONSILIASI
@@ -404,39 +333,22 @@ function ambilStatusRekonsiliasi(){
         let data = response.data;
 
 
+        console.log('STATUS REKONSILIASI', data);
+
+
         if(data.rekonsiliasi){
 
 
-            document.getElementById('filter_tahun').value =
-                data.rekonsiliasi.tahun;
+            tahunAkhir = Number(
+                data.rekonsiliasi.tahun
+            );
 
 
-            document.getElementById('filter_triwulan').value =
-                data.rekonsiliasi.triwulan;
+            buatHeaderTabel(tahunAkhir);
 
-
-        }
-
-
-        if(data.putaran_aktif){
-
-
-            document.getElementById('filter_putaran').value =
-                data.putaran_aktif.nomor;
-
+            ambilTabelPdrb(tahunAkhir);
 
         }
-        else if(data.putaran_terakhir){
-
-
-            document.getElementById('filter_putaran').value =
-                data.putaran_terakhir.nomor;
-
-
-        }
-
-
-        console.log('STATUS REKONSILIASI', data);
 
 
     })
@@ -450,7 +362,6 @@ function ambilStatusRekonsiliasi(){
 
 
 }
-
 
 // ===============================
 // PILIH JENIS TABEL
@@ -485,7 +396,7 @@ document.querySelectorAll('.jenis-tabel')
 
 
 
-        ambilTabelPdrb();
+        ambilTabelPdrb(tahunAkhir);
 
 
     });
@@ -513,15 +424,80 @@ function formatAngka(nilai){
 }
 
 
+function buatHeaderTabel(tahunAkhir){
+
+
+    let html = `
+
+        <tr>
+
+            <th rowspan="2"
+                class="kolom-kategori">
+                Kategori
+            </th>
+
+    `;
+
+
+    for(let tahun = 2010; tahun <= tahunAkhir; tahun++){
+
+        html += `
+
+            <th colspan="5">
+                ${tahun}
+            </th>
+
+        `;
+
+    }
+
+
+    html += `
+
+        </tr>
+
+        <tr>
+
+    `;
+
+
+    for(let tahun = 2010; tahun <= tahunAkhir; tahun++){
+
+        html += `
+
+            <th>I</th>
+            <th>II</th>
+            <th>III</th>
+            <th>IV</th>
+            <th>Total</th>
+
+        `;
+
+    }
+
+
+    html += `
+
+        </tr>
+
+    `;
+
+
+    document.getElementById('header-tabel')
+        .innerHTML = html;
+
+
+}
+
 // ===============================
 // AMBIL DATA PDRB
 // ===============================
 
-function ambilTabelPdrb(){
+function ambilTabelPdrb(tahunAkhir){
 
 
+    // Sulawesi Selatan
     let wilayah_id = document.getElementById('wilayah_id').value;
-
 
 
     axios.get(
@@ -534,13 +510,10 @@ function ambilTabelPdrb(){
 
         let data = response.data.table;
 
-
         let html = "";
 
 
-
         data.forEach(item => {
-
 
 
             html += `
@@ -552,17 +525,19 @@ function ambilTabelPdrb(){
                     padding-left:${(item.level - 1) * 30}px;
                     font-weight:${item.level == 1 ? 'bold' : 'normal'};
                 ">
-                    ${item.kode ?? ''} 
+
+                    ${item.kode ?? ''}
                     ${item.kategori}
+
                 </td>
 
             `;
 
 
-
             let periode = [];
 
-            for(let tahun = 2010; tahun <= 2026; tahun++){
+
+            for(let tahun = 2010; tahun <= tahunAkhir; tahun++){
 
                 periode.push(`${tahun} Q1`);
                 periode.push(`${tahun} Q2`);
@@ -574,6 +549,7 @@ function ambilTabelPdrb(){
 
 
             periode.forEach(key => {
+
 
                 let nilai = '-';
 
@@ -592,15 +568,20 @@ function ambilTabelPdrb(){
 
                     if(q1 || q2 || q3 || q4){
 
-                        nilai = formatAngka(q1 + q2 + q3 + q4);
+                        nilai = formatAngka(
+                            q1 + q2 + q3 + q4
+                        );
 
                     }
 
 
-                } else {
+                }
+                else{
 
 
-                    nilai = formatAngka(item[key]);
+                    nilai = formatAngka(
+                        item[key]
+                    );
 
 
                 }
@@ -608,9 +589,9 @@ function ambilTabelPdrb(){
 
                 html += `
 
-                <td>
-                    ${formatAngka(nilai)}
-                </td>
+                    <td>
+                        ${nilai}
+                    </td>
 
                 `;
 
@@ -618,28 +599,30 @@ function ambilTabelPdrb(){
             });
 
 
-
             html += `</tr>`;
+
 
         });
 
 
-
         document.getElementById('tabel-pdrb')
-        .innerHTML = html;
+            .innerHTML = html;
 
-        let scrollTable = document.querySelector('.table-responsive');
 
-        scrollTable.scrollLeft = scrollTable.scrollWidth;
+        let scrollTable =
+            document.querySelector('.table-responsive');
+
+
+        scrollTable.scrollLeft =
+            scrollTable.scrollWidth;
+
 
     })
 
 
     .catch(error => {
 
-
         console.error(error);
-
 
     });
 
@@ -656,12 +639,14 @@ document.getElementById('wilayah_id')
 .addEventListener('change', function(){
 
 
-    ambilTabelPdrb();
+    if(tahunAkhir){
+
+        ambilTabelPdrb(tahunAkhir);
+
+    }
 
 
 });
-
-
 
 
 // ===============================
@@ -670,12 +655,7 @@ document.getElementById('wilayah_id')
 
 console.log('HALAMAN DAFTAR TABEL AKTIF');
 
-
 ambilStatusRekonsiliasi();
-
-ambilTabelPdrb();
-
-
 
 </script>
 
