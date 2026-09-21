@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\KategoriLapanganUsaha;
 
 class HasilKonserda extends Model
 {
@@ -57,6 +58,14 @@ class HasilKonserda extends Model
     {
         return $this->hasMany(
             HasilKonserdaDetail::class
+        );
+    }
+
+    public function kategori()
+    {
+        return $this->belongsTo(
+            KategoriLapanganUsaha::class,
+            'kategori_id'
         );
     }
 

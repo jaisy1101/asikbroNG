@@ -364,6 +364,8 @@ class RekonsiliasiController extends Controller
 
             'putaran_aktif' => $putaranAktif ? [
 
+                'id' => $putaranAktif->id,
+
                 'nomor' => $putaranAktif->nomor,
 
                 'status' => $putaranAktif->status
@@ -373,7 +375,11 @@ class RekonsiliasiController extends Controller
 
             'putaran_terakhir' => $putaranTerakhir ? [
 
-                'nomor' => $putaranTerakhir->nomor
+                'id' => $putaranTerakhir->id,
+
+                'nomor' => $putaranTerakhir->nomor,
+
+                'status' => $putaranTerakhir->status,
 
             ] : null,
 

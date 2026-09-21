@@ -101,3 +101,14 @@ Route::middleware('auth:sanctum')->group(function () {
         '/konserda/{putaranId}',
         [KonserdaController::class, 'index']
     );
+
+    Route::get(
+        '/konserda/lapangan-usaha/{putaranId}/{jenis_tabel_id}',
+        [KonserdaController::class, 'showLapanganUsaha']
+    );
+
+
+    Route::get(
+        '/konserda/pengeluaran/{putaranId}/{jenis_tabel_id}',
+        [KonserdaController::class, 'showPengeluaran']
+    );

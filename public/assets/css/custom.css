@@ -273,7 +273,6 @@ textarea,
 }
 
 
-
 /* =====================================================
    KATEGORI FREEZE
 ===================================================== */
@@ -387,6 +386,32 @@ textarea,
 }
 
 /* =====================================================
+   TOTAL KONSERDA
+===================================================== */
+
+.table-data-large tbody tr.level-0 td {
+
+    background-color: #e9ecef !important;
+
+    color: #000000 !important;
+
+    font-weight: 700;
+
+}
+
+
+/* TOTAL freeze kategori */
+.table-data-large tbody tr.level-0 .kolom-kategori {
+
+    background-color: #e9ecef !important;
+
+    color: #000000 !important;
+        
+    font-weight: 700;
+
+}
+
+/* =====================================================
    HOVER CELL
 ===================================================== */
 
@@ -405,3 +430,39 @@ textarea,
     background-color: inherit !important;
 
 }
+
+/*tambahan
+
+.table-data-large thead th.kolom-kategori {
+
+    text-align:center !important;
+
+}
+
+
+.table-data-large .kolom-kategori {
+
+    background-clip: padding-box;
+
+}
+
+
+.table-data-large tbody td.kolom-kategori {
+
+    height:28px;
+
+    max-height:28px;
+
+}
+
+
+.table-data-large thead {
+
+    position:sticky;
+
+    top:0;
+
+    z-index:30;
+
+}
+    */

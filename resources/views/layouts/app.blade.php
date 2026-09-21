@@ -110,6 +110,93 @@
     <!-- Axios -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
+    <script>
+
+
+    // WAKTU HEADER
+
+    function updateWaktu(){
+
+        let sekarang = new Date();
+
+
+        document.getElementById('tanggal-desktop').innerHTML =
+            sekarang.toLocaleDateString('id-ID',{
+                weekday:'long',
+                day:'numeric',
+                month:'long',
+                year:'numeric'
+            });
+
+
+        document.getElementById('tanggal-mobile').innerHTML =
+            sekarang.toLocaleDateString('id-ID');
+
+
+        document.getElementById('jam').innerHTML =
+            sekarang.toLocaleTimeString('id-ID');
+
+    }
+
+
+    updateWaktu();
+
+    setInterval(updateWaktu,1000);
+
+
+
+
+    // PUTARAN HEADER
+
+    function ambilPutaranHeader(){
+
+
+        axios.get('/api/rekonsiliasi/status')
+
+        .then(response=>{
+
+
+            let data = response.data;
+
+
+            if(data.rekonsiliasi){
+
+
+                let putaran = '-';
+
+
+                if(data.putaran_aktif){
+
+                    putaran = data.putaran_aktif.nomor;
+
+                }
+                else if(data.putaran_terakhir){
+
+                    putaran = data.putaran_terakhir.nomor;
+
+                }
+
+
+                document.getElementById('putaran-header')
+                .innerHTML =
+
+                `PUTARAN ${putaran} • REKON ${data.rekonsiliasi.tahun} Q${data.rekonsiliasi.triwulan}`;
+
+
+            }
+
+
+        });
+
+
+    }
+
+
+    ambilPutaranHeader();
+
+
+    </script>
+
 
     {{-- Script halaman --}}
     @yield('scripts')

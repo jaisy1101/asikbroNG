@@ -37,7 +37,10 @@ class KonserdaService
         $periodeList = RekonsiliasiPeriode::where(
             'rekonsiliasi_id',
             $putaran->rekonsiliasi_id
-        )->get();
+        )
+        ->with('periode')
+        ->orderBy('periode_id')
+        ->get();
 
 
 
@@ -170,9 +173,7 @@ class KonserdaService
 
                     }
 
-
-
-                    HasilKonserda::create([
+                    $hasilTotal = HasilKonserda::create([
 
                         'putaran_id' => $putaran->id,
 
@@ -203,7 +204,32 @@ class KonserdaService
 
                     ]);
 
+                    foreach ($kabkota as $wilayah) {
 
+
+                        $nilaiTotal = $model::where([
+                            'wilayah_id' => $wilayah->id,
+                            'periode_id' => $periode->periode_id,
+                            'jenis_tabel_id' => $jenisTabelId,
+                        ])
+                        ->whereIn(
+                            $kategoriColumn,
+                            $kategoriParent->pluck('id')
+                        )
+                        ->sum('nilai');
+
+
+                        HasilKonserdaDetail::create([
+
+                            'hasil_konserda_id' => $hasilTotal->id,
+
+                            'wilayah_id' => $wilayah->id,
+
+                            'nilai' => $nilaiTotal,
+
+                        ]);
+
+                    }
 
                     /*
                     |--------------------------------------------------------------------------
