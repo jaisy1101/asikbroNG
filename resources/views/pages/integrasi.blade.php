@@ -24,21 +24,109 @@
                     Pilih Wilayah
                 </label>
 
-                <select class="form-control">
+                    <select class="form-control" id="wilayah_id">
 
-                    <option selected>
-                        Sulawesi Selatan
-                    </option>
+                        <option value="1" selected>
+                            Sulawesi Selatan
+                        </option>
 
-                    <option>
-                        Kota Makassar
-                    </option>
+                        <option value="2">
+                            Kepulauan Selayar
+                        </option>
 
-                    <option>
-                        Kabupaten Gowa
-                    </option>
+                        <option value="3">
+                            Bulukumba
+                        </option>
 
-                </select>
+                        <option value="4">
+                            Bantaeng
+                        </option>
+
+                        <option value="5">
+                            Jeneponto
+                        </option>
+
+                        <option value="6">
+                            Takalar
+                        </option>
+
+                        <option value="7">
+                            Gowa
+                        </option>
+
+                        <option value="8">
+                            Sinjai
+                        </option>
+
+                        <option value="9">
+                            Maros
+                        </option>
+
+                        <option value="10">
+                            Pangkajene dan Kepulauan
+                        </option>
+
+                        <option value="11">
+                            Barru
+                        </option>
+
+                        <option value="12">
+                            Bone
+                        </option>
+
+                        <option value="13">
+                            Soppeng
+                        </option>
+
+                        <option value="14">
+                            Wajo
+                        </option>
+
+                        <option value="15">
+                            Sidenreng Rappang
+                        </option>
+
+                        <option value="16">
+                            Pinrang
+                        </option>
+
+                        <option value="17">
+                            Enrekang
+                        </option>
+
+                        <option value="18">
+                            Luwu
+                        </option>
+
+                        <option value="19">
+                            Tana Toraja
+                        </option>
+
+                        <option value="20">
+                            Luwu Utara
+                        </option>
+
+                        <option value="21">
+                            Luwu Timur
+                        </option>
+
+                        <option value="22">
+                            Toraja Utara
+                        </option>
+
+                        <option value="23">
+                            Makassar
+                        </option>
+
+                        <option value="24">
+                            Parepare
+                        </option>
+
+                        <option value="25">
+                            Palopo
+                        </option>
+
+                    </select>
 
             </div>
 

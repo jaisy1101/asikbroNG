@@ -411,6 +411,40 @@ textarea,
 
 }
 
+/* STATUS KONSERDA */
+
+.table-data-large tbody tr.status-peringatan td {
+
+    background-color: #fff3cd !important;
+
+}
+
+
+.table-data-large tbody tr.status-ekstrem td {
+
+    background-color: #f8d7da !important;
+
+}
+
+
+
+/* freeze kategori ikut warna */
+
+.table-data-large tbody tr.status-peringatan 
+.kolom-kategori {
+
+    background-color: #fff3cd !important;
+
+}
+
+
+.table-data-large tbody tr.status-ekstrem 
+.kolom-kategori {
+
+    background-color: #f8d7da !important;
+
+}
+
 /* =====================================================
    HOVER CELL
 ===================================================== */
@@ -431,38 +465,47 @@ textarea,
 
 }
 
-/*tambahan
-
-.table-data-large thead th.kolom-kategori {
-
-    text-align:center !important;
-
-}
+/* ===============================
+   TOTAL KONSERDA
+=============================== */
 
 
-.table-data-large .kolom-kategori {
+.table-data-large tbody tr.total-aman td {
 
-    background-clip: padding-box;
+    background-color: #d1e7dd !important;
 
-}
+    color: #000;
 
-
-.table-data-large tbody td.kolom-kategori {
-
-    height:28px;
-
-    max-height:28px;
+    font-weight: 700;
 
 }
 
 
-.table-data-large thead {
+.table-data-large tbody tr.total-peringatan td,
+.table-data-large tbody tr.total-ekstrem td {
 
-    position:sticky;
+    background-color: #f8d7da !important;
 
-    top:0;
+    color: #000;
 
-    z-index:30;
+    font-weight: 700;
 
 }
-    */
+
+
+
+/* freeze kategori TOTAL */
+
+.table-data-large tbody tr.total-aman .kolom-kategori {
+
+    background-color: #d1e7dd !important;
+
+}
+
+
+.table-data-large tbody tr.total-peringatan .kolom-kategori,
+.table-data-large tbody tr.total-ekstrem .kolom-kategori {
+
+    background-color: #f8d7da !important;
+
+}

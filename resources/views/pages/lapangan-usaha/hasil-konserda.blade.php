@@ -34,7 +34,7 @@
             
             <!-- Kiri -->
             <div class="d-flex flex-wrap align-items-center">
- 
+                
                 <!-- Toggle ADHB / ADHK -->
                 <div class="btn-group mr-3 mb-2" role="group">
 
@@ -51,7 +51,7 @@
                     </button>
 
                 </div>
-
+                {{--  
                 <!-- Dropdown Tahun -->
                 <div class="mr-3 mb-2">
 
@@ -116,6 +116,7 @@
                     </select>
 
                 </div>
+                --}}
 
             </div>
 
@@ -616,7 +617,7 @@ axios.get(
 
         html += `
 
-        <tr class="level-${kategori?.level ?? 0}">
+        <tr class="level-${kategori?.level ?? 0} ${!kategori ? 'total-' + items[0].status : 'status-' + items[0].status}">
 
 
             <td class="kolom-kategori"
