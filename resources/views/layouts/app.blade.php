@@ -77,12 +77,43 @@
 
     <script src="{{ asset('assets/vendor/chart.js/Chart.min.js') }}"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+
+        function notifSukses(pesan){
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil',
+                text: pesan,
+                timer: 2000,
+                showConfirmButton: false
+            });
+
+        }
+
+
+        function notifError(pesan){
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal',
+                text: pesan
+            });
+
+        }
+
+
+        </script>
+    
     <!-- Axios -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 
     {{-- Script halaman --}}
     @yield('scripts')
+
 
 </body>
 

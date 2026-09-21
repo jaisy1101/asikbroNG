@@ -147,13 +147,10 @@
                 <i class="far fa-calendar-alt mr-1"></i>
 
                 <!-- Desktop -->
-                <span class="tanggal-desktop">
-                    Senin, 5 Desember 2026
+                <span class="tanggal-desktop" id="tanggal-desktop">
                 </span>
 
-                <!-- Saat layar mengecil -->
-                <span class="tanggal-mobile">
-                    05/12/2026
+                <span class="tanggal-mobile" id="tanggal-mobile">
                 </span>
 
 
@@ -164,7 +161,8 @@
 
                     <i class="far fa-clock mr-1"></i>
 
-                    13:19:50
+                    <span id="jam">
+                    </span>
 
                 </span>
 
@@ -177,9 +175,8 @@
             <!-- ===================================== -->
             <div class="topbar-center">
 
-                <span class="badge badge-success putaran-badge">
-
-                    PUTARAN 1 • REKON 2026 Q2
+                <span class="badge badge-success putaran-badge"
+                    id="putaran-header">
 
                 </span>
 
@@ -443,3 +440,116 @@
     </div>
 
 </div>
+
+@section('scripts')
+
+<script>
+
+
+// ===============================
+// TANGGAL JAM
+// ===============================
+
+function updateWaktu(){
+
+
+    let sekarang = new Date();
+
+
+    let tanggal = sekarang.toLocaleDateString(
+        'id-ID',
+        {
+            weekday:'long',
+            day:'numeric',
+            month:'long',
+            year:'numeric'
+        }
+    );
+
+
+    let tanggalMobile = sekarang.toLocaleDateString(
+        'id-ID'
+    );
+
+
+    let jam = sekarang.toLocaleTimeString(
+        'id-ID'
+    );
+
+
+
+    document.getElementById('tanggal-desktop')
+    .innerHTML = tanggal;
+
+
+
+    document.getElementById('tanggal-mobile')
+    .innerHTML = tanggalMobile;
+
+
+
+    document.getElementById('jam')
+    .innerHTML = jam;
+
+
+}
+
+
+updateWaktu();
+
+setInterval(updateWaktu,1000);
+
+
+
+
+// ===============================
+// PUTARAN HEADER
+// ===============================
+
+axios.get('/api/rekonsiliasi/status')
+
+.then(response=>{
+
+
+    let data = response.data;
+
+
+    if(data.rekonsiliasi){
+
+
+        let putaran = '-';
+
+
+        if(data.putaran_aktif){
+
+            putaran = data.putaran_aktif.nomor;
+
+        }
+        else if(data.putaran_terakhir){
+
+            putaran = data.putaran_terakhir.nomor;
+
+        }
+
+
+
+        document.getElementById('putaran-header')
+        .innerHTML = `
+
+            PUTARAN ${putaran}
+            •
+            REKON ${data.rekonsiliasi.tahun}
+            Q${data.rekonsiliasi.triwulan}
+
+        `;
+
+
+    }
+
+
+});
+
+
+</script>
+
+@endsection

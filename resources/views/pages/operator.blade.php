@@ -78,7 +78,7 @@
                     <!-- Tombol -->
                     <button class="btn btn-success btn-block py-2 mt-4"
                             data-toggle="modal"
-                            data-target="#modalPutaran"
+                            data-target="#modalBukaPutaran"
                             style="
                                 border-radius: 18px;
                                 font-size: 16px;
@@ -307,7 +307,7 @@
 <!-- MODAL -->
 <!-- ========================================= -->
 <div class="modal fade"
-     id="modalPutaran"
+     id="modalBukaPutaran"
      tabindex="-1"
      role="dialog"
      aria-hidden="true">
@@ -569,7 +569,31 @@
          style="max-width: 450px;">
 
         <div class="modal-content border-0 shadow"
-             style="border-radius: 20px;">
+             style="border-radius: 20px; position: relative;">
+
+             <button type="button"
+                        class="close"
+                        data-dismiss="modal"
+                        aria-label="Close"
+                          style="
+                        position: absolute;
+                        top: 15px;
+                        right: 18px;
+                        z-index: 10;
+                        outline: none;
+                    ">
+
+                    <span aria-hidden="true"
+                        style="
+                            font-size: 32px;
+                            color: #cfcfcf;
+                            font-weight: 400;
+                        ">
+                        &times;
+                    </span>
+
+                </button>
+            
 
             <div class="modal-body text-center px-5 py-5">
 
@@ -662,7 +686,7 @@ document.getElementById('btnBukaQuartal')
     })
     .then(response => {
 
-        alert(response.data.message ?? 'Quartal berhasil dibuka');
+        notifSukses(response.data.message ?? 'Quartal berhasil dibuka');
 
         ambilStatusRekonsiliasi();
 
@@ -671,7 +695,7 @@ document.getElementById('btnBukaQuartal')
 
         console.error(error);
 
-        alert(
+        notifError(
             error.response?.data?.message 
             ?? 'Gagal membuka quartal'
         );
@@ -694,14 +718,20 @@ document.getElementById('btnBukaPutaran')
 
         let data = response.data;
 
-
         // kalau masih ada putaran berjalan
         if(data.putaran_aktif){
 
+            Swal.fire({
 
-            alert(
-                'Putaran masih berlangsung. Tutup putaran sebelumnya terlebih dahulu.'
-            );
+                icon: 'warning',
+
+                title: 'Putaran masih berlangsung',
+
+                text: 'Silakan tutup putaran yang sedang berjalan terlebih dahulu sebelum membuka quartal atau putaran baru.',
+
+                confirmButtonText: 'Mengerti'
+
+            });
 
 
             return;
@@ -716,7 +746,7 @@ document.getElementById('btnBukaPutaran')
         .then(response => {
 
 
-            alert(
+            notifSukses(
                 response.data.message ?? 
                 'Putaran berhasil dibuka'
             );
@@ -733,7 +763,7 @@ document.getElementById('btnBukaPutaran')
             console.error(error);
 
 
-            alert(
+            notifError(
                 error.response?.data?.message 
                 ?? 'Gagal membuka putaran'
             );
@@ -751,7 +781,7 @@ document.getElementById('btnBukaPutaran')
         console.error(error);
 
 
-        alert(
+        notifError(
             'Gagal mengecek status rekonsiliasi'
         );
 
@@ -771,7 +801,7 @@ document.getElementById('btnTutupPutaran')
     axios.post('/api/rekonsiliasi/tutup')
     .then(response => {
 
-        alert(response.data.message ?? 'Putaran berhasil ditutup');
+        notifSukses(response.data.message ?? 'Putaran berhasil ditutup');
 
         ambilStatusRekonsiliasi();
 
@@ -780,7 +810,7 @@ document.getElementById('btnTutupPutaran')
 
         console.error(error);
 
-        alert(
+        notifError(
             error.response?.data?.message 
             ?? 'Gagal menutup putaran'
         );

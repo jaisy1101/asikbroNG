@@ -39,12 +39,15 @@ textarea,
 
 .sidebar-custom {
     background: var(--brand-dark-blue) !important;
+
+    position: sticky;
+    top: 0;
+    height: 100vh;
 }
 
 .sidebar-brand-custom {
     background: var(--brand-dark-blue) !important;
 }
-
 
 /* =====================================================
    WARNA BIRU / INFO
