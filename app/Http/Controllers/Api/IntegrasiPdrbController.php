@@ -4,48 +4,59 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\IntegrasiPdrb;
-use Illuminate\Http\Request;
 
 class IntegrasiPdrbController extends Controller
 {
 
-    public function index(Request $request)
+    public function show($rekonsiliasiId, $wilayahId)
     {
 
-        $query = IntegrasiPdrb::with([
+        $data = IntegrasiPdrb::with([
             'wilayah',
             'periode',
             'jenisTabel'
-        ]);
+        ])
+        ->where(
+            'rekonsiliasi_id',
+            $rekonsiliasiId
+        )
+        ->where(
+            'wilayah_id',
+            $wilayahId
+        )
+        ->orderBy('periode_id')
+        ->get();
 
-
-        if ($request->wilayah_id) {
-
-            $query->where(
-                'wilayah_id',
-                $request->wilayah_id
-            );
-
-        }
-
-
-        if ($request->rekonsiliasi_id) {
-
-            $query->where(
-                'rekonsiliasi_id',
-                $request->rekonsiliasi_id
-            );
-
-        }
-
-
-        $data = $query
-            ->orderBy('periode_id')
-            ->get();
 
 
         return response()->json([
-            'table' => $data
+
+            'rekonsiliasi_id' => $rekonsiliasiId,
+
+            'wilayah_id' => $wilayahId,
+
+            'table' => $data->map(function($item){
+
+                return [
+
+                    'id' => $item->id,
+
+                    'periode' => $item->periode,
+
+                    'jenis_tabel' => $item->jenisTabel,
+
+                    'total_lapus' => $item->total_lapus,
+
+                    'total_pengeluaran' => $item->total_pengeluaran,
+
+                    'selisih' => $item->selisih,
+
+                    'status' => $item->status
+
+                ];
+
+            })
+
         ]);
 
     }

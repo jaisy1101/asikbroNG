@@ -93,8 +93,8 @@ Route::middleware('auth:sanctum')->group(function () {
     );
 
     Route::get(
-        '/integrasi',
-        [IntegrasiPdrbController::class, 'index']
+        '/integrasi/{rekonsiliasiId}/{wilayahId}',
+        [IntegrasiPdrbController::class,'show']
     );
 
     Route::get(

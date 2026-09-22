@@ -142,7 +142,8 @@
     <!-- ADHB -->
     <div class="col-md-6 mb-3">
 
-        <div class="card shadow border-left-warning h-100"
+        <div id ="cardADHB"
+             class="card shadow border-left-warning h-100"
              style="cursor: pointer;"
              data-toggle="collapse"
              data-target="#detailADHB">
@@ -160,8 +161,8 @@
 
                         </div>
 
-                        <div class="text-gray-800"
-                             style="font-size: 16px;">
+                        <div class="text-gray-800 status-text"
+                            style="font-size: 16px;">
 
                             Ada Selisih
 
@@ -188,7 +189,8 @@
     <!-- ADHK -->
     <div class="col-md-6 mb-3">
 
-        <div class="card shadow border-left-success h-100"
+        <div id ="cardADHK"
+             class="card shadow border-left-success h-100"
              style="cursor: pointer;"
              data-toggle="collapse"
              data-target="#detailADHK">
@@ -206,7 +208,7 @@
 
                         </div>
 
-                        <div class="text-gray-800"
+                        <div class="text-gray-800 status-text"
                              style="font-size: 16px;">
 
                             Tidak Ada Selisih
@@ -265,40 +267,9 @@
                         </tr>
 
                     </thead>
+                        <tbody id="tableADHB">
 
-                    <tbody>
-
-                        <tr>
-
-                            <td>TW I</td>
-                            <td>12.450</td>
-                            <td>12.450</td>
-                            <td>0</td>
-
-                            <td>
-                                <span class="text-success font-weight-bold">
-                                    ✅ Sinkron
-                                </span>
-                            </td>
-
-                        </tr>
-
-                        <tr>
-
-                            <td>TW II</td>
-                            <td>13.210</td>
-                            <td>13.205</td>
-                            <td>5</td>
-
-                            <td>
-                                <span class="text-warning font-weight-bold">
-                                    ⚠ Ada Selisih
-                                </span>
-                            </td>
-
-                        </tr>
-
-                    </tbody>
+                        </tbody>
 
                 </table>
 
@@ -343,39 +314,9 @@
 
                     </thead>
 
-                    <tbody>
+                        <tbody id="tableADHK">
 
-                        <tr>
-
-                            <td>TW I</td>
-                            <td>11.320</td>
-                            <td>11.320</td>
-                            <td>0</td>
-
-                            <td>
-                                <span class="text-success font-weight-bold">
-                                    ✅ Sinkron
-                                </span>
-                            </td>
-
-                        </tr>
-
-                        <tr>
-
-                            <td>TW II</td>
-                            <td>12.540</td>
-                            <td>12.540</td>
-                            <td>0</td>
-
-                            <td>
-                                <span class="text-success font-weight-bold">
-                                    ✅ Sinkron
-                                </span>
-                            </td>
-
-                        </tr>
-
-                    </tbody>
+                        </tbody>
 
                 </table>
 
@@ -386,5 +327,251 @@
     </div>
 
 </div>
+
+@endsection
+
+@section('scripts')
+
+<script>
+
+const rekonsiliasiId = 25;
+
+
+
+function loadIntegrasi(wilayahId)
+{
+
+    fetch(`/api/integrasi/${rekonsiliasiId}/${wilayahId}`)
+
+    .then(response => response.json())
+
+    .then(result => {
+
+
+        let data = result.table;
+
+
+        let adhb = data.filter(item =>
+            item.jenis_tabel.kode === 'ADHB'
+        );
+
+
+        let adhk = data.filter(item =>
+            item.jenis_tabel.kode === 'ADHK'
+        );
+
+
+
+        updateSummary(
+            'ADHB',
+            adhb
+        );
+
+
+        updateSummary(
+            'ADHK',
+            adhk
+        );
+
+
+
+        renderDetail(
+            'ADHB',
+            adhb
+        );
+
+
+        renderDetail(
+            'ADHK',
+            adhk
+        );
+
+
+    });
+
+}
+
+
+
+function updateSummary(kode,data)
+{
+
+    let card =
+        document.getElementById(
+            kode === 'ADHB'
+            ? 'cardADHB'
+            : 'cardADHK'
+        );
+
+
+
+    let status =
+        card.querySelector('.status-text');
+
+
+    let icon =
+        card.querySelector('i');
+
+
+
+    let adaSelisih =
+        data.some(item =>
+            item.status === 'selisih'
+        );
+
+
+
+    if(adaSelisih){
+
+
+        status.innerHTML =
+            'Ada Selisih';
+
+
+        icon.className =
+            'fas fa-exclamation-triangle text-warning';
+
+
+
+        card.classList.remove(
+            'border-left-success'
+        );
+
+
+        card.classList.add(
+            'border-left-warning'
+        );
+
+
+    }
+    else{
+
+
+        status.innerHTML =
+            'Tidak Ada Selisih';
+
+
+        icon.className =
+            'fas fa-check-circle text-success';
+
+
+
+        card.classList.remove(
+            'border-left-warning'
+        );
+
+
+        card.classList.add(
+            'border-left-success'
+        );
+
+
+    }
+
+}
+
+
+
+
+function renderDetail(kode,data)
+{
+
+
+    let tbody =
+        document.getElementById(
+            kode === 'ADHB'
+            ? 'tableADHB'
+            : 'tableADHK'
+        );
+
+
+
+    let html = '';
+
+
+
+    data.forEach(item=>{
+
+
+        let statusHtml =
+            item.status === 'sesuai'
+            ?
+            `<span class="text-success font-weight-bold">
+                ✅ Sinkron
+             </span>`
+            :
+            `<span class="text-warning font-weight-bold">
+                ⚠ Ada Selisih
+             </span>`;
+
+
+
+        html += `
+
+        <tr>
+
+            <td>
+                ${item.periode.tahun}
+                TW ${item.periode.triwulan}
+            </td>
+
+
+            <td>
+                ${item.total_pengeluaran}
+            </td>
+
+
+            <td>
+                ${item.total_lapus}
+            </td>
+
+
+            <td>
+                ${item.selisih}
+            </td>
+
+
+            <td>
+                ${statusHtml}
+            </td>
+
+
+        </tr>
+
+        `;
+
+
+    });
+
+
+
+    tbody.innerHTML = html;
+
+
+}
+
+
+
+
+
+document
+.getElementById('wilayah_id')
+.addEventListener(
+    'change',
+    function(){
+
+        loadIntegrasi(this.value);
+
+    }
+);
+
+
+
+loadIntegrasi(
+    document.getElementById('wilayah_id').value
+);
+
+
+</script>
 
 @endsection
