@@ -336,7 +336,7 @@
 
 <script>
 
-let putaranId = null;
+let rekonsiliasiId = null;
 
 
 axios.get('/api/rekonsiliasi/status')
@@ -344,8 +344,8 @@ axios.get('/api/rekonsiliasi/status')
 .then(response => {
 
 
-    putaranId =
-        response.data.putaran_aktif.id;
+    rekonsiliasiId =
+        response.data.rekonsiliasi.id;
 
 
 
@@ -367,14 +367,14 @@ axios.get('/api/rekonsiliasi/status')
 function loadIntegrasi(wilayahId)
 {
 
-    if(!putaranId){
+    if(!rekonsiliasiId){
 
         return;
 
     }
 
 
-    fetch(`/api/integrasi/${putaranId}/${wilayahId}`)
+    fetch(`/api/integrasi/${rekonsiliasiId}/${wilayahId}`)
 
     .then(response => response.json())
 

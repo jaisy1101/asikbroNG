@@ -216,7 +216,7 @@ class SubmissionController extends Controller
 
             $integrasi->generate(
 
-                $putaran->id,
+                $rekonsiliasi->id,
 
                 $submission->wilayah_id
 
@@ -333,7 +333,9 @@ class SubmissionController extends Controller
             'line' => $e->getLine(),
 
         ], 500);
-        }
+
+
+}
     }
 
     private function updateMasterLapanganUsaha($submission)

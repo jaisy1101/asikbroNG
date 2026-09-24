@@ -253,7 +253,7 @@ class RekonsiliasiController extends Controller
 
                 $integrasi->generate(
 
-                    $putaranBaru->id,
+                    $rekonsiliasi->id,
 
                     $wilayah->id
 

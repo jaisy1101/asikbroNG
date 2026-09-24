@@ -10,7 +10,8 @@ class IntegrasiPdrb extends Model
 
 
     protected $fillable = [
-        'putaran_id',
+
+        'rekonsiliasi_id',
 
         'wilayah_id',
 
@@ -30,9 +31,9 @@ class IntegrasiPdrb extends Model
 
 
 
-    public function putaran()
+    public function rekonsiliasi()
     {
-        return $this->belongsTo(Putaran::class);
+        return $this->belongsTo(Rekonsiliasi::class);
     }
 
 

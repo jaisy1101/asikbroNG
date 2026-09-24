@@ -7,23 +7,17 @@ use App\Models\DataPdrbLapanganUsaha;
 use App\Models\DataPdrbPengeluaran;
 use App\Models\Wilayah;
 use App\Models\RekonsiliasiPeriode;
-use App\Models\Putaran;
 
 class IntegrasiPdrbService
 {
 
-    public function generate($putaranId, $wilayahId)
+    public function generate($rekonsiliasiId, $wilayahId)
     {
-
-
-        $putaran = Putaran::findOrFail(
-            $putaranId
-        );
 
 
         $periodeList = RekonsiliasiPeriode::where(
             'rekonsiliasi_id',
-            $putaran->rekonsiliasi_id
+            $rekonsiliasiId
         )
         ->get();
 
@@ -80,7 +74,7 @@ class IntegrasiPdrbService
 
                         [
 
-                            'putaran_id' => $putaranId,
+                            'rekonsiliasi_id' => $rekonsiliasiId,
 
                             'wilayah_id' => $wilayah->id,
 
