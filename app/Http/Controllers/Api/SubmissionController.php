@@ -8,6 +8,7 @@ use App\Models\Submission;
 use App\Models\SubmissionFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use App\Services\LapanganUsaha\LapanganUsahaImportService;
 use App\Services\Pengeluaran\PengeluaranImportService;
 use App\Models\Rekonsiliasi;
@@ -113,7 +114,12 @@ class SubmissionController extends Controller
 
                 'modul_id' => $request->modul_id,
 
-                'versi' => 1,
+                'versi' => (
+                    Submission::where('putaran_id', $putaran->id)
+                        ->where('wilayah_id', $wilayahId)
+                        ->where('modul_id', $request->modul_id)
+                        ->max('versi') ?? 0
+                ) + 1,
 
                 'is_aktif' => 1,
 
@@ -297,19 +303,39 @@ class SubmissionController extends Controller
         } catch (\Throwable $e) {
 
 
-            DB::rollBack();
+        DB::rollBack();
 
 
-            return response()->json([
+        Log::error('UPLOAD SUBMISSION GAGAL', [
 
-                'message' => 'Submission gagal dibuat',
+            'message' => $e->getMessage(),
 
-                'error' => $e->getMessage(),
+            'file' => $e->getFile(),
 
-            ], 500);
+            'line' => $e->getLine(),
+
+            'trace' => $e->getTraceAsString(),
+
+            'request' => $request->all(),
+
+        ]);
 
 
-        }
+
+        return response()->json([
+
+            'message' => 'Submission gagal dibuat',
+
+            'error' => $e->getMessage(),
+
+            'file' => $e->getFile(),
+
+            'line' => $e->getLine(),
+
+        ], 500);
+
+
+}
     }
 
     private function updateMasterLapanganUsaha($submission)
