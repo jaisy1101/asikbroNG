@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\PdrbTableController;
 use App\Http\Controllers\Api\RekonsiliasiController;
 use App\Http\Controllers\Api\IntegrasiPdrbController;
 use App\Http\Controllers\Api\KonserdaController;
+use App\Http\Controllers\Api\MonitoringController;
 
 Route::post('/login', function (Request $request) {
 
@@ -93,7 +94,7 @@ Route::middleware('auth:sanctum')->group(function () {
     );
 
     Route::get(
-        '/integrasi/{rekonsiliasiId}/{wilayahId}',
+        '/integrasi/{putaranId}/{wilayahId}',
         [IntegrasiPdrbController::class,'show']
     );
 
@@ -111,4 +112,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get(
         '/konserda/pengeluaran/{putaranId}/{jenis_tabel_id}',
         [KonserdaController::class, 'showPengeluaran']
+    );
+
+    Route::get(
+        '/monitoring/{putaranId}/{modulId}',
+        [MonitoringController::class,'index']
     );

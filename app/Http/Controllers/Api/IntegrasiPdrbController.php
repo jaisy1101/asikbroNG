@@ -8,7 +8,7 @@ use App\Models\IntegrasiPdrb;
 class IntegrasiPdrbController extends Controller
 {
 
-    public function show($rekonsiliasiId, $wilayahId)
+    public function show($putaranId, $wilayahId)
     {
 
         $data = IntegrasiPdrb::with([
@@ -17,8 +17,8 @@ class IntegrasiPdrbController extends Controller
             'jenisTabel'
         ])
         ->where(
-            'rekonsiliasi_id',
-            $rekonsiliasiId
+            'putaran_id',
+            $putaranId
         )
         ->where(
             'wilayah_id',
@@ -31,7 +31,7 @@ class IntegrasiPdrbController extends Controller
 
         return response()->json([
 
-            'rekonsiliasi_id' => $rekonsiliasiId,
+            'putaran_id' => $putaranId,
 
             'wilayah_id' => $wilayahId,
 
