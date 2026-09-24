@@ -10,6 +10,8 @@ use App\Models\Periode;
 use Illuminate\Support\Facades\DB;
 use App\Jobs\GenerateKonserdaJob;
 use App\Models\RekonsiliasiPeriode;
+use App\Models\Wilayah;
+use App\Services\Integrasi\IntegrasiPdrbService;
 
 class RekonsiliasiController extends Controller
 {
@@ -20,7 +22,7 @@ class RekonsiliasiController extends Controller
     | Admin memilih tahun + triwulan.
     | Sistem membuat Rekonsiliasi baru + Putaran 0.
     */
-    public function bukaQuartalBaru(Request $request)
+    public function bukaQuartalBaru(Request $request, IntegrasiPdrbService $integrasi)
     {
         $request->validate([
             'tahun' => 'required|integer',
@@ -129,6 +131,26 @@ class RekonsiliasiController extends Controller
                 'tanggal_mulai' => now(),
             ]);
 
+            /*
+            |--------------------------------------------------------------------------
+            | GENERATE AWAL INTEGRASI SEMUA WILAYAH
+            |--------------------------------------------------------------------------
+            */
+
+            $wilayahList = Wilayah::all();
+
+            foreach($wilayahList as $wilayah){
+
+                $integrasi->generate(
+
+                    $rekonsiliasi->id,
+
+                    $wilayah->id
+
+                );
+
+            }
+
             DB::commit();
 
             return response()->json([
@@ -159,7 +181,7 @@ class RekonsiliasiController extends Controller
     | Tidak perlu input tahun, triwulan, atau nomor putaran.
     | Sistem otomatis membaca rekonsiliasi dan putaran terakhir.
     */
-    public function bukaPutaranBaru()
+    public function bukaPutaranBaru(IntegrasiPdrbService $integrasi)
     {
         try {
 
@@ -178,8 +200,7 @@ class RekonsiliasiController extends Controller
                 return response()->json([
                     'message' => 'Masih ada putaran yang sedang berlangsung'
                 ], 400);
-
-}
+            }
 
             if (!$rekonsiliasi) {
 
@@ -219,6 +240,26 @@ class RekonsiliasiController extends Controller
                 'status' => 'berlangsung',
                 'tanggal_mulai' => now(),
             ]);
+
+            /*
+            |--------------------------------------------------------------------------
+            | GENERATE AWAL INTEGRASI SEMUA WILAYAH
+            |--------------------------------------------------------------------------
+            */
+
+            $wilayahList = Wilayah::all();
+
+            foreach($wilayahList as $wilayah){
+
+                $integrasi->generate(
+
+                    $rekonsiliasi->id,
+
+                    $wilayah->id
+
+                );
+
+            }
 
             DB::commit();
 

@@ -154,7 +154,7 @@
 
                     <div>
 
-                        <div class="font-weight-bold text-warning mb-1"
+                        <div class="font-weight-bold title-text mb-1"
                              style="font-size: 22px;">
 
                             ADHB
@@ -201,7 +201,7 @@
 
                     <div>
 
-                        <div class="font-weight-bold text-success mb-1"
+                        <div class="font-weight-bold title-text mb-1"
                              style="font-size: 22px;">
 
                             ADHK
@@ -242,7 +242,8 @@
 
         <div class="card-header py-3">
 
-            <h6 class="m-0 font-weight-bold text-warning">
+            <h6 id="titleDetailADHB"
+                class="m-0 font-weight-bold text-warning">
                 Detail Integrasi ADHB
             </h6>
 
@@ -288,7 +289,8 @@
 
         <div class="card-header py-3">
 
-            <h6 class="m-0 font-weight-bold text-success">
+            <h6 id="titleDetailADHK"
+                class="m-0 font-weight-bold text-success">
                 Detail Integrasi ADHK
             </h6>
 
@@ -334,12 +336,43 @@
 
 <script>
 
-const rekonsiliasiId = 25;
+let rekonsiliasiId = null;
 
 
+axios.get('/api/rekonsiliasi/status')
+
+.then(response => {
+
+
+    rekonsiliasiId =
+        response.data.rekonsiliasi.id;
+
+
+
+    loadIntegrasi(
+        document.getElementById('wilayah_id').value
+    );
+
+
+})
+
+.catch(error => {
+
+    console.error(
+        error
+    );
+
+});
 
 function loadIntegrasi(wilayahId)
 {
+
+    if(!rekonsiliasiId){
+
+        return;
+
+    }
+
 
     fetch(`/api/integrasi/${rekonsiliasiId}/${wilayahId}`)
 
@@ -361,7 +394,6 @@ function loadIntegrasi(wilayahId)
         );
 
 
-
         updateSummary(
             'ADHB',
             adhb
@@ -372,7 +404,6 @@ function loadIntegrasi(wilayahId)
             'ADHK',
             adhk
         );
-
 
 
         renderDetail(
@@ -389,9 +420,8 @@ function loadIntegrasi(wilayahId)
 
     });
 
+
 }
-
-
 
 function updateSummary(kode,data)
 {
@@ -404,9 +434,12 @@ function updateSummary(kode,data)
         );
 
 
-
     let status =
         card.querySelector('.status-text');
+
+
+    let title =
+        card.querySelector('.title-text');
 
 
     let icon =
@@ -414,10 +447,43 @@ function updateSummary(kode,data)
 
 
 
+    let detailTitle =
+        document.getElementById(
+            kode === 'ADHB'
+            ? 'titleDetailADHB'
+            : 'titleDetailADHK'
+        );
+
+
+
     let adaSelisih =
         data.some(item =>
             item.status === 'selisih'
         );
+
+
+
+    // reset warna
+    card.classList.remove(
+        'border-left-warning',
+        'border-left-success'
+    );
+
+
+    title.classList.remove(
+        'text-warning',
+        'text-success'
+    );
+
+
+    if(detailTitle){
+
+        detailTitle.classList.remove(
+            'text-warning',
+            'text-success'
+        );
+
+    }
 
 
 
@@ -433,14 +499,24 @@ function updateSummary(kode,data)
 
 
 
-        card.classList.remove(
-            'border-left-success'
-        );
-
-
         card.classList.add(
             'border-left-warning'
         );
+
+
+        title.classList.add(
+            'text-warning'
+        );
+
+
+        if(detailTitle){
+
+            detailTitle.classList.add(
+                'text-warning'
+            );
+
+        }
+
 
 
     }
@@ -456,21 +532,28 @@ function updateSummary(kode,data)
 
 
 
-        card.classList.remove(
-            'border-left-warning'
-        );
-
-
         card.classList.add(
             'border-left-success'
         );
 
 
+        title.classList.add(
+            'text-success'
+        );
+
+
+        if(detailTitle){
+
+            detailTitle.classList.add(
+                'text-success'
+            );
+
+        }
+
+
     }
 
 }
-
-
 
 
 function renderDetail(kode,data)
@@ -565,11 +648,6 @@ document
     }
 );
 
-
-
-loadIntegrasi(
-    document.getElementById('wilayah_id').value
-);
 
 
 </script>
