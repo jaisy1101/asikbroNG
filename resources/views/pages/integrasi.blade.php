@@ -143,7 +143,7 @@
     <div class="col-md-6 mb-3">
 
         <div id ="cardADHB"
-             class="card shadow border-left-warning h-100"
+             class="card shadow border-left-danger h-100"
              style="cursor: pointer;"
              data-toggle="collapse"
              data-target="#detailADHB">
@@ -172,7 +172,7 @@
 
                     <div>
 
-                        <i class="fas fa-exclamation-triangle text-warning"
+                        <i class="fas fa-exclamation-triangle text-danger"
                            style="font-size: 32px;">
                         </i>
 
@@ -243,7 +243,7 @@
         <div class="card-header py-3">
 
             <h6 id="titleDetailADHB"
-                class="m-0 font-weight-bold text-warning">
+                class="m-0 font-weight-bold text-danger">
                 Detail Integrasi ADHB
             </h6>
 
@@ -253,9 +253,9 @@
 
             <div class="table-responsive">
 
-                <table class="table table-bordered">
+                <table class="table table-bordered table-monitoring">
 
-                    <thead class="thead-light">
+                    <thead>
 
                         <tr>
 
@@ -300,9 +300,9 @@
 
             <div class="table-responsive">
 
-                <table class="table table-bordered">
+                <table class="table table-bordered table-monitoring">
 
-                    <thead class="thead-light">
+                    <thead>
 
                         <tr>
 
@@ -465,13 +465,13 @@ function updateSummary(kode,data)
 
     // reset warna
     card.classList.remove(
-        'border-left-warning',
+        'border-left-danger',
         'border-left-success'
     );
 
 
     title.classList.remove(
-        'text-warning',
+        'text-danger',
         'text-success'
     );
 
@@ -479,7 +479,7 @@ function updateSummary(kode,data)
     if(detailTitle){
 
         detailTitle.classList.remove(
-            'text-warning',
+            'text-danger',
             'text-success'
         );
 
@@ -495,24 +495,24 @@ function updateSummary(kode,data)
 
 
         icon.className =
-            'fas fa-exclamation-triangle text-warning';
+            'fas fa-exclamation-triangle text-danger';
 
 
 
         card.classList.add(
-            'border-left-warning'
+            'border-left-danger'
         );
 
 
         title.classList.add(
-            'text-warning'
+            'text-danger'
         );
 
 
         if(detailTitle){
 
             detailTitle.classList.add(
-                'text-warning'
+                'text-danger'
             );
 
         }
@@ -576,16 +576,44 @@ function renderDetail(kode,data)
     data.forEach(item=>{
 
 
-        let statusHtml =
-            item.status === 'sesuai'
-            ?
-            `<span class="text-success font-weight-bold">
-                ✅ Sinkron
-             </span>`
-            :
-            `<span class="text-warning font-weight-bold">
-                ⚠ Ada Selisih
-             </span>`;
+        let statusHtml = '';
+
+
+
+        if(item.status === 'sesuai'){
+
+
+            statusHtml = `
+
+            <span class="badge-monitoring badge-success">
+
+                <i class="fas fa-check"></i>
+
+                Sesuai
+
+            </span>
+
+            `;
+
+
+        }
+        else{
+
+
+            statusHtml = `
+
+            <span class="badge-monitoring badge-danger">
+
+                <i class="fas fa-times"></i>
+
+                Selisih
+
+            </span>
+
+            `;
+
+
+        }
 
 
 
@@ -632,10 +660,6 @@ function renderDetail(kode,data)
 
 
 }
-
-
-
-
 
 document
 .getElementById('wilayah_id')

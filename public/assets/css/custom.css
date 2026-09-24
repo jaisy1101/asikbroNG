@@ -509,3 +509,104 @@ textarea,
     background-color: #f8d7da !important;
 
 }
+
+/* =====================================================
+   MONITORING TABLE
+===================================================== */
+
+.table-monitoring {
+
+    font-size: 14px;
+    white-space: nowrap;
+
+}
+
+
+.table-monitoring th,
+.table-monitoring td {
+
+    padding: 8px 12px !important;
+    vertical-align: middle;
+
+}
+
+
+/* HEADER */
+
+.table-monitoring thead th {
+
+    background-color: var(--brand-dark-blue) !important;
+
+    color: #ffffff !important;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    text-align: center;
+
+    border-color: var(--brand-dark-blue) !important;
+
+}
+
+
+/* isi */
+
+.table-monitoring td {
+
+    text-align: center;
+
+}
+
+
+.table-monitoring td:first-child {
+
+    text-align: left;
+
+    font-weight: 500;
+
+}
+
+
+
+/* BADGE MONITORING */
+
+.badge-monitoring {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 5px;
+
+
+    width: 110px;
+
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    padding: 6px 10px;
+
+    border-radius: 8px;
+
+}
+
+/* Status upload */
+.table-monitoring td:nth-child(2) .badge-monitoring {
+
+    width: 130px;
+
+}
+
+
+/* ADHB ADHK */
+.table-monitoring td:nth-child(5) .badge-monitoring,
+.table-monitoring td:nth-child(6) .badge-monitoring {
+
+    width: 90px;
+
+}
