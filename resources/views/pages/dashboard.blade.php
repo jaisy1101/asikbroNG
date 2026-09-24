@@ -194,109 +194,146 @@
 
     <!-- List Pengumuman -->
     <div class="card border-0 shadow-sm"
-         style="
+        style="
             border-radius: 25px;
-         ">
+        ">
 
-        <div class="card-body p-0">
+        <div class="card-body p-0"
+            id="listPengumuman">
 
-            <!-- Item -->
-            <div class="d-flex align-items-center justify-content-between p-4 border-bottom">
 
-                <div>
+            <!-- Data dari API muncul disini -->
 
-                    <h5 class="font-weight-bold text-dark mb-1">
-
-                        Putaran 1 Dibuka
-
-                    </h5>
-
-                    <small class="text-gray-500">
-
-                        Rekonsiliasi PDRB 2026 Q2 telah dimulai.
-
-                    </small>
-
-                </div>
-
-                <div class="text-right">
-
-                    <small class="text-gray-500">
-
-                        20 Mei 2026
-
-                    </small>
-
-                </div>
-
-            </div>
-
-            <!-- Item -->
-            <div class="d-flex align-items-center justify-content-between p-4 border-bottom">
-
-                <div>
-
-                    <h5 class="font-weight-bold text-dark mb-1">
-
-                        Putaran 4 Ditutup
-
-                    </h5>
-
-                    <small class="text-gray-500">
-
-                        Rekonsiliasi PDRB 2025 Q4 telah selesai.
-
-                    </small>
-
-                </div>
-
-                <div class="text-right">
-
-                    <small class="text-gray-500">
-
-                        18 Mei 2026
-
-                    </small>
-
-                </div>
-
-            </div>
-
-            <!-- Item -->
-            <div class="d-flex align-items-center justify-content-between p-4">
-
-                <div>
-
-                    <h5 class="font-weight-bold text-dark mb-1">
-
-                        Putaran 3 Dibuka
-
-                    </h5>
-
-                    <small class="text-gray-500">
-
-                        Monitoring data daerah telah diperbarui.
-
-                    </small>
-
-                </div>
-
-                <div class="text-right">
-
-                    <small class="text-gray-500">
-
-                        12 Mei 2026
-
-                    </small>
-
-                </div>
-
-            </div>
 
         </div>
 
     </div>
 
 </div>
+
+@endsection
+
+@section('scripts')
+
+<script>
+
+
+axios.get('/api/pengumuman')
+
+.then(response => {
+
+
+    let data = response.data.data;
+
+
+    let html = '';
+
+
+
+    if(data.length === 0){
+
+
+        html = `
+
+        <div class="p-4 text-center text-gray-500">
+
+            Belum ada pengumuman
+
+        </div>
+
+        `;
+
+
+    }
+    else{
+
+
+        data.forEach(item => {
+
+
+            let tanggal =
+                new Date(item.created_at)
+                .toLocaleDateString(
+                    'id-ID',
+                    {
+                        day:'numeric',
+                        month:'long',
+                        year:'numeric'
+                    }
+                );
+
+
+
+            html += `
+
+
+            <div class="d-flex align-items-center justify-content-between p-4 border-bottom">
+
+
+                <div>
+
+
+                    <h5 class="font-weight-bold text-dark mb-1">
+
+                        Pengumuman
+
+                    </h5>
+
+
+
+                    <small class="text-gray-500">
+
+                        ${item.isi}
+
+                    </small>
+
+
+                </div>
+
+
+
+                <div class="text-right">
+
+
+                    <small class="text-gray-500">
+
+                        ${tanggal}
+
+                    </small>
+
+
+                </div>
+
+
+            </div>
+
+
+            `;
+
+
+        });
+
+
+    }
+
+
+
+    document
+    .getElementById('listPengumuman')
+    .innerHTML = html;
+
+
+
+})
+
+
+.catch(error => {
+
+    console.error(error);
+
+});
+
+
+</script>
 
 @endsection

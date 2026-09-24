@@ -159,18 +159,18 @@
             </h5>
 
             <!-- Button -->
-
             <input type="hidden"
                 id="modul_id"
                 value="2">
-
 
             <input type="file"
                 id="fileExcel"
                 hidden
                 accept=".xlsx,.xls">
-            <button id="btnUpload" 
-                class="btn btn-primary mt-4">
+
+
+            <button id="btnUpload"
+                    class="btn btn-primary mt-4">
 
                 <i class="fas fa-folder-open mr-2"></i>
 

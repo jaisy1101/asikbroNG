@@ -11,6 +11,8 @@ use App\Http\Controllers\Api\RekonsiliasiController;
 use App\Http\Controllers\Api\IntegrasiPdrbController;
 use App\Http\Controllers\Api\KonserdaController;
 use App\Http\Controllers\Api\MonitoringController;
+use App\Http\Controllers\Api\PengumumanController;
+
 
 Route::post('/login', function (Request $request) {
 
@@ -117,4 +119,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get(
         '/monitoring/{putaranId}/{modulId}',
         [MonitoringController::class,'index']
+    );
+
+    Route::get(
+        '/pengumuman',
+        [PengumumanController::class,'index']
+    );
+
+    Route::post(
+        '/pengumuman',
+        [PengumumanController::class,'store']
     );

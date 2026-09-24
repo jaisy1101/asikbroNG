@@ -261,35 +261,30 @@
     <div class="card shadow border-0"
          style="
             border-radius: 20px;
-         ">
+            max-width: 900px;
+            width: 100%;
+        ">
 
         <div class="card-body p-4">
 
-            <textarea class="form-control border-0 shadow-none"
-                      rows="5"
-                      placeholder="Tulis Disini.............."
-                      style="
-                        resize: none;
-                        font-size: 14px;
-                      "></textarea>
+            <textarea 
+                id="isiPengumuman"
+                class="form-control border-0 shadow-none"
+                rows="4"
+                placeholder="Tulis Disini..............">
+            </textarea>
 
             <div class="d-flex justify-content-end align-items-center mt-3">
 
-                <button class="btn btn-link p-0 mr-3"
+                <button id="btnKirimPengumuman"
+                        class="btn btn-primary rounded-circle"
                         style="
-                            font-size: 35px;
-                            color: #36b9cc;
-                         ">
-
-                    <i class="far fa-smile"></i>
-
-                </button>
-
-                <button class="btn btn-link p-0"
-                        style="
-                            font-size: 40px;
-                            color: #36b9cc;
-                         ">
+                            width:45px;
+                            height:45px;
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                        ">
 
                     <i class="fas fa-paper-plane"></i>
 
@@ -304,7 +299,7 @@
 </div>
 
 <!-- ========================================= -->
-<!-- MODAL -->
+<!-- MODAL KONFIRMASI BUKA PUTARAN -->
 <!-- ========================================= -->
 <div class="modal fade"
      id="modalBukaPutaran"
@@ -792,8 +787,6 @@ document.getElementById('btnBukaPutaran')
 });
 
 
-
-
 // Tutup Putaran
 document.getElementById('btnTutupPutaran')
 .addEventListener('click', function(){
@@ -885,6 +878,81 @@ function ambilStatusRekonsiliasi(){
 
 }
 
+
+document
+.getElementById('btnKirimPengumuman')
+.addEventListener('click', function(){
+
+
+    let isi =
+        document.getElementById('isiPengumuman').value;
+
+
+
+    if(!isi.trim()){
+
+        alert('Pengumuman masih kosong');
+
+        return;
+
+    }
+
+
+
+    axios.post(
+        '/api/pengumuman',
+        {
+
+            isi: isi
+
+        }
+    )
+
+    .then(response=>{
+
+
+        Swal.fire({
+
+            icon: 'success',
+
+            title: 'Berhasil',
+
+            text: 'Pengumuman berhasil dikirim',
+
+            showConfirmButton: false,
+
+            timer: 1500
+
+        });
+
+
+
+        document
+        .getElementById('isiPengumuman')
+        .value = '';
+
+
+        })
+
+        .catch(error=>{
+
+
+        Swal.fire({
+
+            icon: 'error',
+
+            title: 'Gagal',
+
+            text: 'Pengumuman gagal dikirim'
+
+        });
+
+
+    });
+
+
+
+});
 
 // jalankan saat halaman dibuka
 ambilStatusRekonsiliasi();

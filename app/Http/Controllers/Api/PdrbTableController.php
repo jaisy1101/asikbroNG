@@ -234,39 +234,40 @@ class PdrbTableController extends Controller
 
                 $query->whereHas('periode', function ($q) use ($periodeAktif) {
 
-
                     $q->where('tahun', '<', $periodeAktif->tahun)
                     ->orWhere(function ($q2) use ($periodeAktif) {
-
 
                         $q2->where('tahun', $periodeAktif->tahun)
                         ->where('triwulan', '<=', $periodeAktif->triwulan);
 
-
                     });
 
-
                 });
-
 
             })
             ->with([
                 'periode',
-                'kategori'
+                'kategori.parent'
             ])
             ->get();
 
 
 
         $result = $data
-            ->groupBy('kategori.nama')
+            ->groupBy('kategori.id')
             ->map(function ($items) {
 
 
                 $row = [];
 
-                $row['kategori'] =
-                    $items->first()->kategori->nama;
+                $kategori = $items->first()->kategori;
+
+
+                $row['kategori'] = $kategori->nama;
+
+                $row['kode'] = $kategori->kode;
+
+                $row['level'] = $kategori->level;
 
 
 
@@ -288,6 +289,7 @@ class PdrbTableController extends Controller
 
 
                 return $row;
+
 
             })
             ->values();
