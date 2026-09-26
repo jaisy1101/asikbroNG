@@ -45,14 +45,13 @@
             <div id="content">
 
                 {{-- Topbar --}}
-                @include('components.topbar')
-
+                <div class="asikbro-topbar-wrapper">
+                    @include('components.topbar')
+                </div>
 
                 {{-- Isi halaman --}}
                 <div class="container-fluid asikbro-content">
-
                     @yield('content')
-
                 </div>
 
             </div>

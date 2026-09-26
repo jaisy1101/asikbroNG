@@ -211,7 +211,7 @@
 
     <div class="card-body">
 
-        <div class="table-responsive">
+        <div class="table-responsive table-scroll">
 
             <table class="table table-bordered table-hover table-data-large">
 
