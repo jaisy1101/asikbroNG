@@ -638,52 +638,82 @@ textarea,
 
 
 
+/*Header Freeze*/
 
-/* semua header tabel */
+/* area scroll */
+.table-scroll {
+    max-height: 600px;
+    overflow: auto;
+}
+
+
+/* SEMUA HEADER */
 .table-scroll thead th {
 
     position: sticky;
-    background: #004765;
+
+    background-color: #004765 !important;
+
     color: white;
 
-    z-index: 20;
+    z-index: 100;
+
+    height: 38px;
+    vertical-align: middle;
 
 }
 
 
-/* header level paling atas */
+/* header level 1 */
 .table-scroll thead tr:nth-child(1) th {
 
     top: 0;
 
+    z-index: 110;
+
 }
 
 
-/* header level kedua */
+/* header level 2 */
 .table-scroll thead tr:nth-child(2) th {
 
-    top: 30px;
+    top: 38px;
+
+    z-index: 110;
 
 }
 
 
-/* header level ketiga */
+/* header level 3 */
 .table-scroll thead tr:nth-child(3) th {
 
-    top: 60px;
+    top: 76px;
+
+    z-index: 110;
 
 }
 
 
 
-/* freeze kolom kategori */
-.table-scroll th:first-child,
-.table-scroll td:first-child {
+/* isi tabel */
+.table-scroll tbody td {
+
+    position: relative;
+
+    z-index: 1;
+
+}
+
+
+
+/* Freeze kategori */
+.table-scroll tbody td:first-child {
 
     position: sticky;
+
     left: 0;
 
-    z-index: 30;
+    z-index: 50;
 
     background: white;
 
@@ -694,31 +724,21 @@ textarea,
 /* pojok kiri atas */
 .table-scroll thead th:first-child {
 
-    z-index: 50;
-    background:#004765;
-
-}
-
-.table-scroll thead {
-
-    background-color: #004765;
-
-}
-
-
-.table-scroll thead th::after {
-
-    content: "";
-
-    position: absolute;
-
     left: 0;
-    right: 0;
-    bottom: 0;
-    top: 0;
 
-    background: #004765;
+    z-index: 200;
 
-    z-index: -1;
+    background-color: #004765 !important;
+
+}
+
+
+
+/* hilangkan efek transparansi border bootstrap */
+.table-scroll table {
+
+    border-collapse: separate !important;
+
+    border-spacing: 0;
 
 }
