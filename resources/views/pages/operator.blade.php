@@ -413,7 +413,7 @@
                         <label class="font-weight-bold text-gray-700 mb-0"
                             style="font-size:18px;">
 
-                            Quartal Terakhir
+                            Quartal
 
                         </label>
 
@@ -479,7 +479,7 @@
                         <label class="font-weight-bold text-gray-700 mb-0"
                             style="font-size:18px;">
 
-                            Putaran Terakhir
+                            Putaran Berikutnya
 
                         </label>
 
@@ -499,14 +499,13 @@
                                     font-size:18px;
                                 ">
 
-                            <option value="0">Putaran 0</option>
-                            <option value="1">Putaran 1</option>
-                            <option value="2">Putaran 2</option>
-                            <option value="3">Putaran 3</option>
-                            <option value="4">Putaran 4</option>
-                            <option value="5">Putaran 5</option>
-                            <option value="6">Putaran 6</option>
-                            <option value="7">Putaran 7</option>
+                            @for($i = 0; $i <= 10; $i++)
+
+                                <option value="{{ $i }}">
+                                    Putaran {{ $i }}
+                                </option>
+
+                            @endfor
 
                         </select>
 
@@ -863,7 +862,7 @@ function ambilStatusRekonsiliasi(){
         if(data.putaran_terakhir){
 
             document.getElementById('putaran').value =
-                data.putaran_terakhir.nomor;
+                data.putaran_terakhir.nomor + 1;
 
         }
 
