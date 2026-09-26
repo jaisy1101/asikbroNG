@@ -170,13 +170,13 @@ axios.get('/api/rekonsiliasi/status')
 
 
     putaranId =
-        response.data.putaran_aktif.id;
+        response.data.putaran_terakhir.id;
 
 
 
     document.getElementById('infoPutaran').innerHTML =
         'PUTARAN ' +
-        response.data.putaran_aktif.nomor;
+        response.data.putaran_terakhir.nomor;
 
 
 

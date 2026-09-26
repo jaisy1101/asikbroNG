@@ -191,11 +191,9 @@
 <script>
 
 let fileInput = document.getElementById('fileExcel');
-
 let btnUpload = document.getElementById('btnUpload');
 
-
-// buka pilih file
+// buka explorer
 btnUpload.addEventListener('click', function(){
 
     fileInput.click();
@@ -203,7 +201,7 @@ btnUpload.addEventListener('click', function(){
 });
 
 
-// setelah pilih file
+// ketika file dipilih
 fileInput.addEventListener('change', function(){
 
     let file = this.files[0];
@@ -211,7 +209,53 @@ fileInput.addEventListener('change', function(){
 
     if(file){
 
-        uploadFile(file);
+
+        Swal.fire({
+
+            title: 'Konfirmasi Upload',
+
+            html: `
+                
+                File yang dipilih:
+
+                <br>
+
+                <b>${file.name}</b>
+
+                <br><br>
+
+                Ukuran:
+                ${(file.size / 1024 / 1024).toFixed(2)} MB
+
+            `,
+
+            icon: 'question',
+
+            showCancelButton: true,
+
+            confirmButtonText: 'Upload',
+
+            cancelButtonText: 'Batal'
+
+
+        })
+        .then((result)=>{
+
+
+            if(result.isConfirmed){
+
+                uploadFile(file);
+
+            }
+            else{
+
+                fileInput.value = "";
+
+            }
+
+
+        });
+
 
     }
 
@@ -235,32 +279,112 @@ function uploadFile(file){
 
 
 
+    Swal.fire({
+
+        title: 'Mengunggah file...',
+
+        html: `
+            <div id="progress-text">
+                0%
+            </div>
+
+            <div class="progress mt-3">
+
+                <div id="upload-progress"
+                    class="progress-bar"
+                    role="progressbar"
+                    style="width:0%">
+                </div>
+
+            </div>
+        `,
+
+        allowOutsideClick: false,
+
+        showConfirmButton: false
+
+    });
+
+
+
     axios.post('/api/submission/upload', formData, {
 
+
         headers: {
+
             'Content-Type': 'multipart/form-data'
+
+        },
+
+
+        onUploadProgress: function(progressEvent){
+
+
+            let percent = Math.round(
+                (progressEvent.loaded * 100) / progressEvent.total
+            );
+
+
+            let mbLoaded = (
+                progressEvent.loaded / 1024 / 1024
+            ).toFixed(2);
+
+
+            let mbTotal = (
+                progressEvent.total / 1024 / 1024
+            ).toFixed(2);
+
+
+
+            document.getElementById('upload-progress')
+            .style.width = percent + '%';
+
+
+
+            document.getElementById('progress-text')
+            .innerHTML = `
+
+                ${percent}% 
+
+                <br>
+
+                ${mbLoaded} MB / ${mbTotal} MB
+
+            `;
+
+
         }
 
+
     })
+
     .then(response => {
 
 
-        alert(
-            response.data.message ?? 
-            'Upload berhasil'
+        Swal.close();
+
+
+        notifSukses(
+            response.data.message 
+            ?? 'Upload berhasil'
         );
 
 
     })
+
+
     .catch(error => {
+
+
+        Swal.close();
 
 
         console.error(error);
 
 
-        alert(
-            error.response?.data?.message ??
-            'Upload gagal'
+        notifError(
+            error.response?.data?.message
+            ?? 'Upload gagal'
         );
 
 

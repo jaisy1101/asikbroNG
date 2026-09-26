@@ -8,10 +8,6 @@
     <ol class="breadcrumb bg-white shadow-sm">
 
         <li class="breadcrumb-item">
-            <a href="/">Beranda</a>
-        </li>
-
-        <li class="breadcrumb-item">
             Pengeluaran
         </li>
 

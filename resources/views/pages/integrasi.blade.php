@@ -345,7 +345,7 @@ axios.get('/api/rekonsiliasi/status')
 
 
     putaranId =
-        response.data.putaran_aktif.id;
+        response.data.putaran_terakhir.id;
 
 
 
@@ -363,6 +363,25 @@ axios.get('/api/rekonsiliasi/status')
     );
 
 });
+
+function formatAngka(nilai){
+
+    if(nilai === null || nilai === undefined || nilai === ''){
+        return '-';
+    }
+
+
+    if(isNaN(nilai)){
+        return nilai;
+    }
+
+
+    return Number(nilai).toLocaleString('id-ID', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+
+}
 
 function loadIntegrasi(wilayahId)
 {
@@ -626,19 +645,18 @@ function renderDetail(kode,data)
                 TW ${item.periode.triwulan}
             </td>
 
-
             <td>
-                ${item.total_pengeluaran}
+                ${formatAngka(item.total_pengeluaran)}
             </td>
 
 
             <td>
-                ${item.total_lapus}
+                ${formatAngka(item.total_lapus)}
             </td>
 
 
             <td>
-                ${item.selisih}
+                ${formatAngka(item.selisih)}
             </td>
 
 

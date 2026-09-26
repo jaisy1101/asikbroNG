@@ -8,10 +8,6 @@
     <ol class="breadcrumb bg-white shadow-sm">
 
         <li class="breadcrumb-item">
-            <a href="/">Beranda</a>
-        </li>
-
-        <li class="breadcrumb-item">
             Pengeluaran
         </li>
 
@@ -439,7 +435,7 @@ function buatHeaderTabel(tahunAkhir){
     `;
 
 
-    for(let tahun = 2010; tahun <= tahunAkhir; tahun++){
+    for(let tahun = 2018; tahun <= tahunAkhir; tahun++){
 
         html += `
 
@@ -461,7 +457,7 @@ function buatHeaderTabel(tahunAkhir){
     `;
 
 
-    for(let tahun = 2010; tahun <= tahunAkhir; tahun++){
+    for(let tahun = 2018; tahun <= tahunAkhir; tahun++){
 
         html += `
 
@@ -537,7 +533,7 @@ function ambilTabelPdrb(tahunAkhir){
             let periode = [];
 
 
-            for(let tahun = 2010; tahun <= tahunAkhir; tahun++){
+            for(let tahun = 2018; tahun <= tahunAkhir; tahun++){
 
                 periode.push(`${tahun} Q1`);
                 periode.push(`${tahun} Q2`);
