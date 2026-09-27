@@ -240,7 +240,6 @@ class PengeluaranImportService
 
 
 
-
                 $rows[] = [
 
                     'submission_id' => $submission ? $submission->id : null,

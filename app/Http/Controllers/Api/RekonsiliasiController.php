@@ -60,6 +60,32 @@ class RekonsiliasiController extends Controller
                 ->latest('id')
                 ->first();
 
+
+            if ($rekonsiliasiAktif) {
+
+
+                $putaranAktif = Putaran::where(
+                    'rekonsiliasi_id',
+                    $rekonsiliasiAktif->id
+                )
+                ->where('status', 'berlangsung')
+                ->first();
+
+
+                if ($putaranAktif) {
+
+                    DB::rollBack();
+
+                    return response()->json([
+                        'message' => 'Masih ada putaran yang sedang berlangsung',
+                        'putaran_id' => $putaranAktif->id,
+                        'nomor_putaran' => $putaranAktif->nomor
+                    ], 400);
+
+                }
+
+            }
+
             if ($rekonsiliasiAktif) {
 
                 $rekonsiliasiAktif->update([
