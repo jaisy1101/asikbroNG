@@ -470,7 +470,7 @@ textarea,
 =============================== */
 
 
-.table-data-large tbody tr.total-aman td {
+.table-data-large tbody tr.level-0 td.status-aman {
 
     background-color: #d1e7dd !important;
 
@@ -480,6 +480,18 @@ textarea,
 
 }
 
+.table-data-large tbody tr.level-0 td.status-peringatan {
+
+    background-color: #fff3cd !important;
+
+}
+
+
+.table-data-large tbody tr.level-0 td.status-ekstrem {
+
+    background-color: #f8d7da !important;
+
+}
 
 .table-data-large tbody tr.total-peringatan td,
 .table-data-large tbody tr.total-ekstrem td {
@@ -507,6 +519,40 @@ textarea,
 .table-data-large tbody tr.total-ekstrem .kolom-kategori {
 
     background-color: #f8d7da !important;
+
+}
+
+/*WARNA DISKREPANSI*/
+
+
+.diskrepansi-cell.status-peringatan {
+
+    background-color: #fff3cd !important;
+
+    font-weight:700;
+
+}
+
+
+.diskrepansi-cell.status-ekstrem {
+
+    background-color: #f8d7da !important;
+
+    font-weight:700;
+
+}
+
+
+.status-peringatan {
+
+    background-color:#fff3cd !important;
+
+}
+
+
+.status-ekstrem {
+
+    background-color:#f8d7da !important;
 
 }
 
@@ -759,3 +805,4 @@ textarea,
     border-spacing: 0;
 
 }
+

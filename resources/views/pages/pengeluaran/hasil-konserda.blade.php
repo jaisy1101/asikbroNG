@@ -605,156 +605,93 @@ axios.get(
     // LOOP KATEGORI
     // ===============================
 
-    Object.values(kategoriGroup).forEach(items => {
+        function getStatusClass(status)
+        {
+            if(status === 'aman'){
+                return 'status-aman';
+            }
+
+            if(status === 'peringatan'){
+                return 'status-peringatan';
+            }
+
+            if(status === 'ekstrem'){
+                return 'status-ekstrem';
+            }
+
+            return '';
+        }
+
+        function getStatusTotalClass(nilai)
+        {
+            if(nilai < 2){
+                return 'status-aman';
+            }
+
+            if(nilai < 5){
+                return 'status-peringatan';
+            }
+
+            return 'status-ekstrem';
+        }
+
+        Object.values(kategoriGroup).forEach(items => {
 
 
-        let kategori = items[0].kategori;
+            let kategori = items[0].kategori;
+
+            let statusKategori = 'aman';
 
 
-        html += `
+            if(kategori){
 
-        <tr class="level-${kategori?.level ?? 0} ${!kategori ? 'total-' + items[0].status : 'status-' + items[0].status}">
+                items.forEach(item => {
 
+                    if(item.status === 'ekstrem'){
 
-            <td class="kolom-kategori"
-                style="
-                    padding-left:${(kategori?.level ?? 0) * 30}px;
-                    font-weight:${kategori?.level == 1 || !kategori ? 'bold' : 'normal'};
-                ">
-                ${kategori?.kode ?? ''}
-                ${kategori?.nama ?? 'TOTAL'}
-            </td>
+                        statusKategori = 'ekstrem';
 
-        `;
+                    }
+                    else if(
+                        item.status === 'peringatan'
+                        &&
+                        statusKategori !== 'ekstrem'
+                    ){
 
+                        statusKategori = 'peringatan';
 
+                    }
 
-        // ===============================
-        // DISKREPANSI
-        // ===============================
+                });
 
-        periode.forEach(p => {
-
-
-            let item = items.find(i => 
-                i.periode_id == p.id
-            );
-
-
-            html += `
-
-            <td>
-                 
-                    ${formatAngka(item 
-                        ? item.diskrepansi_persen 
-                        : '-'
-                    )}
-            </td>
-
-            `;
-
-
-        });
-
-
-
-
-        // ===============================
-        // SELISIH
-        // ===============================
-
-        periode.forEach(p => {
-
-
-            let item = items.find(i => 
-                i.periode_id == p.id
-            );
+            }
 
 
             html += `
 
-            <td>
-                ${formatAngka(item 
-                    ? item.selisih 
-                    : '-'
-                )}
-            </td>
+            <tr class="level-${kategori?.level ?? 0}">
+                <td class="kolom-kategori ${
+                    kategori 
+                    ? getStatusClass(statusKategori)
+                    : getStatusTotalClass(
+                        items[0].diskrepansi_persen
+                    )
+                }"
+                    style="
+                        padding-left:${(kategori?.level ?? 0) * 30}px;
+                        font-weight:${kategori?.level == 1 || !kategori ? 'bold' : 'normal'};
+                    ">
+                    ${kategori?.kode ?? ''}
+                    ${kategori?.nama ?? 'TOTAL'}
+                </td>
 
             `;
 
 
-        });
 
-
-
-
-
-        // ===============================
-        // PROVINSI
-        // ===============================
-
-        periode.forEach(p => {
-
-
-            let item = items.find(i => 
-                i.periode_id == p.id
-            );
-
-
-            html += `
-
-            <td>
-                ${formatAngka(item 
-                    ? item.nilai_provinsi
-                    : '-'
-                )}
-            </td>
-
-            `;
-
-
-        });
-
-
-
-
-
-        // ===============================
-        // KAB/KOTA TOTAL
-        // ===============================
-
-        periode.forEach(p => {
-
-
-            let item = items.find(i => 
-                i.periode_id == p.id
-            );
-
-
-            html += `
-
-            <td>
-                ${formatAngka(item 
-                    ? item.nilai_agregasi_kabkota
-                    : '-'
-                )}
-            </td>
-
-            `;
-
-
-        });
-
-
-
-
-
-        // ===============================
-        // DETAIL KAB/KOTA
-        // ===============================
-
-        kabkotaList.forEach(wilayah => {
-
+            // ===============================
+            // DISKREPANSI
+            // ===============================
 
             periode.forEach(p => {
 
@@ -764,19 +701,19 @@ axios.get(
                 );
 
 
-                let detail = item?.detail.find(d =>
-                    d.wilayah_id == wilayah.id
-                );
-
-
-
                 html += `
 
-                <td>
-                    ${detail
-                        ? detail.nilai
+                <td class="diskrepansi-cell ${
+                    !kategori
+                    ? getStatusTotalClass(
+                        item?.diskrepansi_persen ?? 0
+                    )
+                    : getStatusClass(item?.status)
+                }">
+                    ${formatAngka(item 
+                        ? item.diskrepansi_persen 
                         : '-'
-                    }
+                    )}
                 </td>
 
                 `;
@@ -785,19 +722,150 @@ axios.get(
             });
 
 
+
+
+            // ===============================
+            // SELISIH
+            // ===============================
+
+            periode.forEach(p => {
+
+
+                let item = items.find(i => 
+                    i.periode_id == p.id
+                );
+
+
+                html += `
+
+                <td class="${getStatusClass(item?.status)}">
+
+                    ${formatAngka(
+                        item 
+                        ? item.selisih 
+                        : '-'
+                    )}
+
+                </td>
+
+                `;
+
+
+            });
+
+
+
+
+
+            // ===============================
+            // PROVINSI
+            // ===============================
+
+            periode.forEach(p => {
+
+
+                let item = items.find(i => 
+                    i.periode_id == p.id
+                );
+
+
+                html += `
+
+                <td class="${getStatusClass(item?.status)}">
+                    ${formatAngka(item 
+                        ? item.nilai_provinsi
+                        : '-'
+                    )}
+                </td>
+
+                `;
+
+
+            });
+
+
+
+
+
+            // ===============================
+            // KAB/KOTA TOTAL
+            // ===============================
+
+            periode.forEach(p => {
+
+
+                let item = items.find(i => 
+                    i.periode_id == p.id
+                );
+
+
+                html += `
+
+                <td class="${getStatusClass(item?.status)}">
+                    ${formatAngka(item 
+                        ? item.nilai_agregasi_kabkota
+                        : '-'
+                    )}
+                </td>
+
+                `;
+
+
+            });
+
+
+
+
+
+            // ===============================
+            // DETAIL KAB/KOTA
+            // ===============================
+
+            kabkotaList.forEach(wilayah => {
+
+
+                periode.forEach(p => {
+
+
+                    let item = items.find(i => 
+                        i.periode_id == p.id
+                    );
+
+
+                    let detail = item?.detail.find(d =>
+                        d.wilayah_id == wilayah.id
+                    );
+
+
+
+                    html += `
+
+                    <td class="${getStatusClass(item?.status)}">
+                        ${detail
+                            ? detail.nilai
+                            : '-'
+                        }
+                    </td>
+
+                    `;
+
+
+                });
+
+
+            });
+
+
+
+            html += `
+
+            </tr>
+
+            `;
+
+
+
         });
-
-
-
-        html += `
-
-        </tr>
-
-        `;
-
-
-
-    });
 
 
 
