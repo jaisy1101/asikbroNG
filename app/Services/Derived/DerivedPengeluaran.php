@@ -156,13 +156,15 @@ class DerivedPengeluaran
 
 
             if (!$sebelumnya || $sebelumnya->nilai == 0) {
-                continue;
+
+                $qtq = 0;
+
+            } else {
+
+                $qtq =
+                    (($item->nilai / $sebelumnya->nilai) * 100) - 100;
+
             }
-
-
-            $qtq =
-                (($item->nilai / $sebelumnya->nilai) * 100) - 100;
-
 
 
             DataPdrbPengeluaran::create([
@@ -250,15 +252,15 @@ class DerivedPengeluaran
 
 
             if (!$tahunLalu || $tahunLalu->nilai == 0) {
-                continue;
+
+                $yty = 0;
+
+            } else {
+
+                $yty =
+                    (($item->nilai / $tahunLalu->nilai) * 100) - 100;
+
             }
-
-
-
-            $yty =
-                (($item->nilai / $tahunLalu->nilai) * 100) - 100;
-
-
 
             DataPdrbPengeluaran::create([
 
@@ -366,13 +368,15 @@ class DerivedPengeluaran
 
 
             if ($totalLalu == 0) {
-                continue;
+
+                $ctc = 0;
+
+            } else {
+
+                $ctc =
+                    (($totalSekarang / $totalLalu) * 100) - 100;
+
             }
-
-
-            $ctc =
-                (($totalSekarang / $totalLalu) * 100) - 100;
-
 
 
             DataPdrbPengeluaran::create([
@@ -533,14 +537,15 @@ class DerivedPengeluaran
 
 
             if (!$sebelumnya || $sebelumnya->nilai == 0) {
-                continue;
+
+                $qtq = 0;
+
+            } else {
+
+                $qtq =
+                    (($item->nilai / $sebelumnya->nilai) * 100) - 100;
+
             }
-
-
-
-            $qtq =
-                (($item->nilai / $sebelumnya->nilai) * 100) - 100;
-
 
 
             DataPdrbPengeluaran::create([
@@ -614,15 +619,15 @@ class DerivedPengeluaran
 
 
             if (!$tahunLalu || $tahunLalu->nilai == 0) {
-                continue;
+
+                $yty = 0;
+
+            } else {
+
+                $yty =
+                    (($item->nilai / $tahunLalu->nilai) * 100) - 100;
+
             }
-
-
-
-            $yty =
-                (($item->nilai / $tahunLalu->nilai) * 100) - 100;
-
-
 
             DataPdrbPengeluaran::create([
 
