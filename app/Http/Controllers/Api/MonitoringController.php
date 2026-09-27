@@ -81,13 +81,25 @@ class MonitoringController extends Controller
 
             $adhb = $integrasi
                 ->where('jenis_tabel_id',1)
-                ->first();
+                ->contains(function($item){
+
+                    return $item->status == 'selisih';
+
+                })
+                ? (object)['status'=>'selisih']
+                : (object)['status'=>'sesuai'];
 
 
 
             $adhk = $integrasi
                 ->where('jenis_tabel_id',2)
-                ->first();
+                ->contains(function($item){
+
+                    return $item->status == 'selisih';
+
+                })
+                ? (object)['status'=>'selisih']
+                : (object)['status'=>'sesuai'];
 
 
 
