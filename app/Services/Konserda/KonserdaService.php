@@ -197,9 +197,8 @@ class KonserdaService
 
                         'batas_toleransi' => 2,
 
-                        'status' => $this->cekStatus(
-                            $diskrepansiTotal,
-                            2
+                        'status' => $this->cekStatusTotal(
+                            $diskrepansiTotal
                         ),
 
                     ]);
@@ -308,9 +307,8 @@ class KonserdaService
 
                             'batas_toleransi' => 5,
 
-                            'status' => $this->cekStatus(
-                                $diskrepansi,
-                                5
+                            'status' => $this->cekStatusKategori(
+                                $diskrepansi
                             ),
 
                         ]);
@@ -352,17 +350,40 @@ class KonserdaService
 
                         
 
-    private function cekStatus(float $nilai, float $batas)
+    private function cekStatusTotal(float $nilai)
     {
 
-        if ($nilai <= $batas) {
+        if ($nilai < 2) {
 
             return 'aman';
 
         }
 
 
-        if ($nilai <= ($batas * 2.5)) {
+        if ($nilai < 10) {
+
+            return 'peringatan';
+
+        }
+
+
+        return 'ekstrem';
+
+    }
+
+
+
+    private function cekStatusKategori(float $nilai)
+    {
+
+        if ($nilai < 5) {
+
+            return 'aman';
+
+        }
+
+
+        if ($nilai < 10) {
 
             return 'peringatan';
 
