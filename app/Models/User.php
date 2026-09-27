@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -11,19 +10,29 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Wilayah;
+use App\Models\Role;
 
-#[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'remember_token'])]
+
+#[Fillable([
+    'username',
+    'name',
+    'email',
+    'password',
+    'role_id',
+    'wilayah_id'
+])]
+
+#[Hidden([
+    'password',
+    'remember_token'
+])]
+
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
+
     use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
+
     protected function casts(): array
     {
         return [
@@ -32,8 +41,22 @@ class User extends Authenticatable
         ];
     }
 
+
     public function wilayah()
     {
-        return $this->belongsTo(Wilayah::class, 'wilayah_id');
+        return $this->belongsTo(
+            Wilayah::class,
+            'wilayah_id'
+        );
     }
+
+
+    public function role()
+    {
+        return $this->belongsTo(
+            Role::class,
+            'role_id'
+        );
+    }
+
 }

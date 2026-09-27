@@ -12,32 +12,13 @@ use App\Http\Controllers\Api\IntegrasiPdrbController;
 use App\Http\Controllers\Api\KonserdaController;
 use App\Http\Controllers\Api\MonitoringController;
 use App\Http\Controllers\Api\PengumumanController;
+use App\Http\Controllers\Api\AuthController;
 
 
-Route::post('/login', function (Request $request) {
-
-    $request->validate([
-        'email' => 'required|email',
-        'password' => 'required',
-    ]);
-
-    $user = \App\Models\User::where('email', $request->email)->first();
-
-    if (!$user || !Hash::check($request->password, $user->password)) {
-        return response()->json([
-            'message' => 'Email atau password salah'
-        ], 401);
-    }
-
-    $token = $user->createToken('asikbro-token')->plainTextToken;
-
-    return response()->json([
-        'message' => 'Login berhasil',
-        'token' => $token,
-        'user' => $user
-    ]);
-});
-
+Route::post(
+    '/login',
+    [AuthController::class, 'login']
+);
 
 Route::middleware('auth:sanctum')->group(function () {
 
