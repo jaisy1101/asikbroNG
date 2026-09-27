@@ -60,6 +60,11 @@ Route::middleware('auth:sanctum')->group(function () {
         [SubmissionDataController::class, 'show']
     );
 
+    Route::get(
+        '/submission-file/{id}/download',
+        [SubmissionController::class,'downloadFile']
+    );
+
     Route::post(
         '/rekonsiliasi/buka-quartal',
         [RekonsiliasiController::class, 'bukaQuartalBaru']

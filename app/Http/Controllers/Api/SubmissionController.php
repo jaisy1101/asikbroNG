@@ -336,6 +336,19 @@ class SubmissionController extends Controller
         }
     }
 
+    public function downloadFile($id)
+    {
+
+        $file = SubmissionFile::findOrFail($id);
+
+
+        return Storage::download(
+            $file->path_file,
+            $file->nama_file
+        );
+
+    }
+
     private function updateMasterLapanganUsaha($submission)
     {
         $data = $submission

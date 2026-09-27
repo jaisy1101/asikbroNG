@@ -120,6 +120,7 @@
                         <th>Status</th>
                         <th>Tanggal Upload</th>
                         <th>Waktu</th>
+                        <th>File</th>
                         <th>ADHB</th>
                         <th>ADHK</th>
 
@@ -302,6 +303,34 @@ function loadMonitoring()
 
                 <td>
                     ${item.waktu_upload ?? '-'}
+                </td>
+
+                <td>
+
+                    ${
+                        item.file && item.file.length > 0
+
+                        ?
+
+                        `
+
+                        <a href="/api/submission-file/${item.file[0].id}/download"
+                        class="btn btn-sm btn-success">
+
+                            <i class="fas fa-download"></i>
+
+                            Download
+
+                        </a>
+
+                        `
+
+                        :
+
+                        '-'
+
+                    }
+
                 </td>
 
 

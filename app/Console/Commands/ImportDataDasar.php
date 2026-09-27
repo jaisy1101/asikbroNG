@@ -28,7 +28,8 @@ class ImportDataDasar extends Command
         |--------------------------------------------------------------------------
         | DATA DASAR LAPANGAN USAHA
         |--------------------------------------------------------------------------
-        
+        */
+
         $folderLapangan = storage_path('app/data-dasar/Lapangan_Usaha');
 
         $files = File::files($folderLapangan);
@@ -40,7 +41,7 @@ class ImportDataDasar extends Command
             if (!str_contains($file->getFilename(), '7306')) {
                 continue;
             }
-            
+            */
 
             
             $namaFile = $file->getFilename();
@@ -81,9 +82,6 @@ class ImportDataDasar extends Command
                 null,
                 $wilayah->id
             );
-
-            gc_collect_cycles();
-            unset($files);
             gc_collect_cycles();
 
         }
@@ -93,7 +91,7 @@ class ImportDataDasar extends Command
         |--------------------------------------------------------------------------
         | DATA DASAR PENGELUARAN
         |--------------------------------------------------------------------------
-        
+        */
         
         $folderPengeluaran = storage_path('app/data-dasar/Pengeluaran');
 
@@ -107,7 +105,7 @@ class ImportDataDasar extends Command
             if (!str_contains($file->getFilename(), '7306')) {
                 continue;
             }
-            
+            */
             
             $namaFile = $file->getFilename();
 
@@ -147,9 +145,6 @@ class ImportDataDasar extends Command
                 $wilayah->id
             );
 
-
-            gc_collect_cycles();
-            unset($files);
             gc_collect_cycles();
 
         }
@@ -158,7 +153,7 @@ class ImportDataDasar extends Command
         |--------------------------------------------------------------------------
         | DATA DASAR PROVINSI
         |--------------------------------------------------------------------------
-        */
+        
 
         $folderProvinsi = storage_path('app/data-dasar/Provinsi');
 
@@ -236,7 +231,7 @@ class ImportDataDasar extends Command
             gc_collect_cycles();
 
         }
-        
+        */
 
         $this->info("Import data dasar selesai.");
 

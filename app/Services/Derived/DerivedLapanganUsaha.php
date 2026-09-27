@@ -76,7 +76,7 @@ class DerivedLapanganUsaha
 
                     'kategori_lapus_id' => $item->kategori_lapus_id,
 
-                    'nilai' => round($nilaiDistribusi,2),
+                    'nilai' => round($nilaiDistribusi,6),
 
                     'tipe_data' => 'derived'
 
@@ -178,7 +178,7 @@ class DerivedLapanganUsaha
 
                 'kategori_lapus_id' => $item->kategori_lapus_id,
 
-                'nilai' => round($qtq,2),
+                'nilai' => round($qtq,6),
 
                 'tipe_data' => 'derived'
 
@@ -273,7 +273,7 @@ class DerivedLapanganUsaha
 
                 'kategori_lapus_id' => $item->kategori_lapus_id,
 
-                'nilai' => round($yty,2),
+                'nilai' => round($yty,6),
 
                 'tipe_data' => 'derived'
 
@@ -389,7 +389,7 @@ class DerivedLapanganUsaha
 
                 'kategori_lapus_id' => $kategoriId,
 
-                'nilai' => round($ctc,2),
+                'nilai' => round($ctc,6),
 
                 'tipe_data' => 'derived'
 
@@ -476,7 +476,7 @@ class DerivedLapanganUsaha
 
                 'kategori_lapus_id' => $kategoriId,
 
-                'nilai' => round($implisit,2),
+                'nilai' => round($implisit,6),
 
                 'tipe_data' => 'derived'
 
@@ -558,7 +558,7 @@ class DerivedLapanganUsaha
 
                 'kategori_lapus_id' => $kategoriId,
 
-                'nilai' => round($qtq,2),
+                'nilai' => round($qtq,6),
 
                 'tipe_data' => 'derived'
 
@@ -626,7 +626,7 @@ class DerivedLapanganUsaha
                     (($item->nilai / $tahunLalu->nilai) * 100) - 100;
 
             }
-            
+
 
             DataPdrbLapanganUsaha::create([
 
@@ -640,7 +640,7 @@ class DerivedLapanganUsaha
 
                 'kategori_lapus_id' => $kategoriId,
 
-                'nilai' => round($yty,2),
+                'nilai' => round($yty,6),
 
                 'tipe_data' => 'derived'
 

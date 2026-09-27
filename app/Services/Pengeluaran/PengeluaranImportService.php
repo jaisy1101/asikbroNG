@@ -232,8 +232,7 @@ class PengeluaranImportService
                     ->getCalculatedValue();
 
 
-
-                if ($nilai === null || $nilai === '') {
+                if ($nilai === null || $nilai === '' || !is_numeric($nilai)) {
 
                     $nilai = 0;
 

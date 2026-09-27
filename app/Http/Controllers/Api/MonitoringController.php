@@ -39,7 +39,8 @@ class MonitoringController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $submission = Submission::where(
+            $submission = Submission::with('files')
+            ->where(
                 'putaran_id',
                 $putaranId
             )
@@ -115,6 +116,16 @@ class MonitoringController extends Controller
                         'H:i',
                         strtotime($submission->submitted_at)
                     )
+                    : null,
+
+                'file' => $submission && $submission->files->count()
+                    ? [
+
+                        'id' => $submission->files->first()->id,
+
+                        'nama_file' => $submission->files->first()->nama_file,
+
+                    ]
                     : null,
 
 

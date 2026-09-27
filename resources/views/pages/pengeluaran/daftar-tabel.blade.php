@@ -191,7 +191,8 @@
 
             <!-- Kanan -->
             <div class="mt-2 mt-md-0">
-
+                <!--
+                    //ini akan terbuka saat user bisa mengedit langsung di website
                 <button class="btn btn-success">
 
                     <i class="fas fa-download mr-2"></i>
@@ -199,7 +200,7 @@
                     Unduh Tabel
 
                 </button>
-
+                -->
             </div>
 
         </div>
