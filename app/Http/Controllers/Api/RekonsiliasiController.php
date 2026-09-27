@@ -141,9 +141,9 @@ class RekonsiliasiController extends Controller
 
             foreach($wilayahList as $wilayah){
 
-                $integrasi->generate(
+                    $integrasi->generate(
 
-                    $rekonsiliasi->id,
+                    $putaran->id,
 
                     $wilayah->id
 
