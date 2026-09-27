@@ -119,7 +119,7 @@
 
             <!-- Kanan -->
             <div class="mt-2 mt-md-0">
-
+                {{-- NANTI SAAT STRUKTUR ANTAR DALAM DAN IMPLISIT JADI 
                 <button class="btn btn-success">
 
                     <i class="fas fa-download mr-2"></i>
@@ -127,6 +127,7 @@
                     Unduh Tabel
 
                 </button>
+                --}}
 
             </div>
 

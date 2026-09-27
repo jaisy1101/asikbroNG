@@ -308,14 +308,15 @@ function loadMonitoring()
                 <td>
 
                     ${
-                        item.file && item.file.length > 0
+                        item.file
 
                         ?
 
                         `
 
-                        <a href="/api/submission-file/${item.file[0].id}/download"
-                        class="btn btn-sm btn-success">
+                        <a href="javascript:void(0)"
+                        class="btn btn-sm btn-success"
+                        onclick="konfirmasiDownload('${item.file.id}', '${item.file.nama_file}')">
 
                             <i class="fas fa-download"></i>
 
@@ -370,6 +371,61 @@ function loadMonitoring()
 
 }
 
+function konfirmasiDownload(id, namaFile)
+{
+
+
+    Swal.fire({
+
+
+        title: 'Konfirmasi Download',
+
+
+        html: `
+
+            File yang akan didownload:
+
+            <br>
+
+            <b>${namaFile}</b>
+
+            <br><br>
+
+            Apakah Anda yakin ingin mendownload file ini?
+
+        `,
+
+
+        icon: 'question',
+
+
+        showCancelButton: true,
+
+
+        confirmButtonText: 'Download',
+
+
+        cancelButtonText: 'Batal'
+
+
+    })
+    .then((result)=>{
+
+
+        if(result.isConfirmed){
+
+
+            window.location.href =
+                `/api/submission-file/${id}/download`;
+
+
+        }
+
+
+    });
+
+
+}
 
 function badgeIntegrasi(status)
 {
