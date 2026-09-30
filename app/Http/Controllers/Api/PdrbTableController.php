@@ -8,6 +8,7 @@ use App\Models\Rekonsiliasi;
 use App\Models\Periode;
 use App\Models\DataPdrbLapanganUsaha;
 use App\Models\DataPdrbPengeluaran;
+use Illuminate\Support\Facades\Auth;
 
 class PdrbTableController extends Controller
 {
@@ -127,6 +128,10 @@ class PdrbTableController extends Controller
 
     public function showLapanganUsaha($wilayah_id, $jenis_tabel_id)
     {
+        if (Auth::check() && Auth::user()->role_id == 2) {
+            $wilayah_id = Auth::user()->wilayah_id;
+        }
+
         $rekonsiliasi = Rekonsiliasi::where('status', 'berlangsung')
             ->latest('id')
             ->first();
@@ -215,6 +220,9 @@ class PdrbTableController extends Controller
 
     public function showPengeluaran($wilayah_id, $jenis_tabel_id)
     {
+        if (Auth::check() && Auth::user()->role_id == 2) {
+            $wilayah_id = Auth::user()->wilayah_id;
+        }
         $rekonsiliasi = Rekonsiliasi::where('status', 'berlangsung')
             ->latest('id')
             ->first();

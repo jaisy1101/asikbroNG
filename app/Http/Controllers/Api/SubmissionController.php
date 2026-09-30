@@ -19,6 +19,7 @@ use App\Models\DataPdrbPengeluaran;
 use App\Jobs\GenerateDerivedLapanganUsahaJob;
 use App\Jobs\GenerateDerivedPengeluaranJob;
 use App\Services\Integrasi\IntegrasiPdrbService;
+use Illuminate\Support\Facades\Auth;
 
 class SubmissionController extends Controller
 {
@@ -37,10 +38,13 @@ class SubmissionController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | SEMENTARA UNTUK TESTING
+        | Ambil wilayah berdasarkan user login
         |--------------------------------------------------------------------------
         */
-        $wilayahId = 7;
+
+        $user = Auth::user();
+
+        $wilayahId = $user->wilayah_id;
 
 
         $rekonsiliasi = Rekonsiliasi::where('status', 'berlangsung')
@@ -64,7 +68,7 @@ class SubmissionController extends Controller
 
 
         if (!$putaran) {
-
+            
             return response()->json([
                 'message' => 'Tidak ada putaran yang sedang berlangsung',
             ], 404);
@@ -108,7 +112,7 @@ class SubmissionController extends Controller
 
                 'putaran_id' => $putaran->id,
 
-                'user_id' => 9,
+                'user_id' => $user->id,
 
                 'wilayah_id' => $wilayahId,
 
@@ -339,7 +343,23 @@ class SubmissionController extends Controller
     public function downloadFile($id)
     {
 
-        $file = SubmissionFile::findOrFail($id);
+        $file = SubmissionFile::with('submission')
+            ->findOrFail($id);
+
+
+        $user = Auth::user();
+
+
+        if(
+            $user->role_id == 2 &&
+            $file->submission->wilayah_id != $user->wilayah_id
+        ){
+
+            return response()->json([
+                'message'=>'Akses ditolak'
+            ],403);
+
+        }
 
 
         return Storage::download(

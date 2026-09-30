@@ -25,26 +25,37 @@ Route::middleware('auth:sanctum')->group(function () {
 
 });
 
-//sementara buat testing, nanti dihapus
-    Route::post(
-        '/submission/upload',
-        [SubmissionController::class, 'upload']
-    );
+Route::middleware([
+    'auth:sanctum',
+    'admin'
+])
+->get('/test-admin', function(){
 
-    Route::get(
-        '/submissions',
-        [SubmissionListController::class, 'index']
-    );
+    return response()->json([
+        'message'=>'Halo admin'
+    ]);
 
-    Route::get(
-        '/submissions/{id}/data',
-        [SubmissionDataController::class, 'show']
-    );
+});
 
-    Route::get(
-        '/submission-file/{id}/download',
-        [SubmissionController::class,'downloadFile']
-    );
+
+Route::middleware([
+    'auth:sanctum',
+    'user'
+])
+->get('/test-user', function(){
+
+    return response()->json([
+        'message'=>'Halo user'
+    ]);
+
+});
+
+Route::middleware([
+    'auth:sanctum',
+    'admin'
+])
+->group(function(){
+
 
     Route::post(
         '/rekonsiliasi/buka-quartal',
@@ -61,35 +72,71 @@ Route::middleware('auth:sanctum')->group(function () {
         [RekonsiliasiController::class, 'tutup']
     );
 
+
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+
+
+    Route::post(
+        '/submission/upload',
+        [SubmissionController::class, 'upload']
+    );
+
+
+    Route::get(
+        '/submissions',
+        [SubmissionListController::class, 'index']
+    );
+
+
+    Route::get(
+        '/submissions/{id}/data',
+        [SubmissionDataController::class, 'show']
+    );
+
+
+    Route::get(
+        '/submission-file/{id}/download',
+        [SubmissionController::class,'downloadFile']
+    );
+
+
     Route::get(
         '/rekonsiliasi/status',
         [RekonsiliasiController::class, 'status']
     );
+
 
     Route::get(
         '/submissions/{id}/table',
         [PdrbTableController::class, 'showSubmission']
     );
 
+
     Route::get(
         '/pdrb/lapangan-usaha/{wilayah_id}/{jenis_tabel_id}',
         [PdrbTableController::class, 'showLapanganUsaha']
     );
+
 
     Route::get(
         '/pdrb/pengeluaran/{wilayah_id}/{jenis_tabel_id}',
         [PdrbTableController::class, 'showPengeluaran']
     );
 
+
     Route::get(
         '/integrasi/{putaranId}/{wilayahId}',
         [IntegrasiPdrbController::class,'show']
     );
 
+
     Route::get(
         '/konserda/{putaranId}',
         [KonserdaController::class, 'index']
     );
+
 
     Route::get(
         '/konserda/lapangan-usaha/{putaranId}/{jenis_tabel_id}',
@@ -102,17 +149,23 @@ Route::middleware('auth:sanctum')->group(function () {
         [KonserdaController::class, 'showPengeluaran']
     );
 
+
     Route::get(
         '/monitoring/{putaranId}/{modulId}',
         [MonitoringController::class,'index']
     );
+
 
     Route::get(
         '/pengumuman',
         [PengumumanController::class,'index']
     );
 
+
     Route::post(
         '/pengumuman',
         [PengumumanController::class,'store']
     );
+
+
+});
