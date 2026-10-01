@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Api\SubmissionController;
 use App\Http\Controllers\Api\SubmissionListController;
 use App\Http\Controllers\Api\SubmissionDataController;
@@ -20,6 +21,15 @@ Route::post(
     '/login',
     [AuthController::class, 'login']
 );
+
+Route::middleware('auth:sanctum')
+->get('/cek-user', function(){
+
+    return response()->json([
+        'user' => Auth::user()
+    ]);
+
+});
 
 //admin
 Route::middleware([
@@ -146,3 +156,4 @@ Route::middleware('auth:sanctum')->group(function () {
     );
 
 });
+

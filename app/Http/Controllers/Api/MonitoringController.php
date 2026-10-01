@@ -6,12 +6,24 @@ use App\Http\Controllers\Controller;
 use App\Models\Submission;
 use App\Models\Wilayah;
 use App\Models\IntegrasiPdrb;
+use Illuminate\Support\Facades\Auth;
 
 class MonitoringController extends Controller
 {
 
     public function index($putaranId, $modulId)
     {
+
+        $user = Auth::user();
+
+
+        if($user->role_id != 1){
+
+            return response()->json([
+                'message'=>'Akses ditolak'
+            ],403);
+
+        }
 
 
         $wilayahList = Wilayah::whereIn(

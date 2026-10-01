@@ -29,7 +29,9 @@ class WilayahController extends Controller
         }
         else{
 
-            $data = Wilayah::all();
+            $data = Wilayah::orderBy('jenis')
+                ->orderBy('nama')
+                ->get();
 
         }
 
