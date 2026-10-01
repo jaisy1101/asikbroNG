@@ -23,9 +23,16 @@ Route::post(
 );
 
 
-Route::post('/logout', function(){
+Route::post('/logout', function(Request $request){
 
-    dd('MASUK LOGOUT');
+    Auth::logout();
+
+    $request->session()->invalidate();
+
+    $request->session()->regenerateToken();
+
+
+    return redirect('/login');
 
 });
 
