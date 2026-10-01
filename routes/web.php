@@ -1,164 +1,140 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 use App\Services\Derived\DerivedLapanganUsaha;
 use App\Jobs\GenerateDerivedLapanganUsahaJob;
 
-Route::get('/', function () {
-    return view('pages.dashboard');
-});
 
-Route::view('/', 'pages.dashboard');
+/*
+|--------------------------------------------------------------------------
+| Login
+|--------------------------------------------------------------------------
+*/
 
-Route::view('/pengeluaran', 'pages.pengeluaran');
-
-Route::view('/lapangan-usaha', 'pages.lapangan-usaha');
-
-Route::view('/integrasi', 'pages.integrasi');
-
-Route::view('/monitoring', 'pages.monitoring');
-
-Route::view('/forum', 'pages.forum');
-
-Route::view('/operator', 'pages.operator');
-
-Route::view('/pengeluaran/unggah-tabel', 'pages.pengeluaran.unggah-tabel');
-
-Route::view('/pengeluaran/daftar-tabel', 'pages.pengeluaran.daftar-tabel');
-
-Route::view('/pengeluaran/perubahan-nilai', 'pages.pengeluaran.perubahan-nilai');
-
-Route::view('/pengeluaran/hasil-konserda', 'pages.pengeluaran.hasil-konserda');
-
-Route::view('/lapangan-usaha/unggah-tabel', 'pages.lapangan-usaha.unggah-tabel');
-
-Route::view('/lapangan-usaha/daftar-tabel', 'pages.lapangan-usaha.daftar-tabel');
-
-Route::view('/lapangan-usaha/perubahan-nilai', 'pages.lapangan-usaha.perubahan-nilai');
-
-Route::view('/lapangan-usaha/hasil-konserda', 'pages.lapangan-usaha.hasil-konserda');
-
-Route::view('/login-preview', 'auth.login');
+Route::view('/login', 'auth.login')
+    ->name('login');
 
 
-Route::get('/test-distribusi', function (DerivedLapanganUsaha $service) {
+Route::post(
+    '/login',
+    [AuthController::class,'login']
+);
 
-    $service->hitungDistribusi(
-        7, // wilayah_id
-        67  // periode_id
-    ); 
 
-    return "Membuat Tabel Distribusi selesai";
 
-});
+/*
+|--------------------------------------------------------------------------
+| Halaman User + Admin
+|--------------------------------------------------------------------------
+*/
 
-Route::get('/test-qtq', function(
-    \App\Services\Derived\DerivedLapanganUsaha $service
-){
+Route::middleware('auth')
+->group(function(){
 
-    $service->hitungQtQ(
-        1, // wilayah_id
-        63  // 2025 Q2
+
+    Route::view('/', 'pages.dashboard');
+
+
+    Route::view(
+        '/pengeluaran',
+        'pages.pengeluaran'
     );
 
-    return "Membuat Tabel QTQ selesai";
+
+    Route::view(
+        '/lapangan-usaha',
+        'pages.lapangan-usaha'
+    );
+
+
+    Route::view(
+        '/integrasi',
+        'pages.integrasi'
+    );
+
+
+    Route::view(
+        '/forum',
+        'pages.forum'
+    );
+
+
+    Route::view(
+        '/pengeluaran/unggah-tabel',
+        'pages.pengeluaran.unggah-tabel'
+    );
+
+
+    Route::view(
+        '/pengeluaran/daftar-tabel',
+        'pages.pengeluaran.daftar-tabel'
+    );
+
+
+    Route::view(
+        '/pengeluaran/perubahan-nilai',
+        'pages.pengeluaran.perubahan-nilai'
+    );
+
+
+    Route::view(
+        '/pengeluaran/hasil-konserda',
+        'pages.pengeluaran.hasil-konserda'
+    );
+
+
+    Route::view(
+        '/lapangan-usaha/unggah-tabel',
+        'pages.lapangan-usaha.unggah-tabel'
+    );
+
+
+    Route::view(
+        '/lapangan-usaha/daftar-tabel',
+        'pages.lapangan-usaha.daftar-tabel'
+    );
+
+
+    Route::view(
+        '/lapangan-usaha/perubahan-nilai',
+        'pages.lapangan-usaha.perubahan-nilai'
+    );
+
+
+    Route::view(
+        '/lapangan-usaha/hasil-konserda',
+        'pages.lapangan-usaha.hasil-konserda'
+    );
+
 
 });
 
-Route::get('/test-yty', function(
-    \App\Services\Derived\DerivedLapanganUsaha $service
-){
 
-    $service->hitungYtY(
-        1,
-        63
+
+/*
+|--------------------------------------------------------------------------
+| Admin Only
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware([
+    'auth',
+    'admin'
+])
+->group(function(){
+
+
+    Route::view(
+        '/monitoring',
+        'pages.monitoring'
     );
 
-    return "YTY selesai";
 
-});
-
-Route::get('/test-ctc', function(
-    \App\Services\Derived\DerivedLapanganUsaha $service
-){
-
-    $service->hitungCtC(
-        1,
-        63
+    Route::view(
+        '/operator',
+        'pages.operator'
     );
 
-    return "CTC selesai";
 
-});
-
-Route::get('/test-implisit', function(
-    \App\Services\Derived\DerivedLapanganUsaha $service
-){
-
-    $service->hitungImplisit(
-        1,
-        59
-    );
-
-    return "Implisit selesai";
-
-});
-
-Route::get('/test-implisit-qtq', function(
-    \App\Services\Derived\DerivedLapanganUsaha $service
-){
-
-    $service->hitungImplisitQtQ(
-        1,
-        63
-    );
-
-    return "Implisit QTQ selesai";
-
-});
-
-Route::get('/test-implisit-yty', function(
-    \App\Services\Derived\DerivedLapanganUsaha $service
-){
-
-    $service->hitungImplisitYtY(
-        1,
-        63
-    );
-
-    return "Implisit YTY selesai";
-
-});
-
-
-Route::get('/test-job-derived', function(){
-
-    GenerateDerivedLapanganUsahaJob::dispatch(
-        1,
-        63
-    );
-
-    return "Job dikirim";
-
-});
-
-Route::get('/test-derived-error', function () {
-
-    \App\Jobs\GenerateDerivedLapanganUsahaJob::dispatch(
-        12,
-        56
-    );
-
-    return "dikirim";
-
-});
-
-Route::get('/test-derived-qtq', function () {
-
-    GenerateDerivedLapanganUsahaJob::dispatch(
-        7,
-        67
-    );
-
-    return "job dikirim";
 });

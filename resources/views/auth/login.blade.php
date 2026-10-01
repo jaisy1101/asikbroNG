@@ -154,7 +154,9 @@
                     </p>
 
 
-                    <form>
+                    <form method="POST" action="/login">
+
+                        @csrf
 
 
                         <!-- Nama Pengguna -->
@@ -165,33 +167,38 @@
                                 <div class="input-group-prepend">
 
                                     <span class="input-group-text border-0"
-                                          style="
+                                        style="
                                             background: #ffffff;
                                             border-radius: 18px 0 0 18px;
                                             padding-left: 18px;
                                             padding-right: 10px;
-                                          ">
+                                        ">
 
                                         <i class="far fa-user"
-                                           style="
+                                        style="
                                                 color: #888;
                                                 font-size: 20px;
-                                           "></i>
+                                        "></i>
 
                                     </span>
 
                                 </div>
 
-                                <input type="text"
-                                       class="form-control border-0"
-                                       placeholder="Nama Pengguna"
-                                       style="
-                                            height: 52px;
-                                            border-radius: 0 18px 18px 0;
-                                            font-size: 16px;
-                                            font-weight: 600;
-                                            letter-spacing: 1px;
-                                       ">
+
+                                <input
+                                    type="text"
+                                    id="username"
+                                    name="username"
+                                    class="form-control border-0"
+                                    placeholder="Nama Pengguna"
+                                    style="
+                                        height: 52px;
+                                        border-radius: 0 18px 18px 0;
+                                        font-size: 16px;
+                                        font-weight: 600;
+                                        letter-spacing: 1px;
+                                    "
+                                >
 
                             </div>
 
@@ -204,36 +211,41 @@
 
                             <div class="input-group">
 
+
                                 <div class="input-group-prepend">
 
                                     <span class="input-group-text border-0"
-                                          style="
+                                        style="
                                             background: #ffffff;
                                             border-radius: 18px 0 0 18px;
                                             padding-left: 18px;
                                             padding-right: 10px;
-                                          ">
+                                        ">
 
                                         <i class="fas fa-lock"
-                                           style="
+                                        style="
                                                 color: #888;
                                                 font-size: 18px;
-                                           "></i>
+                                        "></i>
 
                                     </span>
 
                                 </div>
 
-                                <input type="password"
-                                       id="password"
-                                       class="form-control border-0"
-                                       placeholder="Kata Sandi"
-                                       style="
-                                            height: 52px;
-                                            font-size: 16px;
-                                            font-weight: 600;
-                                            letter-spacing: 1px;
-                                       ">
+
+                                <input
+                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    class="form-control border-0"
+                                    placeholder="Kata Sandi"
+                                    style="
+                                        height: 52px;
+                                        font-size: 16px;
+                                        font-weight: 600;
+                                        letter-spacing: 1px;
+                                    "
+                                >
 
 
                                 <div class="input-group-append">
@@ -248,29 +260,31 @@
                                             ">
 
                                         <i class="fas fa-eye"
-                                           id="passwordIcon"
-                                           style="color: #888;"></i>
+                                        id="passwordIcon"
+                                        style="color: #888;"></i>
 
                                     </button>
 
                                 </div>
+
 
                             </div>
 
                         </div>
 
 
+
                         <!-- Lupa Password -->
                         <div class="mb-4">
 
                             <a href="#"
-                               style="
+                            style="
                                     color: #2daae1;
                                     font-size: 14px;
                                     font-weight: 700;
                                     letter-spacing: 1px;
                                     text-decoration: none;
-                               ">
+                            ">
 
                                 Lupa Password?
 
@@ -279,8 +293,9 @@
                         </div>
 
 
+
                         <!-- Tombol Masuk -->
-                        <button type="button"
+                        <button type="submit"
                                 class="btn btn-block text-white py-3"
                                 style="
                                     border: none;
@@ -298,6 +313,7 @@
                             Masuk
 
                         </button>
+
 
                     </form>
 
@@ -333,6 +349,64 @@
 
 
     <script>
+        $('#btnLogin').click(function(){
+
+
+            let username = $('#username').val();
+
+            let password = $('#password').val();
+
+
+
+            $.ajax({
+
+                url:'/api/login',
+
+                method:'POST',
+
+                data:{
+                    username: username,
+                    password: password
+                },
+
+
+                success:function(response){
+
+
+                    localStorage.setItem(
+                        'token',
+                        response.token
+                    );
+
+
+                    localStorage.setItem(
+                        'user',
+                        JSON.stringify(response.user)
+                    );
+
+
+                    window.location.href='/';
+
+
+                },
+
+
+                error:function(xhr){
+
+
+                    alert(
+                        xhr.responseJSON.message
+                    );
+
+
+                }
+
+
+            });
+
+
+        });
+
         $('#togglePassword').click(function () {
 
             const password = $('#password');
