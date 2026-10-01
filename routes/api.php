@@ -13,43 +13,15 @@ use App\Http\Controllers\Api\KonserdaController;
 use App\Http\Controllers\Api\MonitoringController;
 use App\Http\Controllers\Api\PengumumanController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\WilayahController;
 
-
+//login
 Route::post(
     '/login',
     [AuthController::class, 'login']
 );
 
-Route::middleware('auth:sanctum')->group(function () {
-
-
-});
-
-Route::middleware([
-    'auth:sanctum',
-    'admin'
-])
-->get('/test-admin', function(){
-
-    return response()->json([
-        'message'=>'Halo admin'
-    ]);
-
-});
-
-
-Route::middleware([
-    'auth:sanctum',
-    'user'
-])
-->get('/test-user', function(){
-
-    return response()->json([
-        'message'=>'Halo user'
-    ]);
-
-});
-
+//admin
 Route::middleware([
     'auth:sanctum',
     'admin'
@@ -71,10 +43,23 @@ Route::middleware([
         '/rekonsiliasi/tutup',
         [RekonsiliasiController::class, 'tutup']
     );
+    
+    Route::get(
+        '/monitoring/{putaranId}/{modulId}',
+        [MonitoringController::class,'index']
+    );
+
+
+    Route::post(
+        '/pengumuman',
+        [PengumumanController::class,'store']
+    );
 
 
 });
 
+
+// Semua user login
 Route::middleware('auth:sanctum')->group(function () {
 
 
@@ -151,21 +136,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::get(
-        '/monitoring/{putaranId}/{modulId}',
-        [MonitoringController::class,'index']
-    );
-
-
-    Route::get(
         '/pengumuman',
         [PengumumanController::class,'index']
     );
 
-
-    Route::post(
-        '/pengumuman',
-        [PengumumanController::class,'store']
+    Route::get(
+        '/wilayah',
+        [WilayahController::class,'index']
     );
-
 
 });

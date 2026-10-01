@@ -4,12 +4,23 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\IntegrasiPdrb;
+use Illuminate\Support\Facades\Auth;
 
 class IntegrasiPdrbController extends Controller
 {
 
     public function show($putaranId, $wilayahId)
     {
+
+        $user = Auth::user();
+
+
+        if($user->role_id == 2){
+
+            $wilayahId = $user->wilayah_id;
+
+        }
+
 
         $data = IntegrasiPdrb::with([
             'wilayah',
