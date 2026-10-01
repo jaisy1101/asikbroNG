@@ -51,9 +51,29 @@ class AuthController extends Controller
         $request->session()->regenerate();
 
 
+        $token = $user
+            ->createToken('asikbro-web')
+            ->plainTextToken;
 
-        return redirect('/');
+
+        return redirect('/')
+            ->with('token', $token);
 
     }
 
+    public function logout(Request $request)
+    {
+
+        Auth::logout();
+
+
+        $request->session()->invalidate();
+
+
+        $request->session()->regenerateToken();
+
+
+        return redirect('/login');
+
+    }
 }

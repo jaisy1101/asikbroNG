@@ -181,6 +181,8 @@
     </li>
 
 
+    @if(auth()->user()->role_id == 1)
+
     <!-- Monitoring -->
     <li class="nav-item {{ request()->is('monitoring') ? 'active' : '' }}">
 
@@ -193,6 +195,10 @@
 
     </li>
 
+    @endif
+
+
+    @if(auth()->user()->role_id == 1)
 
     <!-- Operator -->
     <li class="nav-item {{ request()->is('operator') ? 'active' : '' }}">
@@ -205,6 +211,8 @@
         </a>
 
     </li>
+
+    @endif
 
     <hr class="sidebar-divider d-none d-md-block">
 

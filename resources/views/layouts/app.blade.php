@@ -49,6 +49,9 @@
                     @include('components.topbar')
                 </div>
 
+                {{-- Modal --}}
+                @include('components.modal')
+
                 {{-- Isi halaman --}}
                 <div class="container-fluid asikbro-content">
                     @yield('content')
@@ -104,12 +107,37 @@
         }
 
 
-        </script>
+    </script>
     
     <!-- Axios -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
     <script>
+
+
+    @if(session('token'))
+
+    localStorage.setItem(
+        'token',
+        "{{ session('token') }}"
+    );
+
+    @endif
+
+
+
+    // TOKEN API
+
+    let token = localStorage.getItem('token');
+
+
+    if(token){
+
+        axios.defaults.headers.common['Authorization'] =
+            'Bearer ' + token;
+
+    }
+
 
 
     // WAKTU HEADER
@@ -184,6 +212,12 @@
 
             }
 
+
+        })
+
+        .catch(error=>{
+
+            console.error(error);
 
         });
 
