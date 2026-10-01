@@ -4,12 +4,44 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\HasilKonserda;
+use App\Models\Putaran;
+use Illuminate\Support\Facades\Auth;
 
 class KonserdaController extends Controller
 {
+    private function cekAksesKonserda($putaranId)
+    {
+
+        $user = Auth::user();
+
+
+        $putaran = Putaran::findOrFail($putaranId);
+
+
+        // admin bebas melihat
+        if($user->role_id == 1){
+
+            return;
+
+        }
+
+
+        // user hanya jika putaran selesai
+        if($putaran->status != 'selesai'){
+
+            abort(response()->json([
+
+                'message'=>'Hasil konserda belum dapat diakses'
+
+            ],403));
+
+        }
+
+    }
 
     public function index($putaranId)
     {
+        $this->cekAksesKonserda($putaranId);
 
         $data = HasilKonserda::with([
 
@@ -57,6 +89,7 @@ class KonserdaController extends Controller
 
     public function showLapanganUsaha($putaranId, $jenis_tabel_id)
     {
+        $this->cekAksesKonserda($putaranId);
 
         $data = HasilKonserda::with([
 
@@ -111,6 +144,7 @@ class KonserdaController extends Controller
 
     public function showPengeluaran($putaranId, $jenis_tabel_id)
     {
+        $this->cekAksesKonserda($putaranId);
 
         $data = HasilKonserda::with([
 
