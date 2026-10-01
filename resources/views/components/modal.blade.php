@@ -1,3 +1,22 @@
+<style>
+
+.modal {
+    z-index: 1050 !important;
+}
+
+.modal-backdrop {
+    z-index: 1040 !important;
+}
+
+.modal-dialog {
+    pointer-events: auto !important;
+}
+
+.modal-content {
+    pointer-events: auto !important;
+}
+
+</style>
 <!-- ================================================= -->
 <!-- MODAL PENGATURAN -->
 <!-- ================================================= -->
@@ -176,19 +195,24 @@
                     </button>
 
 
-                    <button type="button"
-                            id="btnLogout"
-                            class="btn btn-info"
-                            style="
-                                border-radius:10px;
-                                min-width:95px;
-                                height:42px;
-                                font-size:15px;
-                            ">
+                    <form method="POST" action="/logout">
 
-                        Ya
+                        @csrf
 
-                    </button>
+                        <button type="submit"
+                                class="btn btn-info"
+                                style="
+                                    border-radius:10px;
+                                    min-width:95px;
+                                    height:42px;
+                                    font-size:15px;
+                                ">
+
+                            Ya
+
+                        </button>
+
+                    </form>
 
                 </div>
 
@@ -199,29 +223,3 @@
     </div>
 
 </div>
-
-<script>
-
-$('#btnLogout').click(function(){
-
-    $.ajax({
-
-        url:'/logout',
-
-        type:'POST',
-
-        data:{
-            _token:'{{ csrf_token() }}'
-        },
-
-        success:function(){
-
-            window.location.href='/login';
-
-        }
-
-    });
-
-});
-
-</script>

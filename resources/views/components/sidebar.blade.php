@@ -208,7 +208,7 @@
             <i class="fas fa-users-cog"></i>
             <span>Operator</span>
 
-        </a>
+        </a>        
 
     </li>
 

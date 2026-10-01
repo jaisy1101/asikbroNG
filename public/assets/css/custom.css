@@ -806,26 +806,10 @@ textarea,
 
 }
 
-/* FIX MODAL BOOTSTRAP */
+.modal-backdrop {
+    z-index: 1040 !important;
+}
+
 .modal {
-    z-index: 99999 !important;
-}
-
-.modal-backdrop {
-    z-index: 99998 !important;
-    background-color: rgba(0,0,0,0.5) !important;
-}
-
-.modal-dialog,
-.modal-content {
-    pointer-events: auto !important;
-}
-
-.modal-content {
-    background-color: #fff !important;
-    opacity: 1 !important;
-}
-
-.modal-backdrop {
-    pointer-events: none !important;
+    z-index: 1050 !important;
 }

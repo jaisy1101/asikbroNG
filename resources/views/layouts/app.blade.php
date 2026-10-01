@@ -49,9 +49,6 @@
                     @include('components.topbar')
                 </div>
 
-                {{-- Modal --}}
-                @include('components.modal')
-
                 {{-- Isi halaman --}}
                 <div class="container-fluid asikbro-content">
                     @yield('content')
@@ -66,7 +63,9 @@
         </div>
 
     </div>
-
+    
+    {{-- Modal --}}
+    @include('components.modal')
 
     <!-- JS -->
     <script src="{{ asset('assets/vendor/jquery/jquery.min.js') }}"></script>
