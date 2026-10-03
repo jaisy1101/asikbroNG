@@ -170,19 +170,31 @@ class PdrbTableController extends Controller
 
 
         $result = $data
-            ->groupBy('kategori.id')
+            ->groupBy('kategori_lapus_id')
             ->map(function ($items) {
-
 
                 $row = [];
 
                 $kategori = $items->first()->kategori;
 
-                $row['kategori'] = $kategori->nama;
 
-                $row['kode'] = $kategori->kode;
+                if ($kategori === null) {
 
-                $row['level'] = $kategori->level;
+                    $row['kategori'] = 'TOTAL';
+
+                    $row['kode'] = null;
+
+                    $row['level'] = 0;
+
+                } else {
+
+                    $row['kategori'] = $kategori->nama;
+
+                    $row['kode'] = $kategori->kode;
+
+                    $row['level'] = $kategori->level;
+
+                }
 
 
                 foreach ($items as $item) {
@@ -192,14 +204,12 @@ class PdrbTableController extends Controller
                         ' Q' .
                         $item->periode->triwulan;
 
-
                     $row[$periode] = $item->nilai;
 
                 }
 
 
                 return $row;
-
 
             })
             ->values();
