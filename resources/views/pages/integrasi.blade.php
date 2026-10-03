@@ -529,6 +529,20 @@ function updateSummary(kode,data)
 function renderDetail(kode,data)
 {
 
+    data.sort((a,b)=>{
+
+        let periodeA =
+            (a.periode.tahun * 10) + a.periode.triwulan;
+
+
+        let periodeB =
+            (b.periode.tahun * 10) + b.periode.triwulan;
+
+
+        return periodeA - periodeB;
+
+    });
+
 
     let tbody =
         document.getElementById(
@@ -593,7 +607,7 @@ function renderDetail(kode,data)
 
             <td>
                 ${item.periode.tahun}
-                TW ${item.periode.triwulan}
+                Q${item.periode.triwulan}
             </td>
 
             <td>

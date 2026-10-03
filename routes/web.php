@@ -1,15 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Services\Derived\DerivedLapanganUsaha;
-use App\Jobs\GenerateDerivedLapanganUsahaJob;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use App\Http\Controllers\AuthController;
 
 
 /*
-| Login
+|--------------------------------------------------------------------------
+| Authentication
 |--------------------------------------------------------------------------
 */
 
@@ -19,7 +18,7 @@ Route::view('/login', 'auth.login')
 
 Route::post(
     '/login',
-    [AuthController::class,'login']
+    [AuthController::class, 'login']
 );
 
 
@@ -31,7 +30,6 @@ Route::post('/logout', function(Request $request){
 
     $request->session()->regenerateToken();
 
-
     return redirect('/login');
 
 });
@@ -39,7 +37,7 @@ Route::post('/logout', function(Request $request){
 
 /*
 |--------------------------------------------------------------------------
-| Halaman User + Admin
+| User & Admin Pages
 |--------------------------------------------------------------------------
 */
 
@@ -47,8 +45,23 @@ Route::middleware('auth')
 ->group(function(){
 
 
-    Route::view('/', 'pages.dashboard');
+    /*
+    |--------------------------------------------------------------------------
+    | Dashboard
+    |--------------------------------------------------------------------------
+    */
 
+    Route::view(
+        '/',
+        'pages.dashboard'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Modul Umum
+    |--------------------------------------------------------------------------
+    */
 
     Route::view(
         '/pengeluaran',
@@ -74,52 +87,80 @@ Route::middleware('auth')
     );
 
 
-    Route::view(
-        '/pengeluaran/unggah-tabel',
-        'pages.pengeluaran.unggah-tabel'
-    );
+
+    /*
+    |--------------------------------------------------------------------------
+    | Pengeluaran
+    |--------------------------------------------------------------------------
+    */
+
+    Route::prefix('pengeluaran')
+    ->group(function(){
 
 
-    Route::view(
-        '/pengeluaran/daftar-tabel',
-        'pages.pengeluaran.daftar-tabel'
-    );
+        Route::view(
+            '/unggah-tabel',
+            'pages.pengeluaran.unggah-tabel'
+        );
 
 
-    Route::view(
-        '/pengeluaran/perubahan-nilai',
-        'pages.pengeluaran.perubahan-nilai'
-    );
+        Route::view(
+            '/daftar-tabel',
+            'pages.pengeluaran.daftar-tabel'
+        );
 
 
-    Route::view(
-        '/pengeluaran/hasil-konserda',
-        'pages.pengeluaran.hasil-konserda'
-    );
+        Route::view(
+            '/perubahan-nilai',
+            'pages.pengeluaran.perubahan-nilai'
+        );
 
 
-    Route::view(
-        '/lapangan-usaha/unggah-tabel',
-        'pages.lapangan-usaha.unggah-tabel'
-    );
+        Route::view(
+            '/hasil-konserda',
+            'pages.pengeluaran.hasil-konserda'
+        );
 
 
-    Route::view(
-        '/lapangan-usaha/daftar-tabel',
-        'pages.lapangan-usaha.daftar-tabel'
-    );
+    });
 
 
-    Route::view(
-        '/lapangan-usaha/perubahan-nilai',
-        'pages.lapangan-usaha.perubahan-nilai'
-    );
+
+    /*
+    |--------------------------------------------------------------------------
+    | Lapangan Usaha
+    |--------------------------------------------------------------------------
+    */
+
+    Route::prefix('lapangan-usaha')
+    ->group(function(){
 
 
-    Route::view(
-        '/lapangan-usaha/hasil-konserda',
-        'pages.lapangan-usaha.hasil-konserda'
-    );
+        Route::view(
+            '/unggah-tabel',
+            'pages.lapangan-usaha.unggah-tabel'
+        );
+
+
+        Route::view(
+            '/daftar-tabel',
+            'pages.lapangan-usaha.daftar-tabel'
+        );
+
+
+        Route::view(
+            '/perubahan-nilai',
+            'pages.lapangan-usaha.perubahan-nilai'
+        );
+
+
+        Route::view(
+            '/hasil-konserda',
+            'pages.lapangan-usaha.hasil-konserda'
+        );
+
+
+    });
 
 
 });
