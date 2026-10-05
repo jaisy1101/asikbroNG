@@ -30,6 +30,12 @@ class SubmissionController extends Controller
         IntegrasiPdrbService $integrasi
     )
     {
+        if (!config('features.table_upload_enabled')) {
+            return response()->json([
+                'message' => 'Unggah tabel dinonaktifkan sementara untuk testing.',
+            ], 403);
+        }
+
         $request->validate([
             'file' => 'required|file|mimes:xlsx,xls|max:10240',
             'modul_id' => 'required',
@@ -415,4 +421,4 @@ class SubmissionController extends Controller
 
         }
     }
-} 
+}
