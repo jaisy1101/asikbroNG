@@ -54,7 +54,7 @@
 
                     <select class="form-control" id="wilayah_id">
 
-                    </select>
+                    </select>   
 
                 </div>
 
