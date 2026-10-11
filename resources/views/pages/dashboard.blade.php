@@ -112,13 +112,12 @@
                     <!-- Text -->
                     <div class="text-center text-white">
 
-                        <div style="
+                        <div id="dashboard-putaran"
+                            style="
                                 font-size: 22px;
                                 letter-spacing: 3px;
                                 font-weight: bold;
                             ">
-
-                            PUTARAN 1
 
                         </div>
 
@@ -139,16 +138,16 @@
                         font-weight: bold;
                      ">
 
-                    <div style="font-size: 14px;">
-                        Rekon 2025
+                    <div id="dashboard-rekon-tahun"
+                        style="font-size: 14px;">
+
                     </div>
 
-                    <div style="
+                    <div id="dashboard-rekon-q"
+                        style="
                             font-size: 40px;
                             line-height: 1;
-                         ">
-
-                        Q1
+                        ">
 
                     </div>
 
@@ -216,7 +215,60 @@
 @section('scripts')
 
 <script>
+function ambilPutaranDashboard(){
 
+    axios.get('/api/rekonsiliasi/status')
+
+    .then(response => {
+
+        let data = response.data;
+
+
+        if(data.rekonsiliasi){
+
+            let putaran = '-';
+
+
+            if(data.putaran_aktif){
+
+                putaran = data.putaran_aktif.nomor;
+
+            }
+            else if(data.putaran_terakhir){
+
+                putaran = data.putaran_terakhir.nomor;
+
+            }
+
+
+            document.getElementById('dashboard-putaran')
+                .innerHTML =
+                `PUTARAN ${putaran}`;
+
+
+            document.getElementById('dashboard-rekon-tahun')
+                .innerHTML =
+                `Rekon ${data.rekonsiliasi.tahun}`;
+
+
+            document.getElementById('dashboard-rekon-q')
+                .innerHTML =
+                `Q${data.rekonsiliasi.triwulan}`;
+
+        }
+
+    })
+
+    .catch(error => {
+
+        console.error(error);
+
+    });
+
+}
+
+
+ambilPutaranDashboard();
 
 axios.get('/api/pengumuman')
 
