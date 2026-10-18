@@ -297,7 +297,7 @@ class PdrbTableController extends Controller
 
 
         /*
-        | Baris TOTAL (ADHB/ADHK saja) = jumlah kategori induk per periode,
+        | Baris TOTAL (ADHB/ADHK saja, paling bawah) = jumlah kategori induk per periode,
         | sama dengan TOTAL di Konserda dan Integrasi. Nilai kosong = 0;
         | periode tanpa data sama sekali tetap kosong. Derived tidak
         | dijumlahkan karena perhitungannya berbeda.
@@ -325,7 +325,7 @@ class PdrbTableController extends Controller
 
             $result = $result
                 ->reject(fn ($row) => $row['kode'] === null && $row['kategori'] === 'TOTAL')
-                ->prepend($total)
+                ->push($total)
                 ->values();
         }
 

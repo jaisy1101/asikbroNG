@@ -17,6 +17,11 @@
 
     <link href="{{ asset('assets/css/sb-admin-2.min.css') }}"
           rel="stylesheet">
+    <style>
+    input[type="password"]::-ms-reveal {
+        display: none;
+    }
+    </style>
 </head>
 
 
@@ -297,7 +302,7 @@
 
                         <!-- Tombol Masuk -->
                         <button type="submit"
-                                class="btn btn-block text-white py-3"
+                                class="btn btn-block text-white py-3 mt-4"
                                 style="
                                     border: none;
                                     border-radius: 18px;

@@ -378,7 +378,7 @@ class NilaiEfektifPdrbTest extends TestCase
                 ->showLapanganUsaha(Request::create('/x', 'GET', $query), self::WILAYAH, self::ADHB)
                 ->getData(true);
 
-            // Baris kategori A (baris pertama adalah TOTAL).
+            // Baris kategori A (TOTAL ada di baris terakhir).
             $respons['table'][0] = collect($respons['table'])->firstWhere('kode', 'A');
 
             return $respons;
@@ -419,13 +419,15 @@ class NilaiEfektifPdrbTest extends TestCase
             ->getData(true)['table'];
 
         $adhb = $baca(self::ADHB);
+        $total = end($adhb);
 
-        $this->assertSame('TOTAL', $adhb[0]['kategori']);
-        $this->assertSame(0, $adhb[0]['level']);
-        $this->assertEquals(500, $adhb[0]['2026 Q1'], 'A + B.');
-        $this->assertEquals(50, $adhb[0]['2025 Q1'], 'B kosong dianggap 0.');
-        $this->assertArrayNotHasKey('2025 Q2', $adhb[0], 'Periode tanpa data tetap kosong.');
         $this->assertCount(3, $adhb);
+        $this->assertSame('A', $adhb[0]['kode'], 'Kategori lebih dulu.');
+        $this->assertSame('TOTAL', $total['kategori'], 'TOTAL di baris paling bawah.');
+        $this->assertSame(0, $total['level']);
+        $this->assertEquals(500, $total['2026 Q1'], 'A + B.');
+        $this->assertEquals(50, $total['2025 Q1'], 'B kosong dianggap 0.');
+        $this->assertArrayNotHasKey('2025 Q2', $total, 'Periode tanpa data tetap kosong.');
 
         $distribusi = $baca(3);
 

@@ -224,7 +224,7 @@
 
         <div class="table-responsive table-scroll">
 
-            <table class="table table-bordered table-hover table-data-large">
+            <table class="table table-bordered table-hover table-data-large tabel-konserda">
 
                 <thead class="thead-light" id="header-konserda">
 
@@ -330,29 +330,8 @@ axios.get(
     // AMBIL DAFTAR KAB/KOTA
     // ===============================
 
-    let kabkotaMap = new Map();
-
-    data.forEach(item => {
-
-        item.detail?.forEach(detail => {
-
-            if (detail.wilayah) {
-
-                kabkotaMap.set(
-                    detail.wilayah.id,
-                    detail.wilayah
-                );
-
-            }
-
-        });
-
-    });
-
-
-    let kabkotaList = Array.from(
-        kabkotaMap.values()
-    );
+    // Daftar kab/kota dikirim sekali oleh API (bukan di setiap detail).
+    let kabkotaList = response.data.wilayah ?? [];
 
 
     // ===============================

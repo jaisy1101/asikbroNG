@@ -881,13 +881,14 @@ textarea,
 
 .tabel-isian td.sel-isian input {
 
+    /* Serapat Daftar Tabel (padding 3px 8px, huruf 12px) */
     width: 100%;
 
-    min-width: 130px;
+    min-width: 105px;
 
     height: 100%;
 
-    padding: 6px 8px;
+    padding: 3px 8px;
 
     border: 0;
 
@@ -895,7 +896,9 @@ textarea,
 
     text-align: right;
 
-    font-size: 0.85rem;
+    font-size: 12px;
+
+    line-height: 1.2;
 
     color: #3a3b45;
 
@@ -936,5 +939,19 @@ textarea,
 .btn-group .badge-draf {
 
     margin-left: 6px;
+
+}
+
+
+
+/* =====================================================
+   HASIL KONSERDA - kategori induk berlatar putih
+   (tetap tebal; warna status tetap berlaku)
+===================================================== */
+
+.tabel-konserda tbody tr.level-1 td,
+.tabel-konserda tbody tr.level-1 .kolom-kategori {
+
+    background-color: #ffffff;
 
 }
