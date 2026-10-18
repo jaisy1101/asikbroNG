@@ -4,17 +4,28 @@ namespace App\Services\Konserda;
 
 use App\Models\Putaran;
 use App\Models\RekonsiliasiPeriode;
-use App\Models\DataPdrbLapanganUsaha;
-use App\Models\DataPdrbPengeluaran;
 use App\Models\Wilayah;
 use App\Models\KategoriLapanganUsaha;
 use App\Models\KategoriPengeluaran;
 use App\Models\HasilKonserda;
 use App\Models\HasilKonserdaDetail;
+use App\Services\Pdrb\EffectiveValueService;
+use App\Services\Pdrb\PdrbModul;
 use Illuminate\Support\Facades\Log;
 
 class KonserdaService
 {
+
+    /*
+    |--------------------------------------------------------------------------
+    | GENERATE KONSERDA
+    |--------------------------------------------------------------------------
+    |
+    | Nilai provinsi dan kabkota memakai nilai efektif pada putaran yang
+    | diproses: data dasar + revisi semua putaran dengan putaran.id <= putaran
+    | ini. Setiap sel hanya dihitung satu kali (tidak menjumlahkan versi).
+    |
+    */
 
     public function generate($putaranId)
     {
@@ -64,24 +75,30 @@ class KonserdaService
             $provinsi->id
         )->get();
 
+        $wilayahIds = $kabkota->pluck('id')
+            ->push($provinsi->id)
+            ->all();
+
         $modulList = [
 
             [
-                'modul_id' => 1,
-                'model' => DataPdrbLapanganUsaha::class,
-                'kategori_column' => 'kategori_lapus_id',
+                'modul_id' => PdrbModul::LAPANGAN_USAHA,
+                'kategori_parent' => KategoriLapanganUsaha::whereNull('parent_id')->get(),
+                'kategori_list' => KategoriLapanganUsaha::all(),
             ],
 
             [
-                'modul_id' => 2,
-                'model' => DataPdrbPengeluaran::class,
-                'kategori_column' => 'kategori_pengeluaran_id',
+                'modul_id' => PdrbModul::PENGELUARAN,
+                'kategori_parent' => KategoriPengeluaran::whereNull('parent_id')->get(),
+                'kategori_list' => KategoriPengeluaran::all(),
             ],
 
         ];
 
 
         $jenisTabelList = [1,2];
+
+        $effective = app(EffectiveValueService::class);
 
 
 
@@ -92,31 +109,40 @@ class KonserdaService
 
 
                 foreach ($jenisTabelList as $jenisTabelId) {
-                    /*
-                    |--------------------------------------------------------------------------
-                    | TOTAL PDRB
-                    |--------------------------------------------------------------------------
-                    */
 
 
-                    if ($modul['modul_id'] == 1) {
+                    $nilaiEfektif = $effective->source(
+                        $modul['modul_id'],
+                        $wilayahIds,
+                        [$periode->periode_id],
+                        [$jenisTabelId],
+                        (int) $putaran->id
+                    );
 
-                        $kategoriParent = KategoriLapanganUsaha::whereNull('parent_id')->get();
+                    $nilai = function ($wilayahId, $kategoriIds) use (
+                        $nilaiEfektif,
+                        $periode,
+                        $jenisTabelId
+                    ) {
 
-                        $kategoriList = KategoriLapanganUsaha::all();
+                        $total = 0;
 
-                    } else {
+                        foreach ($kategoriIds as $kategoriId) {
 
-                        $kategoriParent = KategoriPengeluaran::whereNull('parent_id')->get();
+                            $row = $nilaiEfektif->get(EffectiveValueService::kunci(
+                                $wilayahId,
+                                $periode->periode_id,
+                                $jenisTabelId,
+                                $kategoriId
+                            ));
 
-                        $kategoriList = KategoriPengeluaran::all();
+                            if ($row) {
+                                $total += (float) $row->nilai;
+                            }
+                        }
 
-                    }
-
-
-                    $model = $modul['model'];
-
-                    $kategoriColumn = $modul['kategori_column'];
+                        return $total;
+                    };
 
 
 
@@ -126,109 +152,24 @@ class KonserdaService
                     |--------------------------------------------------------------------------
                     */
 
+                    $parentIds = $modul['kategori_parent']->pluck('id')->all();
 
-                    $nilaiProvinsiTotal = $model::where([
-                        'wilayah_id' => $provinsi->id,
-                        'periode_id' => $periode->periode_id,
-                        'jenis_tabel_id' => $jenisTabelId,
-                    ])
-                    ->whereIn(
-                        $kategoriColumn,
-                        $kategoriParent->pluck('id')
-                    )
-                    ->sum('nilai');
-
-
-
-                    $nilaiKabkotaTotal = $model::whereIn(
-                        'wilayah_id',
-                        $kabkota->pluck('id')
-                    )
-                    ->where([
-                        'periode_id' => $periode->periode_id,
-                        'jenis_tabel_id' => $jenisTabelId,
-                    ])
-                    ->whereIn(
-                        $kategoriColumn,
-                        $kategoriParent->pluck('id')
-                    )
-                    ->sum('nilai');
+                    $this->simpanHasil(
+                        $putaran->id,
+                        $periode->periode_id,
+                        $provinsi->id,
+                        $modul['modul_id'],
+                        $jenisTabelId,
+                        null,
+                        $nilai($provinsi->id, $parentIds),
+                        $kabkota->mapWithKeys(fn ($wilayah) => [
+                            $wilayah->id => $nilai($wilayah->id, $parentIds),
+                        ])->all(),
+                        2,
+                        fn ($diskrepansi) => $this->cekStatusTotal($diskrepansi)
+                    );
 
 
-
-                    $selisihTotal = $nilaiProvinsiTotal - $nilaiKabkotaTotal;
-
-
-                    $diskrepansiTotal = 0;
-
-
-                    if ($nilaiProvinsiTotal != 0) {
-
-                        $diskrepansiTotal =
-                            abs($selisihTotal)
-                            /
-                            abs($nilaiProvinsiTotal)
-                            *
-                            100;
-
-                    }
-
-                    $hasilTotal = HasilKonserda::create([
-
-                        'putaran_id' => $putaran->id,
-
-                        'periode_id' => $periode->periode_id,
-
-                        'wilayah_parent_id' => $provinsi->id,
-
-                        'modul_id' => $modul['modul_id'],
-
-                        'jenis_tabel_id' => $jenisTabelId,
-
-                        'kategori_id' => null,
-
-                        'nilai_provinsi' => $nilaiProvinsiTotal,
-
-                        'nilai_agregasi_kabkota' => $nilaiKabkotaTotal,
-
-                        'selisih' => $selisihTotal,
-
-                        'diskrepansi_persen' => $diskrepansiTotal,
-
-                        'batas_toleransi' => 2,
-
-                        'status' => $this->cekStatusTotal(
-                            $diskrepansiTotal
-                        ),
-
-                    ]);
-
-                    foreach ($kabkota as $wilayah) {
-
-
-                        $nilaiTotal = $model::where([
-                            'wilayah_id' => $wilayah->id,
-                            'periode_id' => $periode->periode_id,
-                            'jenis_tabel_id' => $jenisTabelId,
-                        ])
-                        ->whereIn(
-                            $kategoriColumn,
-                            $kategoriParent->pluck('id')
-                        )
-                        ->sum('nilai');
-
-
-                        HasilKonserdaDetail::create([
-
-                            'hasil_konserda_id' => $hasilTotal->id,
-
-                            'wilayah_id' => $wilayah->id,
-
-                            'nilai' => $nilaiTotal,
-
-                        ]);
-
-                    }
 
                     /*
                     |--------------------------------------------------------------------------
@@ -237,118 +178,128 @@ class KonserdaService
                     */
 
 
-                    foreach ($kategoriList as $kategori) {
+                    foreach ($modul['kategori_list'] as $kategori) {
 
+                        $this->simpanHasil(
+                            $putaran->id,
+                            $periode->periode_id,
+                            $provinsi->id,
+                            $modul['modul_id'],
+                            $jenisTabelId,
+                            $kategori->id,
+                            $nilai($provinsi->id, [$kategori->id]),
+                            $kabkota->mapWithKeys(fn ($wilayah) => [
+                                $wilayah->id => $nilai($wilayah->id, [$kategori->id]),
+                            ])->all(),
+                            5,
+                            fn ($diskrepansi) => $this->cekStatusKategori($diskrepansi)
+                        );
 
-                        $nilaiProvinsi = $model::where([
-                            'wilayah_id' => $provinsi->id,
-                            'periode_id' => $periode->periode_id,
-                            'jenis_tabel_id' => $jenisTabelId,
-                            $kategoriColumn => $kategori->id,
-                        ])
-                        ->sum('nilai');
-
-
-
-                        $nilaiKabkota = $model::whereIn(
-                            'wilayah_id',
-                            $kabkota->pluck('id')
-                        )
-                        ->where([
-                            'periode_id' => $periode->periode_id,
-                            'jenis_tabel_id' => $jenisTabelId,
-                            $kategoriColumn => $kategori->id,
-                        ])
-                        ->sum('nilai');
-
-
-
-                        $selisih = $nilaiProvinsi - $nilaiKabkota;
-
-
-
-                        $diskrepansi = 0;
-
-
-                        if ($nilaiProvinsi != 0) {
-
-                            $diskrepansi =
-                                abs($selisih)
-                                /
-                                abs($nilaiProvinsi)
-                                *
-                                100;
-
-                        }
-
-
-
-                        $hasil = HasilKonserda::create([
-
-                            'putaran_id' => $putaran->id,
-
-                            'periode_id' => $periode->periode_id,
-
-                            'wilayah_parent_id' => $provinsi->id,
-
-                            'modul_id' => $modul['modul_id'],
-
-                            'jenis_tabel_id' => $jenisTabelId,
-
-                            'kategori_id' => $kategori->id,
-
-                            'nilai_provinsi' => $nilaiProvinsi,
-
-                            'nilai_agregasi_kabkota' => $nilaiKabkota,
-
-                            'selisih' => $selisih,
-
-                            'diskrepansi_persen' => $diskrepansi,
-
-                            'batas_toleransi' => 5,
-
-                            'status' => $this->cekStatusKategori(
-                                $diskrepansi
-                            ),
-
-                        ]);
-
-
-
-                        foreach ($kabkota as $wilayah) {
-
-
-                            $nilai = $model::where([
-                                'wilayah_id' => $wilayah->id,
-                                'periode_id' => $periode->periode_id,
-                                'jenis_tabel_id' => $jenisTabelId,
-                                $kategoriColumn => $kategori->id,
-                            ])
-                            ->sum('nilai');
-
-
-
-                            HasilKonserdaDetail::create([
-
-                                'hasil_konserda_id' => $hasil->id,
-
-                                'wilayah_id' => $wilayah->id,
-
-                                'nilai' => $nilai,
-
-                            ]);
-
-                        }
-
-
-                    } 
+                    }
 
                 }
             }
         }
     }
 
-                        
+
+
+    /*
+    | $nilaiKabkota: [wilayah_id => nilai]
+    */
+    private function simpanHasil(
+        $putaranId,
+        $periodeId,
+        $provinsiId,
+        $modulId,
+        $jenisTabelId,
+        $kategoriId,
+        float $nilaiProvinsi,
+        array $nilaiKabkota,
+        $batasToleransi,
+        callable $cekStatus
+    ): void {
+
+        $nilaiAgregasi = array_sum($nilaiKabkota);
+
+        $selisih = $nilaiProvinsi - $nilaiAgregasi;
+
+
+        $diskrepansi = 0;
+
+
+        if ($nilaiProvinsi != 0) {
+
+            $diskrepansi =
+                abs($selisih)
+                /
+                abs($nilaiProvinsi)
+                *
+                100;
+
+        }
+
+
+        $hasil = HasilKonserda::create([
+
+            'putaran_id' => $putaranId,
+
+            'periode_id' => $periodeId,
+
+            'wilayah_parent_id' => $provinsiId,
+
+            'modul_id' => $modulId,
+
+            'jenis_tabel_id' => $jenisTabelId,
+
+            'kategori_id' => $kategoriId,
+
+            'nilai_provinsi' => $nilaiProvinsi,
+
+            'nilai_agregasi_kabkota' => $nilaiAgregasi,
+
+            'selisih' => $selisih,
+
+            'diskrepansi_persen' => $diskrepansi,
+
+            'batas_toleransi' => $batasToleransi,
+
+            'status' => $cekStatus($diskrepansi),
+
+        ]);
+
+
+        if (empty($nilaiKabkota)) {
+            return;
+        }
+
+
+        $now = now();
+
+        $detail = [];
+
+        foreach ($nilaiKabkota as $wilayahId => $nilai) {
+
+            $detail[] = [
+
+                'hasil_konserda_id' => $hasil->id,
+
+                'wilayah_id' => $wilayahId,
+
+                'nilai' => $nilai,
+
+                'created_at' => $now,
+
+                'updated_at' => $now,
+
+            ];
+
+        }
+
+        HasilKonserdaDetail::insert($detail);
+    }
+
+
 
     private function cekStatusTotal(float $nilai)
     {

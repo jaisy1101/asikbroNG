@@ -19,6 +19,8 @@ use App\Models\DataPdrbPengeluaran;
 use App\Jobs\GenerateDerivedLapanganUsahaJob;
 use App\Jobs\GenerateDerivedPengeluaranJob;
 use App\Services\Integrasi\IntegrasiPdrbService;
+use App\Services\Pdrb\PenyimpananDitolakException;
+use App\Services\Pdrb\PeriodeTerdampak;
 use Illuminate\Support\Facades\Auth;
 
 class SubmissionController extends Controller
@@ -27,7 +29,8 @@ class SubmissionController extends Controller
         Request $request,
         LapanganUsahaImportService $lapanganUsahaImport,
         PengeluaranImportService $pengeluaranImport,
-        IntegrasiPdrbService $integrasi
+        IntegrasiPdrbService $integrasi,
+        PeriodeTerdampak $periodeTerdampakService
     )
     {
         if (!config('features.table_upload_enabled')) {
@@ -124,6 +127,8 @@ class SubmissionController extends Controller
 
                 'modul_id' => $request->modul_id,
 
+                'sumber' => 'excel',
+
                 'versi' => (
                     Submission::where('putaran_id', $putaran->id)
                         ->where('wilayah_id', $wilayahId)
@@ -170,16 +175,19 @@ class SubmissionController extends Controller
             */
 
 
+            $hasilImport = [
+                'jumlah_perubahan' => 0,
+                'periode_berubah' => [],
+            ];
+
+
             if ($submission->modul_id == 1) {
 
 
-                $lapanganUsahaImport->import(
+                $hasilImport = $lapanganUsahaImport->import(
                     $filePath,
                     $submission
                 );
-
-
-                $this->updateMasterLapanganUsaha($submission);
 
 
             }
@@ -189,16 +197,21 @@ class SubmissionController extends Controller
             if ($submission->modul_id == 2) {
 
 
-                $pengeluaranImport->import(
+                $hasilImport = $pengeluaranImport->import(
                     $filePath,
                     $submission
                 );
 
 
-                $this->updateMasterPengeluaran($submission);
-
-
             }
+
+
+
+            $submission->update([
+
+                'jumlah_perubahan' => $hasilImport['jumlah_perubahan'],
+
+            ]);
 
 
 
@@ -236,17 +249,18 @@ class SubmissionController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | AMBIL PERIODE TERDAMPAK REKONSILIASI
+            | AMBIL PERIODE TERDAMPAK
             |--------------------------------------------------------------------------
+            | Periode yang source-nya berubah, ditambah periode yang derived-nya
+            | bergantung pada periode tersebut (QtQ, YtY, CtC).
+            | Tanpa perubahan, derived putaran ini mewarisi hasil sebelumnya.
             */
 
-            $periodeTerdampak = RekonsiliasiPeriode::where(
+            $periodeTerdampak = $periodeTerdampakService->untuk(
 
-                'rekonsiliasi_id',
+                $hasilImport['periode_berubah']
 
-                $rekonsiliasi->id
-
-            )->get();
+            );
 
 
 
@@ -259,14 +273,16 @@ class SubmissionController extends Controller
             if ($submission->modul_id == 1) {
 
 
-                foreach ($periodeTerdampak as $periode) {
+                foreach ($periodeTerdampak as $periodeId) {
 
 
                     GenerateDerivedLapanganUsahaJob::dispatch(
 
                         $submission->wilayah_id,
 
-                        $periode->periode_id
+                        $periodeId,
+
+                        $putaran->id
 
                     );
 
@@ -281,14 +297,16 @@ class SubmissionController extends Controller
             if ($submission->modul_id == 2) {
 
 
-                foreach ($periodeTerdampak as $periode) {
+                foreach ($periodeTerdampak as $periodeId) {
 
 
                     GenerateDerivedPengeluaranJob::dispatch(
 
                         $submission->wilayah_id,
 
-                        $periode->periode_id
+                        $periodeId,
+
+                        $putaran->id
 
                     );
 
@@ -306,8 +324,23 @@ class SubmissionController extends Controller
 
                 'submission_id' => $submission->id,
 
+                'jumlah_perubahan' => $hasilImport['jumlah_perubahan'],
+
             ], 200);
 
+
+
+        } catch (PenyimpananDitolakException $e) {
+
+
+            DB::rollBack();
+
+
+            return response()->json([
+
+                'message' => $e->getMessage(),
+
+            ], 422);
 
 
         } catch (\Throwable $e) {
@@ -373,52 +406,5 @@ class SubmissionController extends Controller
             $file->nama_file
         );
 
-    }
-
-    private function updateMasterLapanganUsaha($submission)
-    {
-        $data = $submission
-            ->dataPdrbLapanganUsaha()
-            ->get();
-
-
-        foreach ($data as $item) {
-
-
-            DataPdrbLapanganUsaha::whereNull('submission_id')
-                ->where('wilayah_id', $item->wilayah_id)
-                ->where('periode_id', $item->periode_id)
-                ->where('jenis_tabel_id', $item->jenis_tabel_id)
-                ->where('kategori_lapus_id', $item->kategori_lapus_id)
-                ->update([
-
-                    'nilai' => $item->nilai
-
-                ]);
-
-        }
-    }
-
-    private function updateMasterPengeluaran($submission)
-    {
-        $data = $submission
-            ->dataPdrbPengeluaran()
-            ->get();
-
-
-        foreach ($data as $item) {
-
-            DataPdrbPengeluaran::whereNull('submission_id')
-                ->where('wilayah_id', $item->wilayah_id)
-                ->where('periode_id', $item->periode_id)
-                ->where('jenis_tabel_id', $item->jenis_tabel_id)
-                ->where('kategori_pengeluaran_id', $item->kategori_pengeluaran_id)
-                ->update([
-
-                    'nilai' => $item->nilai
-
-                ]);
-
-        }
     }
 }

@@ -36,20 +36,23 @@ class WhiteBoxPdrbTest extends TestCase
             'rekonsiliasi'=>['periode_id','status','nama'],
             'rekonsiliasi_periode'=>['rekonsiliasi_id','periode_id'],
             'putaran'=>['rekonsiliasi_id','nomor','status','tanggal_mulai','tanggal_selesai'],
-            'data_pdrb_lapangan_usaha'=>['submission_id','wilayah_id','periode_id','jenis_tabel_id','kategori_lapus_id','nilai','tipe_data'],
-            'data_pdrb_pengeluaran'=>['submission_id','wilayah_id','periode_id','jenis_tabel_id','kategori_pengeluaran_id','nilai','tipe_data'],
+            'data_pdrb_lapangan_usaha'=>['submission_id','putaran_id','wilayah_id','periode_id','jenis_tabel_id','kategori_lapus_id','nilai','tipe_data'],
+            'data_pdrb_pengeluaran'=>['submission_id','putaran_id','wilayah_id','periode_id','jenis_tabel_id','kategori_pengeluaran_id','nilai','tipe_data'],
             'integrasi_pdrb'=>['putaran_id','wilayah_id','periode_id','jenis_tabel_id','total_lapus','total_pengeluaran','selisih','status'],
             'hasil_konserda'=>['putaran_id','periode_id','wilayah_parent_id','modul_id','jenis_tabel_id','kategori_id','nilai_provinsi','nilai_agregasi_kabkota','selisih','diskrepansi_persen','batas_toleransi','status'],
             'hasil_konserda_details'=>['hasil_konserda_id','wilayah_id','nilai'],
         ];
         foreach ($tables as $name=>$columns) {
-            Schema::create($name, function (Blueprint $t) use ($columns) {
+            Schema::create($name, function (Blueprint $t) use ($columns, $name) {
                 $t->id();
                 foreach ($columns as $c) {
                     if (in_array($c,['nilai','total_lapus','total_pengeluaran','selisih','nilai_provinsi','nilai_agregasi_kabkota','diskrepansi_persen','batas_toleransi'])) $t->double($c)->nullable();
                     elseif (str_ends_with($c,'_id') || in_array($c,['tahun','triwulan','nomor'])) $t->integer($c)->nullable();
                     else $t->string($c)->nullable();
                 }
+                // Kolom virtual sesuai database MySQL.
+                if (str_starts_with($name,'data_pdrb_')) $t->integer('versi_key')->virtualAs('coalesce(putaran_id, 0)');
+                if ($name==='data_pdrb_lapangan_usaha') $t->integer('kategori_key')->virtualAs('coalesce(kategori_lapus_id, 0)');
                 $t->timestamps();
             });
         }
@@ -71,10 +74,15 @@ class WhiteBoxPdrbTest extends TestCase
     private function insert(string $t, array $data): int { return DB::table($t)->insertGetId($data); }
     private function table(int $m): string { return $m===1 ? 'data_pdrb_lapangan_usaha' : 'data_pdrb_pengeluaran'; }
     private function column(int $m): string { return $m===1 ? 'kategori_lapus_id' : 'kategori_pengeluaran_id'; }
-    private function data(int $m, float $value, int $kind=2, int $period=1, int $cat=1, int $region=2, string $type='source', ?int $submission=null): void
+    private function data(int $m, float $value, int $kind=2, int $period=1, int $cat=1, int $region=2, string $type='source', ?int $submission=null, ?int $putaran=null): void
     {
         $this->insert($this->table($m),['nilai'=>$value,'jenis_tabel_id'=>$kind,'periode_id'=>$period,
-            $this->column($m)=>$cat,'wilayah_id'=>$region,'tipe_data'=>$type,'submission_id'=>$submission]);
+            $this->column($m)=>$cat,'wilayah_id'=>$region,'tipe_data'=>$type,'submission_id'=>$submission,'putaran_id'=>$putaran]);
+    }
+    // Implisit = ADHB / ADHK x 100, dihitung dari source (ADHK 100 -> implisit = ADHB).
+    private function implisit(int $m, float $value, int $period): void
+    {
+        $this->data($m,$value,1,$period); $this->data($m,100,2,$period);
     }
     private function derived(int $m, int $kind, int $cat=1, int $period=1): mixed
     {
@@ -117,16 +125,28 @@ class WhiteBoxPdrbTest extends TestCase
             $s->hitungQtQ(2,$now); $this->near($n===5?10:20,$this->derived($m,4,1,$now)); return;
         }
         if ($n>=7 && $n<=11) {
+            // Implisit (sumber 7) dihitung dari ADHB/ADHK, bukan dari baris derived Implisit.
+            $put=fn($source,$value,$period)=>$source===7 ? $this->implisit($m,$value,$period) : $this->data($m,$value,$source,$period);
+            if ($n===8 && !DB::table('putaran')->where('id',2)->exists()) $this->insert('putaran',['id'=>2,'rekonsiliasi_id'=>1,'nomor'=>1,'status'=>'berlangsung']);
             foreach (['hitungQtQ'=>[2,4,2],'hitungYtY'=>[2,5,4],'hitungImplisitQtQ'=>[7,8,2],'hitungImplisitYtY'=>[7,9,4]] as $method=>[$source,$out,$prev]) {
                 DB::table($this->table($m))->delete();
                 $this->data($m,77,$out,1,1,2,'derived');
                 if ($n===7) DB::table('periode')->where('id',$prev)->delete();
                 elseif (!DB::table('periode')->where('id',$prev)->exists()) $this->insert('periode',['id'=>$prev,'tahun'=>$prev===2?2026:2025,'triwulan'=>$prev===2?1:2]);
-                if ($n!==8) $this->data($m,$n===11?80:120,$source,1,1,2,$source===7?'derived':'source');
-                if ($n===10 || $n===11) $this->data($m,$n===10?0:100,$source,$prev,1,2,$source===7?'derived':'source');
+                if ($n===8) {
+                    // Source kosong: derived data dasar dan putaran lain tidak boleh tersentuh.
+                    $this->data($m,80,$out,1,1,2,'derived',null,1);
+                    $s->$method(2,1,2);
+                    $q=fn()=>DB::table($this->table($m))->where(['wilayah_id'=>2,'periode_id'=>1,'jenis_tabel_id'=>$out]);
+                    $this->near(77,$q()->whereNull('putaran_id')->value('nilai'));
+                    $this->near(80,$q()->where('putaran_id',1)->value('nilai'));
+                    $this->assertSame(0,$q()->where('putaran_id',2)->count());
+                    continue;
+                }
+                $put($source,$n===11?80:120,1);
+                if ($n===10 || $n===11) $put($source,$n===10?0:100,$prev);
                 $s->$method(2,1);
-                if ($n===8) $this->assertNull($this->derived($m,$out));
-                else $this->near($n===7?77:($n===11?-20:0),$this->derived($m,$out));
+                $this->near($n===7?77:($n===11?-20:0),$this->derived($m,$out));
             }
             return;
         }
@@ -156,7 +176,7 @@ class WhiteBoxPdrbTest extends TestCase
         }
         if ($n===22) {
             foreach (['hitungImplisitQtQ'=>[8,2],'hitungImplisitYtY'=>[9,4]] as $method=>[$out,$prev]) {
-                $this->data($m,120,7,1,1,2,'derived'); $this->data($m,100,7,$prev,1,2,'derived');
+                $this->implisit($m,120,1); $this->implisit($m,100,$prev);
                 $s->$method(2,1); $this->near(20,$this->derived($m,$out));
                 DB::table($this->table($m))->delete();
             } return;
@@ -176,7 +196,8 @@ class WhiteBoxPdrbTest extends TestCase
                 DB::table($this->table($m))->where(['periode_id'=>1,'jenis_tabel_id'=>1,'tipe_data'=>'source'])->update(['nilai'=>150]);
                 DB::table($this->table($m))->where(['periode_id'=>1,'jenis_tabel_id'=>2,'tipe_data'=>'source'])->update(['nilai'=>120]);
                 $s->$method(2,1); $this->assertSame($count,DB::table($this->table($m))->count());
-                $expected=match($out){3=>100,4=>20,5=>20,6=>10,7=>125,8=>0,9=>0};
+                // Implisit QtQ/YtY ikut source terbaru: 125 dibanding 100 = 25%.
+                $expected=match($out){3=>100,4=>20,5=>20,6=>10,7=>125,8=>25,9=>25};
                 $this->near($expected,$this->derived($m,$out));
             } return;
         }
@@ -207,7 +228,9 @@ class WhiteBoxPdrbTest extends TestCase
             $this->near(100,DB::table('integrasi_pdrb')->where(['periode_id'=>1,'jenis_tabel_id'=>2])->value('total_lapus')); return;
         }
         if ($n===9) {
-            foreach ([1,2] as $m) { $this->data($m,60); $this->data($m,40,2,1,2); $this->data($m,20,2,1,3); $this->data($m,500,2,1,1,2,'source',42); }
+            // Revisi 500 milik putaran 2: belum berlaku pada putaran 1.
+            $this->insert('putaran',['id'=>2,'rekonsiliasi_id'=>1,'nomor'=>1,'status'=>'berlangsung']);
+            foreach ([1,2] as $m) { $this->data($m,60); $this->data($m,40,2,1,2); $this->data($m,20,2,1,3); $this->data($m,500,2,1,1,2,'source',42,2); }
         } elseif ($n!==10) {
             [$a,$b]=match($n){5=>[0.05,0],6=>[0,0.05],7=>[0.050001,0],8=>[120,100],11=>[100,0],default=>[100,100]};
             $this->data(1,$a); if ($n!==11) $this->data(2,$b);
@@ -216,7 +239,12 @@ class WhiteBoxPdrbTest extends TestCase
         $s->generate(1,2); $row=DB::table('integrasi_pdrb')->where('jenis_tabel_id',2)->first();
         $this->assertSame(in_array($n,[7,8,11])?'selisih':'sesuai',$row->status);
         $this->near(match($n){5=>0.05,6=>-0.05,7=>0.050001,8=>20,11=>100,default=>0},$row->selisih);
-        if ($n===9) { $this->near(100,$row->total_lapus); $this->near(100,$row->total_pengeluaran); }
+        if ($n===9) {
+            $this->near(100,$row->total_lapus); $this->near(100,$row->total_pengeluaran);
+            // Putaran 2: revisi menggantikan nilai 60 (500 + 40), bukan ditambahkan.
+            $s->generate(2,2); $r2=DB::table('integrasi_pdrb')->where(['putaran_id'=>2,'jenis_tabel_id'=>2])->first();
+            $this->near(540,$r2->total_lapus); $this->near(540,$r2->total_pengeluaran); $this->assertSame('sesuai',$r2->status);
+        }
         if ($n===8) $this->assertSame('sesuai',DB::table('integrasi_pdrb')->where('jenis_tabel_id',1)->value('status'));
         if ($n===10) { $this->near(0,$row->total_lapus); $this->near(0,$row->total_pengeluaran); }
         if ($n===7) {
@@ -300,8 +328,18 @@ class WhiteBoxPdrbTest extends TestCase
         }
         if ($n===24) { DB::table('kategori_lapangan_usaha')->delete(); $s->generate(1); $this->near(0,$this->konserdaResult()->nilai_provinsi); $this->assertSame(2,DB::table('hasil_konserda')->where('modul_id',1)->count()); return; }
         if ($n===25) {
-            $this->data(1,100,1,1,1,1); $this->data(1,50,1,1,1,1,'source',42); $s->generate(1); $this->near(150,$this->konserdaResult()->nilai_provinsi);
-            (new IntegrasiPdrbService)->generate(1,1); $this->near(100,DB::table('integrasi_pdrb')->where('jenis_tabel_id',1)->value('total_lapus')); return;
+            // Data dasar 100, revisi putaran 2 = 50. Konserda dan Integrasi harus sepakat:
+            // putaran 1 = 100, putaran 2 = 50 (menggantikan), putaran 3 = 50 (diwarisi).
+            $this->insert('putaran',['id'=>2,'rekonsiliasi_id'=>1,'nomor'=>1,'status'=>'selesai']);
+            $this->insert('putaran',['id'=>3,'rekonsiliasi_id'=>1,'nomor'=>2,'status'=>'berlangsung']);
+            $this->data(1,100,1,1,1,1); $this->data(1,50,1,1,1,1,'source',42,2);
+            foreach ([1=>100,2=>50,3=>50] as $put=>$want) {
+                $s->generate($put);
+                $this->near($want,DB::table('hasil_konserda')->where(['putaran_id'=>$put,'periode_id'=>1,'modul_id'=>1,'jenis_tabel_id'=>1])->whereNull('kategori_id')->value('nilai_provinsi'));
+                (new IntegrasiPdrbService)->generate($put,1);
+                $this->near($want,DB::table('integrasi_pdrb')->where(['putaran_id'=>$put,'jenis_tabel_id'=>1])->value('total_lapus'));
+            }
+            return;
         }
         if ($n===26) {
             Schema::create('jobs',function(Blueprint $t){$t->id();$t->string('queue');$t->text('payload');$t->integer('attempts');$t->integer('reserved_at')->nullable();$t->integer('available_at');$t->integer('created_at');});

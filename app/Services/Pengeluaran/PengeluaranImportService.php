@@ -4,14 +4,24 @@ namespace App\Services\Pengeluaran;
 
 use App\Models\DataPdrbPengeluaran;
 use App\Models\Periode;
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use App\Models\RekonsiliasiPeriode;
+use App\Services\Pdrb\SourceWriter;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class PengeluaranImportService
 {
+    public function __construct(
+        private SourceWriter $writer
+    ) {
+    }
 
-    public function import($filePath, $submission=null, $wilayahId=null)
+    /*
+    | Dengan submission: mengembalikan
+    |   ['jumlah_perubahan' => int, 'periode_berubah' => int[]]
+    | Tanpa submission (data dasar): mengembalikan hasil kosong.
+    */
+    public function import($filePath, $submission = null, $wilayahId = null)
     {
         $reader = IOFactory::createReader('Xlsx');
         $reader->setReadDataOnly(true);
@@ -19,62 +29,50 @@ class PengeluaranImportService
 
         $spreadsheet = $reader->load($filePath);
 
-        $sheet = $spreadsheet->getActiveSheet();
+        try {
+            $sheet = $spreadsheet->getActiveSheet();
+            $allowedPeriods = [];
 
-        $allowedPeriods = [];
+            if ($submission) {
+                $putaran = $submission->putaran;
 
-        if ($submission) {
+                if (!$putaran) {
+                    throw new \RuntimeException('Putaran submission tidak ditemukan.');
+                }
 
-            $allowedPeriods = RekonsiliasiPeriode::where(
-                'rekonsiliasi_id',
-                $submission->putaran->rekonsiliasi_id
-            )
-            ->with('periode')
-            ->get()
-            ->mapWithKeys(function($item){
+                $allowedPeriods = RekonsiliasiPeriode::where(
+                    'rekonsiliasi_id',
+                    $putaran->rekonsiliasi_id
+                )
+                    ->with('periode')
+                    ->get()
+                    ->mapWithKeys(function ($item) {
+                        return [
+                            $item->periode->tahun . '-' . $item->periode->triwulan => true,
+                        ];
+                    })
+                    ->toArray();
+            }
 
-                return [
-                    $item->periode->tahun . '-' . $item->periode->triwulan => true
-                ];
+            // ADHB
+            $hasilAdhb = $this->importTable(
+                $sheet, 4, 9, 33, 1,
+                $submission, $wilayahId, $allowedPeriods
+            );
 
-            })
-            ->toArray();
+            // ADHK
+            $hasilAdhk = $this->importTable(
+                $sheet, 81, 86, 110, 2,
+                $submission, $wilayahId, $allowedPeriods
+            );
 
+            return SourceWriter::gabungHasil($hasilAdhb, $hasilAdhk);
+        } finally {
+            $spreadsheet->disconnectWorksheets();
+            unset($spreadsheet);
+            gc_collect_cycles();
         }
-
-
-        // Tabel 1 ADHB
-        $this->importTable(
-            $sheet,
-            4,
-            9,
-            33,
-            1,
-            $submission,
-            $wilayahId,
-            $allowedPeriods
-        );
-
-
-        // Tabel 2 ADHK
-        $this->importTable(
-            $sheet,
-            81,
-            86,
-            110,
-            2,
-            $submission,
-            $wilayahId,
-            $allowedPeriods
-        );
-
-        $spreadsheet->disconnectWorksheets();
-        unset($spreadsheet);
-
-        gc_collect_cycles();
     }
-
-
 
     private function importTable(
         $sheet,
@@ -85,274 +83,120 @@ class PengeluaranImportService
         $submission,
         $wilayahId,
         $allowedPeriods
-    )
-    {
-
-        $highestColumn = $sheet->getHighestColumn();
-
-
+    ) {
+        $endColumn = Coordinate::columnIndexFromString($sheet->getHighestColumn());
         $startColumn = Coordinate::columnIndexFromString('D');
-
-        $endColumn = Coordinate::columnIndexFromString($highestColumn);
-
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Cari kolom periode yang dibutuhkan
-        |--------------------------------------------------------------------------
-        */
-
         $columns = [];
 
         for ($col = $startColumn; $col <= $endColumn; $col++) {
-
-
             $column = Coordinate::stringFromColumnIndex($col);
+            $header = $sheet->getCell($column . $headerRow)->getValue();
 
-
-            $header = $sheet
-                ->getCell($column . $headerRow)
-                ->getValue();
-
-
-
-            if (!$header) {
+            if (!$header || str_contains(strtolower((string) $header), 'total')) {
                 continue;
             }
 
-
-
-            if (str_contains(strtolower($header), 'total')) {
-                continue;
-            }
-
-
-
-            $periodeData = $this->parsePeriode($header);
-
-
-
+            $periodeData = $this->parsePeriode((string) $header);
             if (!$periodeData) {
                 continue;
             }
 
-
-
             if ($submission) {
-
                 $key = $periodeData['tahun'] . '-' . $periodeData['triwulan'];
-
-
                 if (!isset($allowedPeriods[$key])) {
                     continue;
                 }
-
             }
 
-
-
             $columns[] = [
-
                 'column' => $column,
-
                 'tahun' => $periodeData['tahun'],
-
                 'triwulan' => $periodeData['triwulan'],
-
             ];
-
-
         }
 
+        $periodeIds = Periode::whereIn('tahun', collect($columns)->pluck('tahun')->unique())
+            ->get()
+            ->keyBy(fn ($item) => $item->tahun . '-' . $item->triwulan);
 
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Ambil periode sekali
-        |--------------------------------------------------------------------------
-        */
-
-
-        $periodeIds = Periode::whereIn(
-            'tahun',
-            collect($columns)
-                ->pluck('tahun')
-                ->unique()
-        )
-        ->get()
-        ->keyBy(function($item){
-
-            return $item->tahun . '-' . $item->triwulan;
-
-        });
-
-
-
-
+        $targetWilayahId = $submission ? $submission->wilayah_id : $wilayahId;
         $rows = [];
 
-
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Baca hanya kolom yang diperlukan
-        |--------------------------------------------------------------------------
-        */
-
         foreach ($columns as $colData) {
-
-
             $key = $colData['tahun'] . '-' . $colData['triwulan'];
-
-
-
             if (!isset($periodeIds[$key])) {
                 continue;
             }
 
-
-
-            $periode = $periodeIds[$key];
-
-
+            $periodeId = $periodeIds[$key]->id;
 
             $kategoriId = 1;
+            for ($row = $startRow; $row <= $endRow; $row++, $kategoriId++) {
+                $nilai = $sheet->getCell($colData['column'] . $row)->getCalculatedValue();
 
-
-
-            for ($row = $startRow; $row <= $endRow; $row++) {
-
-
-
-                $nilai = $sheet
-                    ->getCell($colData['column'] . $row)
-                    ->getCalculatedValue();
-
-
+                // Menjaga perilaku template Excel lama: sel kosong/bukan angka menjadi nol.
                 if ($nilai === null || $nilai === '' || !is_numeric($nilai)) {
-
                     $nilai = 0;
-
                 }
 
-
-
                 $rows[] = [
-
-                    'submission_id' => $submission ? $submission->id : null,
-
-                    'wilayah_id' => $submission ? $submission->wilayah_id : $wilayahId,
-
-                    'periode_id' => $periode->id,
-
+                    'submission_id' => null,
+                    'putaran_id' => null,
+                    'wilayah_id' => $targetWilayahId,
+                    'periode_id' => $periodeId,
                     'jenis_tabel_id' => $jenisTabelId,
-
                     'kategori_pengeluaran_id' => $kategoriId,
-
                     'nilai' => $nilai,
-
                     'tipe_data' => 'source',
-
                     'created_at' => now(),
-
                     'updated_at' => now(),
-
                 ];
-
-
-
-                $kategoriId++;
-
             }
-
         }
 
-
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Insert sekali
-        |--------------------------------------------------------------------------
-        */
-
-        if (count($rows) > 0) {
-
-            DataPdrbPengeluaran::upsert(
-                $rows,
-                [
-                    'wilayah_id',
-                    'periode_id',
-                    'jenis_tabel_id',
-                    'kategori_pengeluaran_id',
-                    'tipe_data'
-                ],
-                [
-                    'nilai',
-                    'updated_at'
-                ]
-            );
-
-        }
-
-        unset($rows);
-        gc_collect_cycles();
-
-    }
-
-
-
-    private function parsePeriode($header)
-    {
-
-        // contoh:
-        // I-2018
-
-
-        $parts = explode('-', $header);
-
-
-
-        if (count($parts) != 2) {
+        if (empty($rows)) {
             return null;
         }
 
+        if (!$submission) {
+            // Data dasar tidak boleh tertimpa.
+            DataPdrbPengeluaran::insertOrIgnore($rows);
+            return null;
+        }
 
+        // Revisi putaran: aturan simpan mengikuti SourceWriter
+        // (sama dengan input form).
+        return $this->writer->simpan(
+            $submission,
+            $jenisTabelId,
+            array_map(fn ($row) => [
+                'periode_id' => $row['periode_id'],
+                'kategori_id' => $row['kategori_pengeluaran_id'],
+                'nilai' => $row['nilai'],
+            ], $rows)
+        );
+    }
 
-        $triwulan = match(trim($parts[0])) {
+    private function parsePeriode($header)
+    {
+        $parts = explode('-', $header);
+        if (count($parts) !== 2) {
+            return null;
+        }
 
+        $triwulan = match (trim($parts[0])) {
             'I' => 1,
             'II' => 2,
             'III' => 3,
             'IV' => 4,
-
-            default => null
-
+            default => null,
         };
 
-
-
         $tahun = intval($parts[1]);
-
-
-
         if (!$triwulan || !$tahun) {
             return null;
         }
 
-
-
-        return [
-
-            'tahun' => $tahun,
-
-            'triwulan' => $triwulan,
-
-        ];
-
+        return ['tahun' => $tahun, 'triwulan' => $triwulan];
     }
-
 }

@@ -8,6 +8,14 @@ use App\Models\Rekonsiliasi;
 use App\Models\Periode;
 use App\Models\DataPdrbLapanganUsaha;
 use App\Models\DataPdrbPengeluaran;
+use App\Models\JenisTabelPdrb;
+use App\Models\KategoriLapanganUsaha;
+use App\Models\KategoriPengeluaran;
+use App\Models\Putaran;
+use App\Models\RekonsiliasiPeriode;
+use App\Services\Pdrb\EffectiveValueService;
+use App\Services\Pdrb\PdrbModul;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PdrbTableController extends Controller
@@ -126,57 +134,128 @@ class PdrbTableController extends Controller
 
     }
 
-    public function showLapanganUsaha($wilayah_id, $jenis_tabel_id)
+    /*
+    |--------------------------------------------------------------------------
+    | TABEL PDRB BERDASARKAN NILAI EFEKTIF
+    |--------------------------------------------------------------------------
+    |
+    | Tanpa ?putaran_id : kondisi terbaru (termasuk putaran yang berlangsung).
+    | Dengan ?putaran_id: histori, nilai efektif pada putaran tersebut.
+    |
+    | Periode dibatasi sampai triwulan rekonsiliasi terkait (rekonsiliasi
+    | berlangsung untuk kondisi terbaru, rekonsiliasi putaran untuk histori).
+    |
+    | periode_terbuka: periode yang boleh diunggah/diedit, hanya terisi pada
+    | kondisi terbaru ketika ada putaran berlangsung.
+    |
+    */
+
+    public function showLapanganUsaha(Request $request, $wilayah_id, $jenis_tabel_id)
+    {
+        return $this->tabel(
+            $request,
+            PdrbModul::LAPANGAN_USAHA,
+            $wilayah_id,
+            $jenis_tabel_id
+        );
+    }
+
+    public function showPengeluaran(Request $request, $wilayah_id, $jenis_tabel_id)
+    {
+        return $this->tabel(
+            $request,
+            PdrbModul::PENGELUARAN,
+            $wilayah_id,
+            $jenis_tabel_id
+        );
+    }
+
+
+    private function tabel(Request $request, int $modulId, $wilayah_id, $jenis_tabel_id)
     {
         if (Auth::check() && Auth::user()->role_id == 2) {
             $wilayah_id = Auth::user()->wilayah_id;
         }
 
-        $rekonsiliasi = Rekonsiliasi::where('status', 'berlangsung')
-            ->latest('id')
-            ->first();
+        $putaranId = $request->filled('putaran_id')
+            ? (int) $request->query('putaran_id')
+            : null;
 
+        $periodeTerbuka = [];
 
-        $periodeAktif = null;
+        if ($putaranId !== null) {
 
-        if ($rekonsiliasi) {
-            $periodeAktif = $rekonsiliasi->periode;
+            $putaran = Putaran::with('rekonsiliasi.periode')->find($putaranId);
+
+            if (!$putaran) {
+                return response()->json([
+                    'message' => 'Putaran tidak ditemukan',
+                ], 404);
+            }
+
+            $periodeBatas = $putaran->rekonsiliasi?->periode;
+
+        } else {
+
+            $rekonsiliasi = Rekonsiliasi::where('status', 'berlangsung')
+                ->latest('id')
+                ->first();
+
+            $periodeBatas = $rekonsiliasi?->periode;
+
+            $putaranAktif = $rekonsiliasi
+                ? Putaran::where('rekonsiliasi_id', $rekonsiliasi->id)
+                    ->where('status', 'berlangsung')
+                    ->first()
+                : null;
+
+            if ($putaranAktif) {
+                $periodeTerbuka = RekonsiliasiPeriode::where('rekonsiliasi_id', $rekonsiliasi->id)
+                    ->with('periode')
+                    ->get()
+                    ->sortBy(fn ($item) => [$item->periode->tahun, $item->periode->triwulan])
+                    ->map(fn ($item) => $this->labelPeriode($item->periode))
+                    ->values()
+                    ->all();
+            }
         }
 
-
-        $data = DataPdrbLapanganUsaha::where('wilayah_id', $wilayah_id)
-            ->where('jenis_tabel_id', $jenis_tabel_id)
-            ->when($periodeAktif, function ($query) use ($periodeAktif) {
-
-                $query->whereHas('periode', function ($q) use ($periodeAktif) {
-
-                    $q->where('tahun', '<', $periodeAktif->tahun)
-                    ->orWhere(function ($q2) use ($periodeAktif) {
-
-                        $q2->where('tahun', $periodeAktif->tahun)
-                        ->where('triwulan', '<=', $periodeAktif->triwulan);
-
-                    });
-
+        $periodeList = Periode::query()
+            ->when($periodeBatas, function ($query) use ($periodeBatas) {
+                $query->where(function ($q) use ($periodeBatas) {
+                    $q->where('tahun', '<', $periodeBatas->tahun)
+                        ->orWhere(function ($q2) use ($periodeBatas) {
+                            $q2->where('tahun', $periodeBatas->tahun)
+                                ->where('triwulan', '<=', $periodeBatas->triwulan);
+                        });
                 });
-
             })
-            ->with([
-                'periode',
-                'kategori.parent'
-            ])
-            ->get();
+            ->get()
+            ->keyBy('id');
 
+        $tipeData = JenisTabelPdrb::whereKey($jenis_tabel_id)->value('tipe_data') ?? 'source';
 
+        $effective = app(EffectiveValueService::class);
+
+        $data = $tipeData === 'derived'
+            ? $effective->derived($modulId, $wilayah_id, $periodeList->keys()->all(), [$jenis_tabel_id], $putaranId)
+            : $effective->source($modulId, $wilayah_id, $periodeList->keys()->all(), [$jenis_tabel_id], $putaranId);
+
+        $kategoriModel = $modulId === PdrbModul::LAPANGAN_USAHA
+            ? KategoriLapanganUsaha::class
+            : KategoriPengeluaran::class;
+
+        $kategoriList = $kategoriModel::all()->keyBy('id');
+
+        $kategoriColumn = PdrbModul::kategoriColumn($modulId);
 
         $result = $data
-            ->groupBy('kategori_lapus_id')
-            ->map(function ($items) {
+            ->groupBy(fn ($item) => PdrbModul::kategoriKey($item->{$kategoriColumn}))
+            ->map(function ($items, $kategoriKey) use ($kategoriList, $periodeList) {
 
                 $row = [];
 
-                $kategori = $items->first()->kategori;
-
+                $kategori = $kategoriList->get($kategoriKey);
 
                 if ($kategori === null) {
 
@@ -196,21 +275,23 @@ class PdrbTableController extends Controller
 
                 }
 
-
                 foreach ($items as $item) {
 
-                    $periode =
-                        $item->periode->tahun .
-                        ' Q' .
-                        $item->periode->triwulan;
-
-                    $row[$periode] = $item->nilai;
+                    $row[$this->labelPeriode($periodeList[$item->periode_id])] = $item->nilai;
 
                 }
 
+                $row['_urutan'] = $kategori
+                    ? [$kategori->urutan, $kategori->id]
+                    : [-1, 0];
 
                 return $row;
 
+            })
+            ->sortBy('_urutan')
+            ->map(function ($row) {
+                unset($row['_urutan']);
+                return $row;
             })
             ->values();
 
@@ -222,108 +303,20 @@ class PdrbTableController extends Controller
 
             'jenis_tabel_id' => $jenis_tabel_id,
 
+            'putaran_id' => $putaranId,
+
+            'periode_terbuka' => $periodeTerbuka,
+
             'table' => $result
 
         ]);
 
     }
 
-    public function showPengeluaran($wilayah_id, $jenis_tabel_id)
+
+    private function labelPeriode($periode): string
     {
-        if (Auth::check() && Auth::user()->role_id == 2) {
-            $wilayah_id = Auth::user()->wilayah_id;
-        }
-        $rekonsiliasi = Rekonsiliasi::where('status', 'berlangsung')
-            ->latest('id')
-            ->first();
-
-
-        $periodeAktif = null;
-
-        if ($rekonsiliasi) {
-            $periodeAktif = $rekonsiliasi->periode;
-        }
-
-
-
-        $data = DataPdrbPengeluaran::where('wilayah_id', $wilayah_id)
-            ->where('jenis_tabel_id', $jenis_tabel_id)
-            ->when($periodeAktif, function ($query) use ($periodeAktif) {
-
-                $query->whereHas('periode', function ($q) use ($periodeAktif) {
-
-                    $q->where('tahun', '<', $periodeAktif->tahun)
-                    ->orWhere(function ($q2) use ($periodeAktif) {
-
-                        $q2->where('tahun', $periodeAktif->tahun)
-                        ->where('triwulan', '<=', $periodeAktif->triwulan);
-
-                    });
-
-                });
-
-            })
-            ->with([
-                'periode',
-                'kategori.parent'
-            ])
-            ->get();
-
-
-
-        $result = $data
-            ->groupBy('kategori.id')
-            ->map(function ($items) {
-
-
-                $row = [];
-
-                $kategori = $items->first()->kategori;
-
-
-                $row['kategori'] = $kategori->nama;
-
-                $row['kode'] = $kategori->kode;
-
-                $row['level'] = $kategori->level;
-
-
-
-                foreach ($items as $item) {
-
-
-                    $periode =
-                        $item->periode->tahun .
-                        ' Q' .
-                        $item->periode->triwulan;
-
-
-
-                    $row[$periode] = $item->nilai;
-
-
-                }
-
-
-
-                return $row;
-
-
-            })
-            ->values();
-
-
-
-        return response()->json([
-
-            'wilayah_id' => $wilayah_id,
-
-            'jenis_tabel_id' => $jenis_tabel_id,
-
-            'table' => $result
-
-        ]);
-
+        return $periode->tahun . ' Q' . $periode->triwulan;
     }
-    
+
 }

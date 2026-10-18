@@ -3,650 +3,769 @@
 namespace App\Services\Derived;
 
 use App\Models\DataPdrbLapanganUsaha;
+use App\Models\Periode;
+use App\Models\Putaran;
+use App\Services\Pdrb\EffectiveValueService;
+use App\Services\Pdrb\PdrbModul;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class DerivedLapanganUsaha
 {
+    /*
+    |--------------------------------------------------------------------------
+    | IDENTITAS KATEGORI
+    |--------------------------------------------------------------------------
+    */
 
-    public function hitungDistribusi($wilayahId, $periodeId)
+    private function kategoriKey($kategoriId): string
     {
-
-        DB::transaction(function () use ($wilayahId, $periodeId) {
-
-
-            // 1. Ambil ADHB source
-            $source = DataPdrbLapanganUsaha::where([
-                'wilayah_id' => $wilayahId,
-                'periode_id' => $periodeId,
-                'jenis_tabel_id' => 1, // ADHB
-                'tipe_data' => 'source'
-            ])
-            ->get();
-
-
-            if ($source->isEmpty()) {
-                return;
-            }
-
-
-            // 2. Ambil kategori parent untuk total PDRB
-            $totalPdrb = $source
-                ->filter(function ($item) {
-
-                    return $item->kategori 
-                        && $item->kategori->parent_id === null;
-
-                })
-                ->sum('nilai');
-
-            if ($totalPdrb == 0) {
-                return;
-            }
-
-
-
-            // 3. Hapus derived distribusi lama
-            DataPdrbLapanganUsaha::where([
-                'wilayah_id' => $wilayahId,
-                'periode_id' => $periodeId,
-                'jenis_tabel_id' => 3
-            ])
-            ->delete();
-
-
-
-            // 4. Buat hasil distribusi
-            foreach ($source as $item) {
-
-
-                $nilaiDistribusi =
-                    ($item->nilai / $totalPdrb) * 100;
-
-
-
-                DataPdrbLapanganUsaha::create([
-
-                    'submission_id' => null,
-
-                    'wilayah_id' => $wilayahId,
-
-                    'periode_id' => $periodeId,
-
-                    'jenis_tabel_id' => 3,
-
-                    'kategori_lapus_id' => $item->kategori_lapus_id,
-
-                    'nilai' => round($nilaiDistribusi,6),
-
-                    'tipe_data' => 'derived'
-
-                ]);
-
-            }
-
-
-        });
-
+        return $kategoriId === null
+            ? '__TOTAL__'
+            : (string) $kategoriId;
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | AMBIL SOURCE EFEKTIF BERDASARKAN PUTARAN
+    |--------------------------------------------------------------------------
+    |
+    | Mengikuti EffectiveValueService: data dasar ditimpa revisi semua
+    | putaran dengan putaran.id <= putaran target, lintas rekonsiliasi.
+    |
+    | Tanpa putaran (NULL) = derived data dasar, sehingga hanya
+    | source data dasar yang dipakai.
+    |
+    */
+
+    private function getEffectiveSource(
+        $wilayahId,
+        $periodeId,
+        $jenisTabelId,
+        $putaranId = null
+    ): Collection {
+
+        if ($putaranId !== null && !Putaran::whereKey($putaranId)->exists()) {
+            throw new \InvalidArgumentException(
+                'Putaran untuk perhitungan derived tidak ditemukan.'
+            );
+        }
+
+        return app(EffectiveValueService::class)
+            ->source(
+                PdrbModul::LAPANGAN_USAHA,
+                $wilayahId,
+                [$periodeId],
+                [$jenisTabelId],
+                $putaranId === null ? 0 : (int) $putaranId
+            )
+            ->keyBy(function ($item) {
+                return $this->kategoriKey(
+                    $item->kategori_lapus_id
+                );
+            });
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | HITUNG NILAI IMPLISIT EFEKTIF
+    |--------------------------------------------------------------------------
+    |
+    | Digunakan juga untuk menghitung perubahan implisit
+    | tanpa bergantung pada hasil derived putaran lain.
+    |
+    */
+
+    private function getEffectiveImplicitValues(
+        $wilayahId,
+        $periodeId,
+        $putaranId = null
+    ): Collection {
+
+        $adhb = $this->getEffectiveSource(
+            $wilayahId,
+            $periodeId,
+            1,
+            $putaranId
+        );
+
+        $adhk = $this->getEffectiveSource(
+            $wilayahId,
+            $periodeId,
+            2,
+            $putaranId
+        );
+
+        $result = collect();
+
+        foreach ($adhb as $key => $item) {
+
+            $dataAdhk = $adhk->get($key);
+
+            if (!$dataAdhk) {
+                continue;
+            }
+
+            $nilai = $dataAdhk->nilai == 0
+                ? 0
+                : ($item->nilai / $dataAdhk->nilai) * 100;
+
+            $result[$key] = [
+                'kategori_lapus_id' => $item->kategori_lapus_id,
+                'nilai' => round($nilai, 6),
+            ];
+        }
+
+        return $result;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SIMPAN HASIL DERIVED
+    |--------------------------------------------------------------------------
+    |
+    | Penghapusan dibatasi pada jenis tabel, wilayah, periode,
+    | dan putaran yang sedang dihitung.
+    |
+    */
+
+    private function persistDerived(
+        $wilayahId,
+        $periodeId,
+        $jenisTabelId,
+        $putaranId,
+        array $rows
+    ): void {
+
+        DB::transaction(function () use (
+            $wilayahId,
+            $periodeId,
+            $jenisTabelId,
+            $putaranId,
+            $rows
+        ) {
+
+            $query = DataPdrbLapanganUsaha::where([
+                'wilayah_id' => $wilayahId,
+                'periode_id' => $periodeId,
+                'jenis_tabel_id' => $jenisTabelId,
+                'tipe_data' => 'derived',
+            ]);
+
+            if ($putaranId === null) {
+                $query->whereNull('putaran_id');
+            } else {
+                $query->where('putaran_id', $putaranId);
+            }
+
+            $query->delete();
+
+            if (!empty($rows)) {
+                DataPdrbLapanganUsaha::insert($rows);
+            }
+        });
+    }
+
+
+    private function makeDerivedRow(
+        $wilayahId,
+        $periodeId,
+        $jenisTabelId,
+        $kategoriId,
+        $nilai,
+        $putaranId
+    ): array {
+
+        $now = now();
+
+        return [
+            'submission_id' => null,
+            'putaran_id' => $putaranId,
+            'wilayah_id' => $wilayahId,
+            'periode_id' => $periodeId,
+            'jenis_tabel_id' => $jenisTabelId,
+            'kategori_lapus_id' => $kategoriId,
+            'nilai' => round($nilai, 6),
+            'tipe_data' => 'derived',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ];
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | DISTRIBUSI
+    |--------------------------------------------------------------------------
+    */
+
+    public function hitungDistribusi(
+        $wilayahId,
+        $periodeId,
+        $putaranId = null
+    ): void {
+
+        $source = $this->getEffectiveSource(
+            $wilayahId,
+            $periodeId,
+            1,
+            $putaranId
+        );
+
+        if ($source->isEmpty()) {
+            return;
+        }
+
+        $totalPdrb = $source
+            ->filter(function ($item) {
+                return $item->kategori
+                    && $item->kategori->parent_id === null;
+            })
+            ->sum('nilai');
+
+        if ($totalPdrb == 0) {
+            return;
+        }
+
+        $rows = [];
+
+        foreach ($source as $item) {
+
+            $nilaiDistribusi =
+                ($item->nilai / $totalPdrb) * 100;
+
+            $rows[] = $this->makeDerivedRow(
+                $wilayahId,
+                $periodeId,
+                3,
+                $item->kategori_lapus_id,
+                $nilaiDistribusi,
+                $putaranId
+            );
+        }
+
+        $this->persistDerived(
+            $wilayahId,
+            $periodeId,
+            3,
+            $putaranId,
+            $rows
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | PERIODE SEBELUMNYA UNTUK QTQ
+    |--------------------------------------------------------------------------
+    */
 
     private function getPeriodeQtQ($periodeId)
     {
-        $periode = \App\Models\Periode::find($periodeId);
+        $periode = Periode::find($periodeId);
 
         if (!$periode) {
             return null;
         }
 
-
         if ($periode->triwulan == 1) {
 
-            return \App\Models\Periode::where('tahun', $periode->tahun - 1)
+            return Periode::where(
+                'tahun',
+                $periode->tahun - 1
+            )
                 ->where('triwulan', 4)
                 ->first();
-
         }
 
-
-        return \App\Models\Periode::where('tahun', $periode->tahun)
+        return Periode::where('tahun', $periode->tahun)
             ->where('triwulan', $periode->triwulan - 1)
             ->first();
-
     }
 
-    public function hitungQtQ($wilayahId, $periodeId)
-    {
 
-        $periodeSebelumnya = $this->getPeriodeQtQ($periodeId);
+    /*
+    |--------------------------------------------------------------------------
+    | QTQ
+    |--------------------------------------------------------------------------
+    */
+
+    public function hitungQtQ(
+        $wilayahId,
+        $periodeId,
+        $putaranId = null
+    ): void {
+
+        $periodeSebelumnya = $this->getPeriodeQtQ(
+            $periodeId
+        );
 
         if (!$periodeSebelumnya) {
             return;
         }
-        
-        DataPdrbLapanganUsaha::where([
-            'wilayah_id' => $wilayahId,
-            'periode_id' => $periodeId,
-            'jenis_tabel_id' => 4,
-            'tipe_data' => 'derived'
-        ])->delete();
 
+        $sourceSekarang = $this->getEffectiveSource(
+            $wilayahId,
+            $periodeId,
+            2,
+            $putaranId
+        );
 
-        $sourceSekarang = DataPdrbLapanganUsaha::where([
-            'wilayah_id' => $wilayahId,
-            'periode_id' => $periodeId,
-            'jenis_tabel_id' => 2,
-            'tipe_data' => 'source'
-        ])->get();
-
-
-        $sourceSebelumnya = DataPdrbLapanganUsaha::where([
-            'wilayah_id' => $wilayahId,
-            'periode_id' => $periodeSebelumnya->id,
-            'jenis_tabel_id' => 2,
-            'tipe_data' => 'source'
-        ])
-        ->get()
-        ->keyBy('kategori_lapus_id');
-
-
-
-        foreach ($sourceSekarang as $item) {
-
-
-            $sebelumnya = $sourceSebelumnya[$item->kategori_lapus_id] ?? null;
-
-
-            if (!$sebelumnya || $sebelumnya->nilai == 0) {
-
-                $qtq = 0;
-
-            } else {
-
-                $qtq =
-                    (($item->nilai / $sebelumnya->nilai) * 100) - 100;
-
-            }
-
-            DataPdrbLapanganUsaha::create([
-
-                'submission_id' => null,
-
-                'wilayah_id' => $wilayahId,
-
-                'periode_id' => $periodeId,
-
-                'jenis_tabel_id' => 4,
-
-                'kategori_lapus_id' => $item->kategori_lapus_id,
-
-                'nilai' => round($qtq,6),
-
-                'tipe_data' => 'derived'
-
-            ]);
-
+        if ($sourceSekarang->isEmpty()) {
+            return;
         }
 
+        $sourceSebelumnya = $this->getEffectiveSource(
+            $wilayahId,
+            $periodeSebelumnya->id,
+            2,
+            $putaranId
+        );
+
+        $rows = [];
+
+        foreach ($sourceSekarang as $key => $item) {
+
+            $sebelumnya = $sourceSebelumnya->get($key);
+
+            if (!$sebelumnya || $sebelumnya->nilai == 0) {
+                $qtq = 0;
+            } else {
+                $qtq = (
+                    ($item->nilai / $sebelumnya->nilai) * 100
+                ) - 100;
+            }
+
+            $rows[] = $this->makeDerivedRow(
+                $wilayahId,
+                $periodeId,
+                4,
+                $item->kategori_lapus_id,
+                $qtq,
+                $putaranId
+            );
+        }
+
+        $this->persistDerived(
+            $wilayahId,
+            $periodeId,
+            4,
+            $putaranId,
+            $rows
+        );
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | PERIODE TAHUN SEBELUMNYA UNTUK YTY
+    |--------------------------------------------------------------------------
+    */
 
     private function getPeriodeYtY($periodeId)
     {
-        $periode = \App\Models\Periode::find($periodeId);
+        $periode = Periode::find($periodeId);
 
         if (!$periode) {
             return null;
         }
 
-
-        return \App\Models\Periode::where('tahun', $periode->tahun - 1)
+        return Periode::where(
+            'tahun',
+            $periode->tahun - 1
+        )
             ->where('triwulan', $periode->triwulan)
             ->first();
     }
 
-    public function hitungYtY($wilayahId, $periodeId)
-    {
 
-        $periodeSebelumnya = $this->getPeriodeYtY($periodeId);
+    /*
+    |--------------------------------------------------------------------------
+    | YTY
+    |--------------------------------------------------------------------------
+    */
 
+    public function hitungYtY(
+        $wilayahId,
+        $periodeId,
+        $putaranId = null
+    ): void {
+
+        $periodeSebelumnya = $this->getPeriodeYtY(
+            $periodeId
+        );
 
         if (!$periodeSebelumnya) {
             return;
         }
 
+        $sourceSekarang = $this->getEffectiveSource(
+            $wilayahId,
+            $periodeId,
+            2,
+            $putaranId
+        );
 
-        $sourceSekarang = DataPdrbLapanganUsaha::where([
-            'wilayah_id' => $wilayahId,
-            'periode_id' => $periodeId,
-            'jenis_tabel_id' => 2,
-            'tipe_data' => 'source'
-        ])
-        ->get();
-
-
-
-        $sourceTahunLalu = DataPdrbLapanganUsaha::where([
-            'wilayah_id' => $wilayahId,
-            'periode_id' => $periodeSebelumnya->id,
-            'jenis_tabel_id' => 2,
-            'tipe_data' => 'source'
-        ])
-        ->get()
-        ->keyBy('kategori_lapus_id');
-
-
-
-        // hapus hasil lama
-        DataPdrbLapanganUsaha::where([
-            'wilayah_id' => $wilayahId,
-            'periode_id' => $periodeId,
-            'jenis_tabel_id' => 5
-        ])
-        ->delete();
-
-
-
-        foreach ($sourceSekarang as $item) {
-
-
-            $tahunLalu = $sourceTahunLalu[$item->kategori_lapus_id] ?? null;
-
-
-            if (!$tahunLalu || $tahunLalu->nilai == 0) {
-
-                $yty = 0;
-
-            } else {
-
-                $yty =
-                    (($item->nilai / $tahunLalu->nilai) * 100) - 100;
-
-            }
-
-            DataPdrbLapanganUsaha::create([
-
-                'submission_id' => null,
-
-                'wilayah_id' => $wilayahId,
-
-                'periode_id' => $periodeId,
-
-                'jenis_tabel_id' => 5,
-
-                'kategori_lapus_id' => $item->kategori_lapus_id,
-
-                'nilai' => round($yty,6),
-
-                'tipe_data' => 'derived'
-
-            ]);
-
+        if ($sourceSekarang->isEmpty()) {
+            return;
         }
 
+        $sourceTahunLalu = $this->getEffectiveSource(
+            $wilayahId,
+            $periodeSebelumnya->id,
+            2,
+            $putaranId
+        );
+
+        $rows = [];
+
+        foreach ($sourceSekarang as $key => $item) {
+
+            $tahunLalu = $sourceTahunLalu->get($key);
+
+            if (!$tahunLalu || $tahunLalu->nilai == 0) {
+                $yty = 0;
+            } else {
+                $yty = (
+                    ($item->nilai / $tahunLalu->nilai) * 100
+                ) - 100;
+            }
+
+            $rows[] = $this->makeDerivedRow(
+                $wilayahId,
+                $periodeId,
+                5,
+                $item->kategori_lapus_id,
+                $yty,
+                $putaranId
+            );
+        }
+
+        $this->persistDerived(
+            $wilayahId,
+            $periodeId,
+            5,
+            $putaranId,
+            $rows
+        );
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | PERIODE KUMULATIF UNTUK CTC
+    |--------------------------------------------------------------------------
+    */
 
     private function getPeriodeCTC($tahun, $triwulan)
     {
-        return \App\Models\Periode::where('tahun', $tahun)
+        return Periode::where('tahun', $tahun)
             ->where('triwulan', '<=', $triwulan)
             ->get();
     }
 
-    public function hitungCtC($wilayahId, $periodeId)
-    {
 
-        $periode = \App\Models\Periode::find($periodeId);
+    /*
+    |--------------------------------------------------------------------------
+    | CTC
+    |--------------------------------------------------------------------------
+    */
 
+    public function hitungCtC(
+        $wilayahId,
+        $periodeId,
+        $putaranId = null
+    ): void {
+
+        $periode = Periode::find($periodeId);
 
         if (!$periode) {
             return;
         }
-
 
         $periodeSekarang = $this->getPeriodeCTC(
             $periode->tahun,
             $periode->triwulan
         );
 
-
         $periodeTahunLalu = $this->getPeriodeCTC(
             $periode->tahun - 1,
             $periode->triwulan
         );
 
+        $sourceSekarang = [];
+        $sourceTahunLalu = [];
 
-        $sourceSekarang = DataPdrbLapanganUsaha::where([
-            'wilayah_id' => $wilayahId,
-            'jenis_tabel_id' => 2,
-            'tipe_data' => 'source'
-        ])
-        ->whereIn(
-            'periode_id',
-            $periodeSekarang->pluck('id')
-        )
-        ->get()
-        ->groupBy('kategori_lapus_id');
+        foreach ($periodeSekarang as $itemPeriode) {
 
+            $source = $this->getEffectiveSource(
+                $wilayahId,
+                $itemPeriode->id,
+                2,
+                $putaranId
+            );
 
+            foreach ($source as $key => $item) {
 
-        $sourceTahunLalu = DataPdrbLapanganUsaha::where([
-            'wilayah_id' => $wilayahId,
-            'jenis_tabel_id' => 2,
-            'tipe_data' => 'source'
-        ])
-        ->whereIn(
-            'periode_id',
-            $periodeTahunLalu->pluck('id')
-        )
-        ->get()
-        ->groupBy('kategori_lapus_id');
+                if (!isset($sourceSekarang[$key])) {
+                    $sourceSekarang[$key] = [
+                        'kategori_lapus_id' => $item->kategori_lapus_id,
+                        'nilai' => 0,
+                    ];
+                }
 
+                $sourceSekarang[$key]['nilai'] += $item->nilai;
+            }
+        }
 
+        foreach ($periodeTahunLalu as $itemPeriode) {
 
-        DataPdrbLapanganUsaha::where([
-            'wilayah_id' => $wilayahId,
-            'periode_id' => $periodeId,
-            'jenis_tabel_id' => 6
-        ])
-        ->delete();
+            $source = $this->getEffectiveSource(
+                $wilayahId,
+                $itemPeriode->id,
+                2,
+                $putaranId
+            );
 
+            foreach ($source as $key => $item) {
 
+                if (!isset($sourceTahunLalu[$key])) {
+                    $sourceTahunLalu[$key] = [
+                        'kategori_lapus_id' => $item->kategori_lapus_id,
+                        'nilai' => 0,
+                    ];
+                }
 
-        foreach ($sourceSekarang as $kategoriId => $dataSekarang) {
+                $sourceTahunLalu[$key]['nilai'] += $item->nilai;
+            }
+        }
 
+        $rows = [];
 
-            $dataLalu = $sourceTahunLalu[$kategoriId] ?? null;
+        foreach ($sourceSekarang as $key => $dataSekarang) {
 
+            $dataLalu = $sourceTahunLalu[$key] ?? null;
 
             if (!$dataLalu) {
                 continue;
             }
 
-
-            $totalSekarang = $dataSekarang->sum('nilai');
-
-            $totalLalu = $dataLalu->sum('nilai');
-
+            $totalSekarang = $dataSekarang['nilai'];
+            $totalLalu = $dataLalu['nilai'];
 
             if ($totalLalu == 0) {
-
                 $ctc = 0;
-
             } else {
-
-                $ctc =
-                    (($totalSekarang / $totalLalu) * 100) - 100;
-
+                $ctc = (
+                    ($totalSekarang / $totalLalu) * 100
+                ) - 100;
             }
 
-            DataPdrbLapanganUsaha::create([
-
-                'submission_id' => null,
-
-                'wilayah_id' => $wilayahId,
-
-                'periode_id' => $periodeId,
-
-                'jenis_tabel_id' => 6,
-
-                'kategori_lapus_id' => $kategoriId,
-
-                'nilai' => round($ctc,6),
-
-                'tipe_data' => 'derived'
-
-            ]);
-
+            $rows[] = $this->makeDerivedRow(
+                $wilayahId,
+                $periodeId,
+                6,
+                $dataSekarang['kategori_lapus_id'],
+                $ctc,
+                $putaranId
+            );
         }
 
+        $this->persistDerived(
+            $wilayahId,
+            $periodeId,
+            6,
+            $putaranId,
+            $rows
+        );
     }
 
-    public function hitungImplisit($wilayahId, $periodeId)
-    {
 
-        $adhb = DataPdrbLapanganUsaha::where([
-            'wilayah_id' => $wilayahId,
-            'periode_id' => $periodeId,
-            'jenis_tabel_id' => 1,
-            'tipe_data' => 'source'
-        ])
-        ->get()
-        ->keyBy('kategori_lapus_id');
+    /*
+    |--------------------------------------------------------------------------
+    | IMPLISIT
+    |--------------------------------------------------------------------------
+    */
 
+    public function hitungImplisit(
+        $wilayahId,
+        $periodeId,
+        $putaranId = null
+    ): void {
 
+        $source = $this->getEffectiveImplicitValues(
+            $wilayahId,
+            $periodeId,
+            $putaranId
+        );
 
-        $adhk = DataPdrbLapanganUsaha::where([
-            'wilayah_id' => $wilayahId,
-            'periode_id' => $periodeId,
-            'jenis_tabel_id' => 2,
-            'tipe_data' => 'source'
-        ])
-        ->get()
-        ->keyBy('kategori_lapus_id');
-
-
-
-        if ($adhb->isEmpty() || $adhk->isEmpty()) {
+        if ($source->isEmpty()) {
             return;
         }
 
+        $rows = [];
 
+        foreach ($source as $item) {
 
-        // hapus hasil lama
-        DataPdrbLapanganUsaha::where([
-            'wilayah_id' => $wilayahId,
-            'periode_id' => $periodeId,
-            'jenis_tabel_id' => 7
-        ])
-        ->delete();
-
-
-
-        foreach ($adhb as $kategoriId => $dataAdhb) {
-
-
-            $dataAdhk = $adhk[$kategoriId] ?? null;
-
-
-            if (!$dataAdhk) {
-                continue;
-            }
-
-
-            if ($dataAdhk->nilai == 0) {
-
-                $implisit = 0;
-
-            } else {
-
-                $implisit =
-                    ($dataAdhb->nilai / $dataAdhk->nilai) * 100;
-
-            }
-
-
-
-            DataPdrbLapanganUsaha::create([
-
-                'submission_id' => null,
-
-                'wilayah_id' => $wilayahId,
-
-                'periode_id' => $periodeId,
-
-                'jenis_tabel_id' => 7,
-
-                'kategori_lapus_id' => $kategoriId,
-
-                'nilai' => round($implisit,6),
-
-                'tipe_data' => 'derived'
-
-            ]);
-
+            $rows[] = $this->makeDerivedRow(
+                $wilayahId,
+                $periodeId,
+                7,
+                $item['kategori_lapus_id'],
+                $item['nilai'],
+                $putaranId
+            );
         }
 
+        $this->persistDerived(
+            $wilayahId,
+            $periodeId,
+            7,
+            $putaranId,
+            $rows
+        );
     }
 
-    public function hitungImplisitQtQ($wilayahId, $periodeId)
-    {
 
-        $periodeSebelumnya = $this->getPeriodeQtQ($periodeId);
+    /*
+    |--------------------------------------------------------------------------
+    | IMPLISIT QTQ
+    |--------------------------------------------------------------------------
+    */
 
+    public function hitungImplisitQtQ(
+        $wilayahId,
+        $periodeId,
+        $putaranId = null
+    ): void {
+
+        $periodeSebelumnya = $this->getPeriodeQtQ(
+            $periodeId
+        );
 
         if (!$periodeSebelumnya) {
             return;
         }
 
+        $sourceSekarang = $this->getEffectiveImplicitValues(
+            $wilayahId,
+            $periodeId,
+            $putaranId
+        );
 
-        $sourceSekarang = DataPdrbLapanganUsaha::where([
-            'wilayah_id' => $wilayahId,
-            'periode_id' => $periodeId,
-            'jenis_tabel_id' => 7,
-            'tipe_data' => 'derived'
-        ])
-        ->get()
-        ->keyBy('kategori_lapus_id');
+        if ($sourceSekarang->isEmpty()) {
+            return;
+        }
 
+        $sourceSebelumnya = $this->getEffectiveImplicitValues(
+            $wilayahId,
+            $periodeSebelumnya->id,
+            $putaranId
+        );
 
+        $rows = [];
 
-        $sourceSebelumnya = DataPdrbLapanganUsaha::where([
-            'wilayah_id' => $wilayahId,
-            'periode_id' => $periodeSebelumnya->id,
-            'jenis_tabel_id' => 7,
-            'tipe_data' => 'derived'
-        ])
-        ->get()
-        ->keyBy('kategori_lapus_id');
+        foreach ($sourceSekarang as $key => $item) {
 
+            $sebelumnya = $sourceSebelumnya->get($key);
 
-
-        DataPdrbLapanganUsaha::where([
-            'wilayah_id' => $wilayahId,
-            'periode_id' => $periodeId,
-            'jenis_tabel_id' => 8
-        ])
-        ->delete();
-
-
-
-        foreach ($sourceSekarang as $kategoriId => $item) {
-
-
-            $sebelumnya = $sourceSebelumnya[$kategoriId] ?? null;
-
-
-            if (!$sebelumnya || $sebelumnya->nilai == 0) {
-
+            if (!$sebelumnya || $sebelumnya['nilai'] == 0) {
                 $qtq = 0;
-
             } else {
-
-                $qtq =
-                    (($item->nilai / $sebelumnya->nilai) * 100) - 100;
-
+                $qtq = (
+                    ($item['nilai'] / $sebelumnya['nilai']) * 100
+                ) - 100;
             }
 
-
-            DataPdrbLapanganUsaha::create([
-
-                'submission_id' => null,
-
-                'wilayah_id' => $wilayahId,
-
-                'periode_id' => $periodeId,
-
-                'jenis_tabel_id' => 8,
-
-                'kategori_lapus_id' => $kategoriId,
-
-                'nilai' => round($qtq,6),
-
-                'tipe_data' => 'derived'
-
-            ]);
-
+            $rows[] = $this->makeDerivedRow(
+                $wilayahId,
+                $periodeId,
+                8,
+                $item['kategori_lapus_id'],
+                $qtq,
+                $putaranId
+            );
         }
 
+        $this->persistDerived(
+            $wilayahId,
+            $periodeId,
+            8,
+            $putaranId,
+            $rows
+        );
     }
 
-    public function hitungImplisitYtY($wilayahId, $periodeId)
-    {
 
-        $periodeSebelumnya = $this->getPeriodeYtY($periodeId);
+    /*
+    |--------------------------------------------------------------------------
+    | IMPLISIT YTY
+    |--------------------------------------------------------------------------
+    */
 
+    public function hitungImplisitYtY(
+        $wilayahId,
+        $periodeId,
+        $putaranId = null
+    ): void {
+
+        $periodeSebelumnya = $this->getPeriodeYtY(
+            $periodeId
+        );
 
         if (!$periodeSebelumnya) {
             return;
         }
 
+        $sourceSekarang = $this->getEffectiveImplicitValues(
+            $wilayahId,
+            $periodeId,
+            $putaranId
+        );
 
-        $sourceSekarang = DataPdrbLapanganUsaha::where([
-            'wilayah_id' => $wilayahId,
-            'periode_id' => $periodeId,
-            'jenis_tabel_id' => 7,
-            'tipe_data' => 'derived'
-        ])
-        ->get()
-        ->keyBy('kategori_lapus_id');
-
-
-
-        $sourceTahunLalu = DataPdrbLapanganUsaha::where([
-            'wilayah_id' => $wilayahId,
-            'periode_id' => $periodeSebelumnya->id,
-            'jenis_tabel_id' => 7,
-            'tipe_data' => 'derived'
-        ])
-        ->get()
-        ->keyBy('kategori_lapus_id');
-
-
-
-        DataPdrbLapanganUsaha::where([
-            'wilayah_id' => $wilayahId,
-            'periode_id' => $periodeId,
-            'jenis_tabel_id' => 9
-        ])
-        ->delete();
-
-
-
-        foreach ($sourceSekarang as $kategoriId => $item) {
-
-
-            $tahunLalu = $sourceTahunLalu[$kategoriId] ?? null;
-
-
-            if (!$tahunLalu || $tahunLalu->nilai == 0) {
-
-                $yty = 0;
-
-            } else {
-
-                $yty =
-                    (($item->nilai / $tahunLalu->nilai) * 100) - 100;
-
-            }
-
-
-            DataPdrbLapanganUsaha::create([
-
-                'submission_id' => null,
-
-                'wilayah_id' => $wilayahId,
-
-                'periode_id' => $periodeId,
-
-                'jenis_tabel_id' => 9,
-
-                'kategori_lapus_id' => $kategoriId,
-
-                'nilai' => round($yty,6),
-
-                'tipe_data' => 'derived'
-
-            ]);
-
+        if ($sourceSekarang->isEmpty()) {
+            return;
         }
 
+        $sourceTahunLalu = $this->getEffectiveImplicitValues(
+            $wilayahId,
+            $periodeSebelumnya->id,
+            $putaranId
+        );
+
+        $rows = [];
+
+        foreach ($sourceSekarang as $key => $item) {
+
+            $tahunLalu = $sourceTahunLalu->get($key);
+
+            if (!$tahunLalu || $tahunLalu['nilai'] == 0) {
+                $yty = 0;
+            } else {
+                $yty = (
+                    ($item['nilai'] / $tahunLalu['nilai']) * 100
+                ) - 100;
+            }
+
+            $rows[] = $this->makeDerivedRow(
+                $wilayahId,
+                $periodeId,
+                9,
+                $item['kategori_lapus_id'],
+                $yty,
+                $putaranId
+            );
+        }
+
+        $this->persistDerived(
+            $wilayahId,
+            $periodeId,
+            9,
+            $putaranId,
+            $rows
+        );
     }
 }

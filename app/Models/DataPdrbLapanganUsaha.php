@@ -10,6 +10,7 @@ class DataPdrbLapanganUsaha extends Model
 
     protected $fillable = [
         'submission_id',
+        'putaran_id',
         'wilayah_id',
         'periode_id',
         'jenis_tabel_id',
@@ -18,24 +19,26 @@ class DataPdrbLapanganUsaha extends Model
         'tipe_data',
     ];
 
-
     public function submission()
     {
         return $this->belongsTo(Submission::class, 'submission_id');
     }
 
-
     public function jenisTabel()
     {
-        return $this->belongsTo(JenisTabelPdrb::class, 'jenis_tabel_id');
+        return $this->belongsTo(
+            JenisTabelPdrb::class,
+            'jenis_tabel_id'
+        );
     }
-
 
     public function kategori()
     {
-        return $this->belongsTo(KategoriLapanganUsaha::class, 'kategori_lapus_id');
+        return $this->belongsTo(
+            KategoriLapanganUsaha::class,
+            'kategori_lapus_id'
+        );
     }
-
 
     public function periode()
     {

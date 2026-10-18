@@ -13,9 +13,11 @@ class Submission extends Model
     'user_id',
     'wilayah_id',
     'modul_id',
+    'sumber',
     'versi',
     'is_aktif',
     'status',
+    'jumlah_perubahan',
     'submitted_at'
     ];
 
