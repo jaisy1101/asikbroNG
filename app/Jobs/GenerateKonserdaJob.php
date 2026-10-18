@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\Putaran;
 use App\Services\Konserda\KonserdaService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -30,10 +31,33 @@ class GenerateKonserdaJob implements ShouldQueue
     )
     {
 
-        $konserda->generate(
-            $this->putaranId
-        );
+        $this->tandai('proses');
 
+        try {
+
+            $konserda->generate(
+                $this->putaranId
+            );
+
+        } catch (\Throwable $e) {
+
+            $this->tandai('gagal');
+
+            throw $e;
+
+        }
+
+        $this->tandai('selesai');
+
+    }
+
+
+    // Status perhitungan Konserda di putaran (ditampilkan di Hasil Konserda).
+    private function tandai(string $status): void
+    {
+        Putaran::whereKey($this->putaranId)->update([
+            'status_konserda' => $status,
+        ]);
     }
 
 }

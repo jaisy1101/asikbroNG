@@ -419,8 +419,8 @@ function ambilTabelPdrb(tahunAkhir){
 
                 <td class="kolom-kategori"
                     style="
-                    padding-left:${(item.level - 1) * 30}px;
-                    font-weight:${item.level == 1 ? 'bold' : 'normal'};
+                    padding-left:${Math.max(item.level - 1, 0) * 30}px;
+                    font-weight:${item.level <= 1 ? 'bold' : 'normal'};
                 ">
 
                     ${item.kode ?? ''}
@@ -463,7 +463,9 @@ function ambilTabelPdrb(tahunAkhir){
                     let q4 = Number(item[`${tahun} Q4`] ?? 0);
 
 
-                    if(q1 || q2 || q3 || q4){
+                    // Total tahunan hanya untuk ADHB/ADHK (triwulan kosong = 0);
+                    // derived tidak dijumlahkan karena perhitungannya berbeda.
+                    if(jenisTabelId == 1 || jenisTabelId == 2){
 
                         nilai = formatAngka(
                             q1 + q2 + q3 + q4

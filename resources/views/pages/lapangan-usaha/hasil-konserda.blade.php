@@ -12,12 +12,21 @@
         </li>
 
         <li class="breadcrumb-item active" aria-current="page">
-            Daftar Tabel
+            Hasil Konserda
         </li>
 
     </ol>
 
 </nav>
+
+
+<div id="info-konserda"></div>
+
+<x-legenda class="mb-3" :items="[
+    ['penanda' => 'blok', 'warna' => '#d1e7dd', 'label' => 'Aman: TOTAL < 2%, kategori < 5%'],
+    ['penanda' => 'blok', 'warna' => '#fff3cd', 'label' => 'Peringatan: TOTAL 2% - < 10%, kategori 5% - < 10%'],
+    ['penanda' => 'blok', 'warna' => '#f8d7da', 'label' => 'Ekstrem: >= 10%'],
+]" />
 
 
 <!-- Filter Section 1 -->
@@ -236,6 +245,8 @@
 
 @section('scripts')
 
+@include('pages.partials.info-konserda')
+
 <script>
 
 let putaranId = null;
@@ -264,7 +275,7 @@ axios.get('/api/rekonsiliasi/status')
 .then(response => {
 
 
-    putaranId = response.data.putaran_terakhir.id;
+    putaranId = tampilkanInfoKonserda(response.data);
 
 
     loadKonserda();
@@ -278,6 +289,10 @@ axios.get('/api/rekonsiliasi/status')
 });
 
 function loadKonserda(){
+
+if(!putaranId){
+    return;
+}
 
 axios.get(
     `/api/konserda/lapangan-usaha/${putaranId}/${jenisTabelId}`
@@ -628,7 +643,8 @@ axios.get(
                 return 'status-aman';
             }
 
-            if(nilai < 5){
+            // Sama dengan KonserdaService::cekStatusTotal.
+            if(nilai < 10){
                 return 'status-peringatan';
             }
 
@@ -915,8 +931,6 @@ document.querySelectorAll('.btn-jenis-tabel')
 
 
 });
-
-loadKonserda();
 
 </script>
 

@@ -15,6 +15,13 @@ class Putaran extends Model
         'status',
         'tanggal_mulai',
         'tanggal_selesai',
+        'status_konserda',
+    ];
+
+    // Disimpan dalam UTC; dikirim ke browser sebagai ISO agar tampil WITA.
+    protected $casts = [
+        'tanggal_mulai' => 'datetime',
+        'tanggal_selesai' => 'datetime',
     ];
 
     public function rekonsiliasi(): BelongsTo

@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\MonitoringController;
 use App\Http\Controllers\Api\PengumumanController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\WilayahController;
+use App\Http\Controllers\Api\EntriTabelController;
 
 //login
 Route::post(
@@ -58,6 +59,11 @@ Route::middleware([
         '/monitoring/{putaranId}/{modulId}',
         [MonitoringController::class,'index']
     );
+
+    Route::get(
+        '/monitoring/{putaranId}/{modulId}/ekspor/{wilayahId}',
+        [MonitoringController::class,'ekspor']
+    )->whereIn('modulId', ['1', '2']);
 
 
     Route::post(
@@ -144,6 +150,21 @@ Route::middleware('auth:sanctum')->group(function () {
         [KonserdaController::class, 'showPengeluaran']
     );
 
+
+    Route::get(
+        '/entri-tabel/{modulId}',
+        [EntriTabelController::class, 'show']
+    )->whereIn('modulId', ['1', '2']);
+
+    Route::get(
+        '/entri-tabel/{modulId}/template',
+        [EntriTabelController::class, 'template']
+    )->whereIn('modulId', ['1', '2']);
+
+    Route::post(
+        '/entri-tabel/{modulId}',
+        [EntriTabelController::class, 'store']
+    )->whereIn('modulId', ['1', '2']);
 
     Route::get(
         '/pengumuman',

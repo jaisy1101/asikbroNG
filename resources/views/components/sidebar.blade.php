@@ -72,10 +72,10 @@
 
             <div class="bg-white py-2 collapse-inner rounded">
 
-                <a class="collapse-item {{ request()->is('pengeluaran/unggah-tabel') ? 'active' : '' }}"
-                   href="/pengeluaran/unggah-tabel">
+                <a class="collapse-item {{ request()->is('pengeluaran/entri-tabel') ? 'active' : '' }}"
+                   href="/pengeluaran/entri-tabel">
 
-                    Unggah Tabel
+                    Entri Tabel
 
                 </a>
 
@@ -131,10 +131,10 @@
 
             <div class="bg-white py-2 collapse-inner rounded">
 
-                <a class="collapse-item {{ request()->is('lapangan-usaha/unggah-tabel') ? 'active' : '' }}"
-                   href="/lapangan-usaha/unggah-tabel">
+                <a class="collapse-item {{ request()->is('lapangan-usaha/entri-tabel') ? 'active' : '' }}"
+                   href="/lapangan-usaha/entri-tabel">
 
-                    Unggah Tabel
+                    Entri Tabel
 
                 </a>
 

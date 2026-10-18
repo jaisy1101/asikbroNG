@@ -9,10 +9,9 @@ use App\Services\Pdrb\EffectiveValueService;
 use App\Services\Pdrb\PenyimpananDitolakException;
 use App\Services\Pdrb\PeriodeTerdampak;
 use App\Services\Pdrb\SourceWriter;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
+use Tests\Feature\Concerns\SkemaPdrbSqlite;
 use Tests\TestCase;
 
 /*
@@ -28,6 +27,8 @@ use Tests\TestCase;
 
 class NilaiEfektifPdrbTest extends TestCase
 {
+    use SkemaPdrbSqlite;
+
     private const WILAYAH = 2;
     private const KATEGORI = 1;
     private const ADHB = 1;
@@ -43,135 +44,7 @@ class NilaiEfektifPdrbTest extends TestCase
     {
         parent::setUp();
 
-        config([
-            'database.default' => 'sqlite',
-            'database.connections.sqlite.database' => ':memory:',
-            'database.connections.sqlite.url' => null,
-            'logging.default' => 'null',
-        ]);
-        DB::purge('sqlite');
-        $this->assertSame(':memory:', DB::connection()->getDatabaseName());
-
-        Schema::create('periode', function (Blueprint $t) {
-            $t->id();
-            $t->integer('tahun');
-            $t->integer('triwulan');
-            $t->timestamps();
-        });
-
-        Schema::create('wilayah', function (Blueprint $t) {
-            $t->id();
-            $t->string('nama')->nullable();
-            $t->string('jenis')->nullable();
-            $t->integer('parent_id')->nullable();
-            $t->timestamps();
-        });
-
-        foreach (['kategori_lapangan_usaha', 'kategori_pengeluaran'] as $tabel) {
-            Schema::create($tabel, function (Blueprint $t) {
-                $t->id();
-                $t->string('kode')->nullable();
-                $t->string('nama');
-                $t->integer('parent_id')->nullable();
-                $t->integer('level')->default(1);
-                $t->integer('urutan')->default(0);
-                $t->timestamps();
-            });
-        }
-
-        Schema::create('jenis_tabel_pdrb', function (Blueprint $t) {
-            $t->id();
-            $t->string('tipe_data');
-            $t->timestamps();
-        });
-
-        Schema::create('rekonsiliasi', function (Blueprint $t) {
-            $t->id();
-            $t->integer('periode_id');
-            $t->string('nama')->nullable();
-            $t->string('status');
-            $t->timestamps();
-        });
-
-        Schema::create('rekonsiliasi_periode', function (Blueprint $t) {
-            $t->id();
-            $t->integer('rekonsiliasi_id');
-            $t->integer('periode_id');
-            $t->timestamps();
-        });
-
-        Schema::create('putaran', function (Blueprint $t) {
-            $t->id();
-            $t->integer('rekonsiliasi_id');
-            $t->integer('nomor');
-            $t->string('status');
-            $t->timestamps();
-        });
-
-        Schema::create('submission', function (Blueprint $t) {
-            $t->id();
-            $t->integer('putaran_id');
-            $t->integer('user_id')->nullable();
-            $t->integer('wilayah_id');
-            $t->integer('modul_id');
-            $t->string('sumber')->default('excel');
-            $t->integer('versi')->default(1);
-            $t->boolean('is_aktif')->default(true);
-            $t->string('status')->nullable();
-            $t->integer('jumlah_perubahan')->nullable();
-            $t->timestamp('submitted_at')->nullable();
-            $t->timestamps();
-        });
-
-        // Struktur sama dengan MySQL: kolom virtual + UNIQUE INDEX per putaran.
-        foreach ([
-            'data_pdrb_lapangan_usaha' => 'kategori_lapus_id',
-            'data_pdrb_pengeluaran' => 'kategori_pengeluaran_id',
-        ] as $tabel => $kategoriColumn) {
-
-            Schema::create($tabel, function (Blueprint $t) use ($tabel, $kategoriColumn) {
-                $t->id();
-                $t->integer('submission_id')->nullable();
-                $t->integer('putaran_id')->nullable();
-                $t->integer('wilayah_id');
-                $t->integer('periode_id');
-                $t->integer('jenis_tabel_id');
-                $t->integer($kategoriColumn)->nullable();
-                $t->double('nilai');
-                $t->string('tipe_data');
-                $t->integer('versi_key')->virtualAs('coalesce(putaran_id, 0)');
-
-                $kunci = $kategoriColumn;
-
-                if ($tabel === 'data_pdrb_lapangan_usaha') {
-                    $t->integer('kategori_key')->virtualAs('coalesce(kategori_lapus_id, 0)');
-                    $kunci = 'kategori_key';
-                }
-
-                $t->unique([
-                    'wilayah_id', 'periode_id', 'jenis_tabel_id',
-                    $kunci, 'tipe_data', 'versi_key',
-                ]);
-
-                $t->timestamps();
-            });
-        }
-
-        foreach ([[2025, 1], [2025, 2], [2025, 3], [2025, 4], [2026, 1], [2026, 2]] as $i => [$tahun, $triwulan]) {
-            DB::table('periode')->insert(['id' => $i + 1, 'tahun' => $tahun, 'triwulan' => $triwulan]);
-        }
-
-        DB::table('wilayah')->insert(['id' => 1, 'nama' => 'Provinsi', 'jenis' => 'provinsi']);
-        DB::table('wilayah')->insert(['id' => self::WILAYAH, 'nama' => 'Kab A', 'jenis' => 'kabupaten', 'parent_id' => 1]);
-
-        foreach (['kategori_lapangan_usaha', 'kategori_pengeluaran'] as $tabel) {
-            DB::table($tabel)->insert(['id' => 1, 'kode' => 'A', 'nama' => 'Kategori A', 'level' => 1, 'urutan' => 1]);
-            DB::table($tabel)->insert(['id' => 2, 'kode' => 'B', 'nama' => 'Kategori B', 'level' => 1, 'urutan' => 2]);
-        }
-
-        foreach (['source', 'source', 'derived'] as $i => $tipe) {
-            DB::table('jenis_tabel_pdrb')->insert(['id' => $i + 1, 'tipe_data' => $tipe]);
-        }
+        $this->buatSkemaPdrb();
     }
 
 
@@ -501,9 +374,14 @@ class NilaiEfektifPdrbTest extends TestCase
         $this->simpan($putaran, 310);
 
         $baca = function (array $query = []) {
-            return app(PdrbTableController::class)
+            $respons = app(PdrbTableController::class)
                 ->showLapanganUsaha(Request::create('/x', 'GET', $query), self::WILAYAH, self::ADHB)
                 ->getData(true);
+
+            // Baris kategori A (baris pertama adalah TOTAL).
+            $respons['table'][0] = collect($respons['table'])->firstWhere('kode', 'A');
+
+            return $respons;
         };
 
         $terbaru = $baca();
@@ -522,5 +400,35 @@ class NilaiEfektifPdrbTest extends TestCase
         $this->assertSame(404, app(PdrbTableController::class)
             ->showLapanganUsaha(Request::create('/x', 'GET', ['putaran_id' => 999]), self::WILAYAH, self::ADHB)
             ->getStatusCode());
+    }
+
+    public function test_api_tabel_baris_total_hanya_untuk_adhb_adhk(): void
+    {
+        // Kategori A dan B sama-sama induk (level 1).
+        $this->dataDasar(300, self::P_2026Q1, 1);
+        $this->dataDasar(200, self::P_2026Q1, 2);
+        $this->dataDasar(50, self::P_2025Q1, 1);
+
+        DB::table('data_pdrb_lapangan_usaha')->insert([
+            'wilayah_id' => self::WILAYAH, 'periode_id' => self::P_2026Q1, 'jenis_tabel_id' => 3,
+            'kategori_lapus_id' => 1, 'nilai' => 60, 'tipe_data' => 'derived',
+        ]);
+
+        $baca = fn (int $jenis) => app(PdrbTableController::class)
+            ->showLapanganUsaha(Request::create('/x', 'GET'), self::WILAYAH, $jenis)
+            ->getData(true)['table'];
+
+        $adhb = $baca(self::ADHB);
+
+        $this->assertSame('TOTAL', $adhb[0]['kategori']);
+        $this->assertSame(0, $adhb[0]['level']);
+        $this->assertEquals(500, $adhb[0]['2026 Q1'], 'A + B.');
+        $this->assertEquals(50, $adhb[0]['2025 Q1'], 'B kosong dianggap 0.');
+        $this->assertArrayNotHasKey('2025 Q2', $adhb[0], 'Periode tanpa data tetap kosong.');
+        $this->assertCount(3, $adhb);
+
+        $distribusi = $baca(3);
+
+        $this->assertNotContains('TOTAL', array_column($distribusi, 'kategori'), 'Derived tidak dijumlahkan.');
     }
 }

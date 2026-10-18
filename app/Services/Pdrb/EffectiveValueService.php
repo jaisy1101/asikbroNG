@@ -94,6 +94,21 @@ class EffectiveValueService
     }
 
 
+    private bool $mentah = false;
+
+    /*
+    | Versi ringan: baris berupa stdClass (bukan model Eloquent) dengan kolom
+    | seperlunya. Nilai efektifnya sama; untuk pembacaan massal (ekspor Excel).
+    */
+    public function mentah(): static
+    {
+        $salinan = clone $this;
+        $salinan->mentah = true;
+
+        return $salinan;
+    }
+
+
     public static function kunci(
         $wilayahId,
         $periodeId,
@@ -121,7 +136,7 @@ class EffectiveValueService
         $model = PdrbModul::model($modulId);
         $kategoriColumn = PdrbModul::kategoriColumn($modulId);
 
-        $rows = $model::query()
+        $query = $model::query()
             ->where('tipe_data', $tipeData)
             ->whereIn('wilayah_id', (array) $wilayahIds)
             ->whereIn('periode_id', (array) $periodeIds)
@@ -145,8 +160,14 @@ class EffectiveValueService
             // Data dasar (versi_key 0) lebih dulu, lalu revisi menurut
             // putaran.id; baris terakhir per sel menjadi nilai efektif.
             ->orderBy('versi_key')
-            ->orderBy('id')
-            ->get();
+            ->orderBy('id');
+
+        $rows = $this->mentah
+            ? $query->toBase()->get([
+                'wilayah_id', 'periode_id', 'jenis_tabel_id',
+                $kategoriColumn, 'nilai', 'putaran_id',
+            ])
+            : $query->get();
 
         $effective = collect();
 

@@ -12,12 +12,21 @@
         </li>
 
         <li class="breadcrumb-item active" aria-current="page">
-            Daftar Tabel
+            Hasil Konserda
         </li>
 
     </ol>
 
 </nav>
+
+
+<div id="info-konserda"></div>
+
+<x-legenda class="mb-3" :items="[
+    ['penanda' => 'blok', 'warna' => '#d1e7dd', 'label' => 'Aman: TOTAL < 2%, kategori < 5%'],
+    ['penanda' => 'blok', 'warna' => '#fff3cd', 'label' => 'Peringatan: TOTAL 2% - < 10%, kategori 5% - < 10%'],
+    ['penanda' => 'blok', 'warna' => '#f8d7da', 'label' => 'Ekstrem: >= 10%'],
+]" />
 
 
 <!-- Filter Section 1 -->
@@ -120,6 +129,7 @@
             <!-- Kanan -->
             <div class="mt-2 mt-md-0">
 
+                {{-- NANTI SAAT STRUKTUR ANTAR DALAM DAN IMPLISIT JADI 
                 <button class="btn btn-success">
 
                     <i class="fas fa-download mr-2"></i>
@@ -127,6 +137,7 @@
                     Unduh Tabel
 
                 </button>
+                --}}
 
             </div>
 
@@ -235,6 +246,8 @@
 
 @section('scripts')
 
+@include('pages.partials.info-konserda')
+
 <script>
 
 let putaranId = null;
@@ -263,7 +276,7 @@ axios.get('/api/rekonsiliasi/status')
 .then(response => {
 
 
-    putaranId = response.data.putaran_terakhir.id;
+    putaranId = tampilkanInfoKonserda(response.data);
 
 
     loadKonserda();
@@ -277,6 +290,10 @@ axios.get('/api/rekonsiliasi/status')
 });
 
 function loadKonserda(){
+
+if(!putaranId){
+    return;
+}
 
 axios.get(
     `/api/konserda/pengeluaran/${putaranId}/${jenisTabelId}`
@@ -394,7 +411,7 @@ axios.get(
 
         header += `
 
-            <th colspan="${periode.length}">
+            <th colspan="${periode.length}" class="group-header">
                 ${wilayah.nama}
             </th>
 
@@ -628,7 +645,8 @@ axios.get(
                 return 'status-aman';
             }
 
-            if(nilai < 5){
+            // Sama dengan KonserdaService::cekStatusTotal.
+            if(nilai < 10){
                 return 'status-peringatan';
             }
 
@@ -709,7 +727,7 @@ axios.get(
                         item?.diskrepansi_persen ?? 0
                     )
                     : getStatusClass(item?.status)
-                }">
+                } ${p === periode[periode.length - 1] ? 'batas-kanan' : ''}">
                     ${formatAngka(item 
                         ? item.diskrepansi_persen 
                         : '-'
@@ -738,7 +756,7 @@ axios.get(
 
                 html += `
 
-                <td class="${getStatusClass(item?.status)}">
+                <td class="${getStatusClass(item?.status)} ${p === periode[periode.length - 1] ? 'batas-kanan' : ''}">
 
                     ${formatAngka(
                         item 
@@ -771,7 +789,7 @@ axios.get(
 
                 html += `
 
-                <td class="${getStatusClass(item?.status)}">
+                <td class="${getStatusClass(item?.status)} ${p === periode[periode.length - 1] ? 'batas-kanan' : ''}">
                     ${formatAngka(item 
                         ? item.nilai_provinsi
                         : '-'
@@ -801,7 +819,7 @@ axios.get(
 
                 html += `
 
-                <td class="${getStatusClass(item?.status)}">
+                <td class="${getStatusClass(item?.status)} ${p === periode[periode.length - 1] ? 'batas-kanan' : ''}">
                     ${formatAngka(item 
                         ? item.nilai_agregasi_kabkota
                         : '-'
@@ -840,7 +858,11 @@ axios.get(
 
                     html += `
 
-                    <td class="${getStatusClass(item?.status)}">
+                    <td class="${getStatusClass(item?.status)} ${
+                        p === periode[periode.length - 1]
+                        ? 'batas-kanan'
+                        : ''
+                    }">
                         ${detail
                             ? detail.nilai
                             : '-'
@@ -915,8 +937,6 @@ document.querySelectorAll('.btn-jenis-tabel')
 
 
 });
-
-loadKonserda();
 
 </script>
 

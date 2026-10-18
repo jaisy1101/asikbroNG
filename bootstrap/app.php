@@ -19,6 +19,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
             'user' => \App\Http\Middleware\UserMiddleware::class,
 
+            'putaran.berlangsung' => \App\Http\Middleware\PutaranBerlangsungMiddleware::class,
+
         ]);
 
     })

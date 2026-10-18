@@ -99,9 +99,12 @@ Route::middleware('auth')
 
 
         Route::view(
-            '/unggah-tabel',
-            'pages.pengeluaran.unggah-tabel'
-        );
+            '/entri-tabel',
+            'pages.entri-tabel',
+            ['modulId' => 2, 'namaModul' => 'Pengeluaran']
+        )->middleware('putaran.berlangsung');
+
+        Route::redirect('/unggah-tabel', '/pengeluaran/entri-tabel');
 
 
         Route::view(
@@ -137,9 +140,12 @@ Route::middleware('auth')
 
 
         Route::view(
-            '/unggah-tabel',
-            'pages.lapangan-usaha.unggah-tabel'
-        );
+            '/entri-tabel',
+            'pages.entri-tabel',
+            ['modulId' => 1, 'namaModul' => 'Lapangan Usaha']
+        )->middleware('putaran.berlangsung');
+
+        Route::redirect('/unggah-tabel', '/lapangan-usaha/entri-tabel');
 
 
         Route::view(

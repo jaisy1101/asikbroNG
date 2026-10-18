@@ -343,6 +343,8 @@ class RekonsiliasiController extends Controller
         $putaran->update([
             'status' => 'selesai',
             'tanggal_selesai' => now(),
+            // Konserda dihitung di queue; tampil "sedang dihitung" sampai selesai.
+            'status_konserda' => 'proses',
         ]);
 
         /*
@@ -451,6 +453,42 @@ class RekonsiliasiController extends Controller
             ] : null,
 
 
+            // Putaran terakhir yang sudah ditutup (lintas rekonsiliasi):
+            // hasil Konserda yang boleh dilihat user.
+            'putaran_konserda' => $this->putaranKonserda(),
+
+
         ]);
+    }
+
+
+    private function putaranKonserda(): ?array
+    {
+        $putaran = Putaran::with('rekonsiliasi.periode')
+            ->where('status', 'selesai')
+            ->latest('id')
+            ->first();
+
+        if (!$putaran) {
+            return null;
+        }
+
+        return [
+
+            'id' => $putaran->id,
+
+            'nomor' => $putaran->nomor,
+
+            'tanggal_selesai' => $putaran->tanggal_selesai?->toIso8601String(),
+
+            'status_konserda' => $putaran->status_konserda,
+
+            'rekonsiliasi' => $putaran->rekonsiliasi ? [
+                'id' => $putaran->rekonsiliasi->id,
+                'tahun' => $putaran->rekonsiliasi->periode?->tahun,
+                'triwulan' => $putaran->rekonsiliasi->periode?->triwulan,
+            ] : null,
+
+        ];
     }
 }

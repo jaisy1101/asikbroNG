@@ -296,6 +296,40 @@ class PdrbTableController extends Controller
             ->values();
 
 
+        /*
+        | Baris TOTAL (ADHB/ADHK saja) = jumlah kategori induk per periode,
+        | sama dengan TOTAL di Konserda dan Integrasi. Nilai kosong = 0;
+        | periode tanpa data sama sekali tetap kosong. Derived tidak
+        | dijumlahkan karena perhitungannya berbeda.
+        */
+        if ($tipeData === 'source') {
+
+            $indukIds = $kategoriList->whereNull('parent_id')->keys()->all();
+
+            $total = [
+                'kategori' => 'TOTAL',
+                'kode' => null,
+                'level' => 0,
+            ];
+
+            foreach ($data as $item) {
+
+                if (!in_array($item->{$kategoriColumn}, $indukIds)) {
+                    continue;
+                }
+
+                $label = $this->labelPeriode($periodeList[$item->periode_id]);
+
+                $total[$label] = ($total[$label] ?? 0) + (float) $item->nilai;
+            }
+
+            $result = $result
+                ->reject(fn ($row) => $row['kode'] === null && $row['kategori'] === 'TOTAL')
+                ->prepend($total)
+                ->values();
+        }
+
+
 
         return response()->json([
 

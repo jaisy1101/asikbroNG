@@ -813,3 +813,128 @@ textarea,
 .modal {
     z-index: 1050 !important;
 }
+
+
+/* =====================================================
+   LEGENDA (komponen x-legenda)
+===================================================== */
+
+.legenda {
+
+    font-size: 0.85rem;
+
+    color: #5a5c69;
+
+}
+
+.legenda-garis {
+
+    display: inline-block;
+
+    width: 14px;
+
+    height: 14px;
+
+    margin-right: 6px;
+
+    vertical-align: -2px;
+
+    background: #ffffff;
+
+    border: 1px solid #d1d3e2;
+
+    border-left: 4px solid var(--legenda-warna);
+
+}
+
+.legenda-blok {
+
+    display: inline-block;
+
+    width: 14px;
+
+    height: 14px;
+
+    margin-right: 6px;
+
+    vertical-align: -2px;
+
+    background: var(--legenda-warna);
+
+    border: 1px solid #d1d3e2;
+
+}
+
+
+
+/* =====================================================
+   ENTRI TABEL - ISI TABEL
+===================================================== */
+
+.tabel-isian td.sel-isian {
+
+    padding: 0 !important;
+
+    position: relative;
+
+}
+
+.tabel-isian td.sel-isian input {
+
+    width: 100%;
+
+    min-width: 130px;
+
+    height: 100%;
+
+    padding: 6px 8px;
+
+    border: 0;
+
+    background: transparent;
+
+    text-align: right;
+
+    font-size: 0.85rem;
+
+    color: #3a3b45;
+
+}
+
+.tabel-isian td.sel-isian input:focus {
+
+    outline: 2px solid var(--brand-blue);
+
+    outline-offset: -2px;
+
+    background: #ffffff;
+
+}
+
+/* Sudah diubah di putaran ini */
+.tabel-isian td.sel-diubah {
+
+    box-shadow: inset 4px 0 0 #4e73df;
+
+}
+
+/* Belum disimpan (didahulukan dari penanda biru) */
+.tabel-isian td.sel-draf {
+
+    box-shadow: inset 4px 0 0 #f6c23e;
+
+    background-color: #fff8e1 !important;
+
+}
+
+.tabel-isian .ikon-induk {
+
+    cursor: help;
+
+}
+
+.btn-group .badge-draf {
+
+    margin-left: 6px;
+
+}

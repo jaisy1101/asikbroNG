@@ -6,6 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Submission;
 use App\Models\Wilayah;
 use App\Models\IntegrasiPdrb;
+use App\Models\Putaran;
+use App\Services\Pdrb\PdrbExcelExport;
+use App\Services\Pdrb\PdrbModul;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class MonitoringController extends Controller
@@ -38,6 +42,9 @@ class MonitoringController extends Controller
 
 
         $data = [];
+
+
+        $wilayahDiubah = $this->wilayahDiubah($putaranId, (int) $modulId);
 
 
 
@@ -127,19 +134,14 @@ class MonitoringController extends Controller
                     : 'belum_upload',
 
 
+                // submitted_at disimpan UTC; ditampilkan dalam WITA.
                 'tanggal_upload' => $submission
-                    ? date(
-                        'Y-m-d',
-                        strtotime($submission->submitted_at)
-                    )
+                    ? $this->wita($submission->submitted_at)->format('Y-m-d')
                     : null,
 
 
                 'waktu_upload' => $submission
-                    ? date(
-                        'H:i',
-                        strtotime($submission->submitted_at)
-                    )
+                    ? $this->wita($submission->submitted_at)->format('H:i')
                     : null,
 
                 'file' => $submission && $submission->files->count()
@@ -164,7 +166,11 @@ class MonitoringController extends Controller
                         ? $adhk->status
                         : 'belum_tersedia',
 
-                ]
+                ],
+
+
+                // Ekspor tersedia bila minimal 1 sel diubah pada putaran ini.
+                'bisa_ekspor' => in_array($wilayah->id, $wilayahDiubah),
 
             ];
 
@@ -184,6 +190,57 @@ class MonitoringController extends Controller
 
         ]);
 
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | EKSPOR EXCEL
+    |--------------------------------------------------------------------------
+    | Dibuat dari nilai efektif pada putaran ini (bukan berkas kiriman user),
+    | sehingga selalu mengikuti perubahan terakhir dari unggah berkas
+    | maupun isi tabel.
+    */
+    public function ekspor($putaranId, $modulId, $wilayahId, PdrbExcelExport $excel)
+    {
+        $modulId = (int) $modulId;
+
+        $putaran = Putaran::findOrFail($putaranId);
+
+        $wilayah = Wilayah::findOrFail($wilayahId);
+
+        if (!in_array($wilayah->id, $this->wilayahDiubah($putaran->id, $modulId))) {
+
+            return response()->json([
+                'message' => 'Belum ada perubahan nilai dari wilayah ini pada putaran ini.'
+            ], 422);
+
+        }
+
+        $path = $excel->simpanSementara(
+            $excel->buat($modulId, $wilayah, $putaran, true)
+        );
+
+        return response()
+            ->download($path, $excel->namaFile($modulId, $wilayah, $putaran))
+            ->deleteFileAfterSend();
+    }
+
+
+    private function wita($waktu): Carbon
+    {
+        return Carbon::parse($waktu, 'UTC')->setTimezone('Asia/Makassar');
+    }
+
+
+    private function wilayahDiubah($putaranId, int $modulId): array
+    {
+        return PdrbModul::model($modulId)::where('putaran_id', $putaranId)
+            ->where('tipe_data', 'source')
+            ->distinct()
+            ->pluck('wilayah_id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
     }
 
 }

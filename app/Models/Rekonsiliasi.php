@@ -20,6 +20,12 @@ class Rekonsiliasi extends Model
         'tanggal_selesai',
     ];
 
+    // Disimpan dalam UTC; dikirim ke browser sebagai ISO agar tampil WITA.
+    protected $casts = [
+        'tanggal_mulai' => 'datetime',
+        'tanggal_selesai' => 'datetime',
+    ];
+
     public function periode(): BelongsTo
     {
         return $this->belongsTo(Periode::class);

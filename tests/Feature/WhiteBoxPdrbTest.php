@@ -35,7 +35,7 @@ class WhiteBoxPdrbTest extends TestCase
             'kategori_pengeluaran'=>['nama','parent_id'],
             'rekonsiliasi'=>['periode_id','status','nama'],
             'rekonsiliasi_periode'=>['rekonsiliasi_id','periode_id'],
-            'putaran'=>['rekonsiliasi_id','nomor','status','tanggal_mulai','tanggal_selesai'],
+            'putaran'=>['rekonsiliasi_id','nomor','status','status_konserda','tanggal_mulai','tanggal_selesai'],
             'data_pdrb_lapangan_usaha'=>['submission_id','putaran_id','wilayah_id','periode_id','jenis_tabel_id','kategori_lapus_id','nilai','tipe_data'],
             'data_pdrb_pengeluaran'=>['submission_id','putaran_id','wilayah_id','periode_id','jenis_tabel_id','kategori_pengeluaran_id','nilai','tipe_data'],
             'integrasi_pdrb'=>['putaran_id','wilayah_id','periode_id','jenis_tabel_id','total_lapus','total_pengeluaran','selisih','status'],

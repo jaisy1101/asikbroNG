@@ -106,6 +106,95 @@
         }
 
 
+        // Setelah unggah berkas / simpan isi tabel.
+        function notifCekIntegrasi(judul){
+
+            return Swal.fire({
+                icon: 'success',
+                title: judul,
+                html: 'Jangan lupa cek <b>Integrasi</b> untuk memastikan tidak ada selisih '
+                    + 'antara Lapangan Usaha dan Pengeluaran.',
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-link mr-1"></i> Buka Integrasi',
+                cancelButtonText: 'Tutup'
+            })
+            .then(result => {
+
+                if(result.isConfirmed){
+                    window.location.href = '/integrasi';
+                }
+
+                return result;
+
+            });
+
+        }
+
+
+        // Unduh berkas dari API (Excel template / ekspor). Nama berkas dari server.
+        function unduhBerkas(url, namaCadangan){
+
+            Swal.fire({
+                title: 'Menyiapkan berkas...',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            return axios.get(url, { responseType: 'blob' })
+
+            .then(response => {
+
+                let disposisi = response.headers['content-disposition'] ?? '';
+                let cocok = disposisi.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
+                let nama = cocok ? decodeURIComponent(cocok[1]) : namaCadangan;
+
+                let tautan = document.createElement('a');
+                tautan.href = window.URL.createObjectURL(new Blob([response.data]));
+                tautan.setAttribute('download', nama);
+                document.body.appendChild(tautan);
+                tautan.click();
+                tautan.remove();
+                window.URL.revokeObjectURL(tautan.href);
+
+                Swal.close();
+
+            })
+
+            .catch(async error => {
+
+                let pesan = 'Berkas tidak dapat diunduh.';
+
+                try {
+                    pesan = JSON.parse(await error.response.data.text()).message ?? pesan;
+                } catch (e) {}
+
+                notifError(pesan);
+
+            });
+
+        }
+
+
+        // Waktu dari server (ISO, UTC) ditampilkan dalam WITA.
+        function formatWaktuWita(iso){
+
+            if(!iso){
+                return '';
+            }
+
+            return new Date(iso).toLocaleString('id-ID', {
+                timeZone: 'Asia/Makassar',
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }) + ' WITA';
+
+        }
+
+
     </script>
     
     <!-- Axios -->

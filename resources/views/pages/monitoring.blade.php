@@ -120,7 +120,7 @@
                         <th>Status</th>
                         <th>Tanggal Upload</th>
                         <th>Waktu</th>
-                        <th>File</th>
+                        <th>Ekspor</th>
                         <th>ADHB</th>
                         <th>ADHK</th>
 
@@ -308,27 +308,37 @@ function loadMonitoring()
                 <td>
 
                     ${
-                        item.file
+                        item.bisa_ekspor
 
                         ?
 
                         `
-
-                        <a href="javascript:void(0)"
+                        <button type="button"
                         class="btn btn-sm btn-success"
-                        onclick="konfirmasiDownload('${item.file.id}', '${item.file.nama_file}')">
+                        title="Excel dibuat dari data terkini di sistem"
+                        onclick="eksporWilayah(${item.wilayah_id})">
 
-                            <i class="fas fa-download"></i>
+                            <i class="fas fa-file-excel"></i>
 
-                            Download
+                            Ekspor
 
-                        </a>
-
+                        </button>
                         `
 
                         :
 
-                        '-'
+                        `
+                        <button type="button"
+                        class="btn btn-sm btn-secondary"
+                        title="Belum ada perubahan nilai pada putaran ini"
+                        disabled>
+
+                            <i class="fas fa-file-excel"></i>
+
+                            Ekspor
+
+                        </button>
+                        `
 
                     }
 
@@ -371,59 +381,14 @@ function loadMonitoring()
 
 }
 
-function konfirmasiDownload(id, namaFile)
+// Excel dibuat sistem dari nilai efektif putaran ini (bukan berkas kiriman user).
+function eksporWilayah(wilayahId)
 {
 
-
-    Swal.fire({
-
-
-        title: 'Konfirmasi Download',
-
-
-        html: `
-
-            File yang akan didownload:
-
-            <br>
-
-            <b>${namaFile}</b>
-
-            <br><br>
-
-            Apakah Anda yakin ingin mendownload file ini?
-
-        `,
-
-
-        icon: 'question',
-
-
-        showCancelButton: true,
-
-
-        confirmButtonText: 'Download',
-
-
-        cancelButtonText: 'Batal'
-
-
-    })
-    .then((result)=>{
-
-
-        if(result.isConfirmed){
-
-
-            window.location.href =
-                `/api/submission-file/${id}/download`;
-
-
-        }
-
-
-    });
-
+    unduhBerkas(
+        `/api/monitoring/${putaranId}/${modulId}/ekspor/${wilayahId}`,
+        'ekspor.xlsx'
+    );
 
 }
 
