@@ -1,58 +1,137 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Pengembangan Sistem Informasi Rekonsiliasi dan Kompilasi PDRB di BPS Provinsi Sulawesi Selatan
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Identitas Penelitian
 
-## About Laravel
+| Keterangan | Informasi |
+|---|---|
+| Peneliti | Jaisy Nurhasanah |
+| NIM | 222212676 |
+| Institusi | Politeknik Statistika STIS |
+| Tahun | 2026 |
+| Objek penelitian | BPS Provinsi Sulawesi Selatan |
+| Artefak | ASIKBRO — Sistem Informasi Rekonsiliasi dan Kompilasi PDRB |
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Deskripsi
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+ASIKBRO adalah aplikasi web untuk mendukung kompilasi dan rekonsiliasi Produk Domestik Regional Bruto (PDRB) triwulanan, meliputi pengelolaan PDRB menurut lapangan usaha dan pengeluaran, integrasi kedua pendekatan, pemeriksaan diskrepansi melalui proses Konserda, dan pemantauan hasil rekonsiliasi.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Penelitian menggunakan *Design Science Research Methodology* (DSRM). Artefak dikembangkan menggunakan Laravel (PHP), JavaScript, dan MySQL. Pengujian meliputi pengujian fungsional, white-box, serta evaluasi kegunaan menggunakan *System Usability Scale* (SUS).
 
-## Learning Laravel
+## Struktur Proyek
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Struktur berikut disusun berdasarkan daftar folder dan file aktual yang diperiksa pada 25 Oktober 2026. Ditampilkan bagian yang relevan dengan artefak; bukan daftar semua file.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```text
+asikbroNG/
+├── app/
+│   ├── Console/Commands/         # Perintah pembangkitan data turunan dan integrasi
+│   ├── Http/
+│   │   ├── Controllers/Api/      # Endpoint API, entri tabel, integrasi, Konserda, monitoring
+│   │   └── Middleware/           # Middleware hak akses dan putaran
+│   ├── Jobs/                     # Proses pembangkitan turunan dan Konserda
+│   ├── Models/                   # Model PDRB, periode, rekonsiliasi, wilayah, pengguna
+│   └── Services/
+│       ├── Derived/              # Transformasi data turunan LU dan pengeluaran
+│       ├── Integrasi/            # Layanan integrasi PDRB
+│       ├── Konserda/             # Layanan hasil pemeriksaan/rekonsiliasi
+│       ├── LapanganUsaha/        # Impor PDRB lapangan usaha
+│       ├── Pdrb/                 # Pengolahan, nilai efektif, ekspor, submission
+│       └── Pengeluaran/          # Impor PDRB pengeluaran
+├── bootstrap/                    # Inisialisasi Laravel
+├── config/                       # Konfigurasi aplikasi
+├── database/
+│   ├── factories/                # Factory data uji
+│   ├── migrations/               # Migrasi basis data
+│   └── seeders/                  # Seeder Laravel
+├── docs/
+│   ├── white-box-konserda.md
+│   ├── white-box-testing.md
+│   ├── white-box-results.xml
+│   └── white-box-source-hashes.txt
+├── public/assets/               # CSS, JavaScript, gambar, dan aset frontend
+├── resources/views/             # Halaman Blade, layout, dan komponen UI
+├── routes/
+│   ├── api.php                   # Definisi rute API
+│   ├── web.php                   # Definisi rute web
+│   └── console.php               # Definisi perintah terjadwal/console
+├── storage/                      # Penyimpanan runtime Laravel (data sensitif tidak diunggah)
+├── tests/
+│   ├── Feature/                 # Pengujian entri, ekspor, nilai efektif, white-box PDRB
+│   └── Unit/                    # Pengujian unit
+├── .env.example                  # Contoh variabel lingkungan (tanpa kredensial)
+├── composer.json                 # Dependensi PHP
+├── composer.lock                 # Versi dependensi PHP
+├── package.json                  # Dependensi frontend
+├── package-lock.json             # Versi dependensi frontend
+├── phpunit.xml                   # Konfigurasi pengujian
+├── vite.config.js                # Konfigurasi Vite
+├── artisan                       # CLI Laravel
+└── README.md                     # Dokumentasi ini
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Direktori `vendor/`, `node_modules/`, `.git/`, file `.env`, cache sementara, dan data runtime bukan bagian yang perlu dicantumkan atau diunggah sebagai artefak sumber.
 
-## Contributing
+## Lokasi Kode Pengolahan dan Pemodelan
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Dalam struktur yang ada, kode perhitungan, transformasi, dan pengolahan PDRB **menjadi bagian dari aplikasi**, terutama pada:
 
-## Code of Conduct
+- `app/Services/Derived/` — transformasi data turunan menurut lapangan usaha dan pengeluaran.
+- `app/Services/Integrasi/IntegrasiPdrbService.php` — proses integrasi data PDRB.
+- `app/Services/Konserda/KonserdaService.php` — pengolahan hasil pemeriksaan Konserda.
+- `app/Services/Pdrb/` — layanan nilai efektif dan pengolahan data PDRB.
+- `app/Console/Commands/` dan `app/Jobs/` — pemrosesan melalui command/job.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Belum ditemukan folder kode pemodelan terpisah. Jika terdapat skrip pemodelan di luar aplikasi, tambahkan skrip tersebut dan dokumentasikan lokasinya di sini.
 
-## Security Vulnerabilities
+## Dokumentasi Pengujian
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Dokumentasi dan rekaman pengujian white-box berada di `docs/`, sedangkan kode pengujian otomatis ada di `tests/Feature/` dan `tests/Unit/`. Keberadaan file pengujian tidak dengan sendirinya membuktikan semua skenario telah lulus; hasilnya perlu dibaca dari laporan pengujian terkait.
 
-## License
+## Instalasi untuk Lingkungan Pengembangan
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Persyaratan versi PHP, Laravel, dan paket lain mengikuti `composer.json` dan `package.json` pada repository. Contoh alur persiapan aplikasi Laravel:
+
+```bash
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
+```
+
+Pada Windows PowerShell, gunakan `Copy-Item .env.example .env` sebagai pengganti `cp` bila diperlukan. Sesuaikan koneksi MySQL dan pengaturan lingkungan di file `.env` setempat. **Jangan unggah file `.env` ke Git.**
+
+```bash
+php artisan serve
+```
+
+> **Catatan:** Instruksi ini merupakan persiapan umum Laravel. Ketersediaan skema database lengkap, data awal, dan urutan perintah impor ASIKBRO belum diverifikasi dari isi seluruh kode. Jangan menjalankan `migrate:fresh`, `db:wipe`, atau perintah penghapusan database pada data operasional.
+
+## Dataset
+
+**Belum ditemukan folder dataset khusus dalam struktur yang diperiksa.** Untuk memenuhi ketentuan pengumpulan, tambahkan direktori `dataset/` berisi hanya dataset terbuka untuk publik, atau dataset dummy paling sedikit lima baris yang sudah dimasking apabila data sumber tidak bersifat publik. Sertakan penjelasan sumber, struktur kolom, satuan, periode, dan status keterbukaan data. Jangan mengunggah data internal BPS atau salinan database operasional.
+
+## Dokumentasi Sistem dan Panduan Penggunaan
+
+Direktori `docs/` saat ini telah berisi dokumentasi white-box. Agar ketentuan pengumpulan terpenuhi, tambahkan dokumentasi rancangan/implementasi sistem (misalnya diagram arsitektur dan ERD) serta **panduan penggunaan** berdasarkan peran pengguna. Lokasinya dapat dibuat sebagai `docs/panduan-penggunaan.md` atau file PDF di `docs/`; perbarui README setelah berkasnya benar-benar tersedia.
+
+## Keamanan dan Keterbatasan Publikasi
+
+- Pastikan `.env`, token, kunci rahasia, kredensial, backup, dan file unggahan internal tidak masuk commit.
+- Tinjau `database/database.sqlite` sebelum publikasi; jangan unggah apabila mengandung data riil atau sensitif.
+- Periksa `git status` dan `git ls-files` untuk memastikan berkas yang akan dikirim telah sesuai.
+- Jangan memasukkan `vendor/` dan `node_modules/` ke repository; dependensi dipasang dari file manifest.
+
+## Status Kelengkapan Artefak
+
+| Komponen persyaratan | Kondisi berdasarkan daftar file yang diperiksa |
+|---|---|
+| Kode artefak aplikasi | Tersedia dalam proyek Laravel |
+| Kode pengolahan/pemodelan | Kode pengolahan tersedia di `app/Services/`, `app/Jobs/`, dan `app/Console/Commands/`; kode pemodelan terpisah belum teridentifikasi |
+| Dataset publik/dummy | Belum teridentifikasi; perlu dilengkapi |
+| Dokumentasi sistem | Dokumen pengujian tersedia; dokumen desain/implementasi perlu diperiksa atau dilengkapi |
+| Panduan penggunaan | Belum teridentifikasi; perlu dilengkapi |
+| README berisi identitas dan struktur | Dicakup dalam dokumen ini |
+
+---
+
+Repository disiapkan sebagai dokumentasi artefak penelitian skripsi Politeknik Statistika STIS tahun 2026. Struktur dan status dapat diperbarui setelah berkas pengumpulan ditambahkan.
